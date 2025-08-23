@@ -93,18 +93,6 @@ router.get('/:username/beats', optionalAuth, async (req, res) => {
         thumbnail_url: 'https://example.com/thumbnail1.jpg',
         created_at: new Date().toISOString(),
         is_liked: false
-      },
-      {
-        id: 'beat2',
-        title: 'R&B Vibes',
-        description: 'Smooth R&B beat',
-        genre: 'R&B',
-        bpm: 120,
-        price: 35000,
-        preview_url: 'https://example.com/preview2.mp3',
-        thumbnail_url: 'https://example.com/thumbnail2.jpg',
-        created_at: new Date().toISOString(),
-        is_liked: true
       }
     ];
 
@@ -130,7 +118,6 @@ router.post('/:username/follow', authenticateToken, async (req, res) => {
     const { username } = req.params;
 
     // TODO: Implement MongoDB follow functionality
-    // For now, return mock response
     res.json({ message: 'User followed successfully' });
 
   } catch (error) {
@@ -145,7 +132,6 @@ router.delete('/:username/follow', authenticateToken, async (req, res) => {
     const { username } = req.params;
 
     // TODO: Implement MongoDB unfollow functionality
-    // For now, return mock response
     res.json({ message: 'User unfollowed successfully' });
 
   } catch (error) {
@@ -161,13 +147,12 @@ router.get('/:username/followers', optionalAuth, async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
 
     // TODO: Implement MongoDB followers retrieval
-    // For now, return mock followers data
     const mockFollowers = [
       {
         id: 'follower1',
         username: 'follower1',
         profile_picture: 'https://example.com/follower1.jpg',
-        created_at: new Date().toISOString()
+        is_following: false
       }
     ];
 
@@ -194,13 +179,12 @@ router.get('/:username/following', optionalAuth, async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
 
     // TODO: Implement MongoDB following retrieval
-    // For now, return mock following data
     const mockFollowing = [
       {
         id: 'following1',
         username: 'following1',
         profile_picture: 'https://example.com/following1.jpg',
-        created_at: new Date().toISOString()
+        is_following: true
       }
     ];
 
