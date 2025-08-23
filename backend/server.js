@@ -132,16 +132,19 @@ const startServer = async () => {
       console.log(`🌐 Server ready to accept requests`);
     });
     
+    // Temporarily disable MongoDB connection for testing
+    console.log('⚠️ MongoDB connection temporarily disabled for testing');
+    
     // Try to connect to MongoDB in background (non-blocking)
-    setTimeout(async () => {
-      try {
-        await connectDatabase();
-        console.log(`🍃 MongoDB connected successfully`);
-      } catch (dbError) {
-        console.error('❌ MongoDB connection failed, but server is running:', dbError.message);
-        console.log('⚠️ Server is running without database connection');
-      }
-    }, 1000);
+    // setTimeout(async () => {
+    //   try {
+    //     await connectDatabase();
+    //     console.log(`🍃 MongoDB connected successfully`);
+    //   } catch (dbError) {
+    //     console.error('❌ MongoDB connection failed, but server is running:', dbError.message);
+    //     console.log('⚠️ Server is running without database connection');
+    //   }
+    // }, 1000);
     
   } catch (error) {
     console.error('❌ Failed to start server:', error);
