@@ -56,6 +56,16 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Temporary endpoint to get IP for MongoDB whitelist
+app.get('/api/ip', (req, res) => {
+  const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket?.remoteAddress;
+  res.json({ 
+    ip: ip,
+    headers: req.headers,
+    message: 'Use this IP to whitelist in MongoDB Atlas'
+  });
+});
+
 // Socket.io connection handling
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
