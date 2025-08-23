@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const db = require('../config/database');
 
 const authenticateToken = async (req, res, next) => {
   try {
@@ -12,17 +11,18 @@ const authenticateToken = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
     
-    // Get user from database
-    const result = await db.query(
-      'SELECT id, username, email, account_type, is_verified FROM users WHERE id = $1',
-      [decoded.userId]
-    );
+    // TODO: Implement MongoDB user retrieval
+    // For now, use mock user data
+    const mockUser = {
+      id: decoded.userId,
+      userId: decoded.userId, // Keep both for compatibility
+      username: 'mockuser',
+      email: 'mock@example.com',
+      account_type: 'artist',
+      is_verified: true
+    };
 
-    if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-
-    req.user = result.rows[0];
+    req.user = mockUser;
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
@@ -57,14 +57,18 @@ const optionalAuth = async (req, res, next) => {
 
     if (token) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-      const result = await db.query(
-        'SELECT id, username, email, account_type FROM users WHERE id = $1',
-        [decoded.userId]
-      );
       
-      if (result.rows.length > 0) {
-        req.user = result.rows[0];
-      }
+      // TODO: Implement MongoDB user retrieval
+      // For now, use mock user data
+      const mockUser = {
+        id: decoded.userId,
+        userId: decoded.userId,
+        username: 'mockuser',
+        email: 'mock@example.com',
+        account_type: 'artist'
+      };
+      
+      req.user = mockUser;
     }
     next();
   } catch (error) {
