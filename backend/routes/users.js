@@ -3,6 +3,48 @@ const { authenticateToken, optionalAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Search users (specific route first)
+router.get('/search', optionalAuth, async (req, res) => {
+  try {
+    const { q, page = 1, limit = 20 } = req.query;
+
+    if (!q) {
+      return res.status(400).json({ error: 'Search query is required' });
+    }
+
+    // TODO: Implement MongoDB user search
+    // For now, return mock search results
+    const mockSearchResults = [
+      {
+        id: 'user1',
+        username: 'producer1',
+        profile_picture: 'https://example.com/user1.jpg',
+        account_type: 'producer'
+      },
+      {
+        id: 'user2',
+        username: 'artist1',
+        profile_picture: 'https://example.com/user2.jpg',
+        account_type: 'artist'
+      }
+    ];
+
+    res.json({
+      users: mockSearchResults,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: mockSearchResults.length,
+        pages: 1
+      }
+    });
+
+  } catch (error) {
+    console.error('Search users error:', error);
+    res.status(500).json({ error: 'Failed to search users' });
+  }
+});
+
 // Get user profile by username
 router.get('/profile/:username', optionalAuth, async (req, res) => {
   try {
@@ -175,48 +217,6 @@ router.get('/:username/following', optionalAuth, async (req, res) => {
   } catch (error) {
     console.error('Get following error:', error);
     res.status(500).json({ error: 'Failed to get following' });
-  }
-});
-
-// Search users
-router.get('/search', optionalAuth, async (req, res) => {
-  try {
-    const { q, page = 1, limit = 20 } = req.query;
-
-    if (!q) {
-      return res.status(400).json({ error: 'Search query is required' });
-    }
-
-    // TODO: Implement MongoDB user search
-    // For now, return mock search results
-    const mockSearchResults = [
-      {
-        id: 'user1',
-        username: 'producer1',
-        profile_picture: 'https://example.com/user1.jpg',
-        account_type: 'producer'
-      },
-      {
-        id: 'user2',
-        username: 'artist1',
-        profile_picture: 'https://example.com/user2.jpg',
-        account_type: 'artist'
-      }
-    ];
-
-    res.json({
-      users: mockSearchResults,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total: mockSearchResults.length,
-        pages: 1
-      }
-    });
-
-  } catch (error) {
-    console.error('Search users error:', error);
-    res.status(500).json({ error: 'Failed to search users' });
   }
 });
 
