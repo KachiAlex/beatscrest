@@ -32,49 +32,7 @@ const upload = multer({
   }
 });
 
-// Upload beat (Producer only)
-router.post('/upload', authenticateToken, requireProducer, upload.fields([
-  { name: 'preview', maxCount: 1 },
-  { name: 'fullBeat', maxCount: 1 },
-  { name: 'thumbnail', maxCount: 1 }
-]), async (req, res) => {
-  try {
-    if (!s3) {
-      return res.status(503).json({ error: 'File upload service not configured' });
-    }
-
-    const { title, description, genre, bpm, key, price, tags } = req.body;
-
-    if (!title || !price || !req.files.preview) {
-      return res.status(400).json({ error: 'Title, price, and preview file are required' });
-    }
-
-    // For now, return a mock response since we're using MongoDB
-    // TODO: Implement MongoDB queries when database is set up
-    res.status(201).json({
-      message: 'Beat uploaded successfully',
-      beat: {
-        id: 'mock-beat-id',
-        title,
-        description,
-        genre,
-        bpm,
-        key,
-        price: parseFloat(price),
-        previewUrl: 'https://example.com/mock-preview.mp3',
-        fullBeatUrl: req.files.fullBeat ? 'https://example.com/mock-full-beat.mp3' : null,
-        thumbnailUrl: req.files.thumbnail ? 'https://example.com/mock-thumbnail.jpg' : null,
-        producer: req.user.id
-      }
-    });
-
-  } catch (error) {
-    console.error('Upload beat error:', error);
-    res.status(500).json({ error: 'Failed to upload beat' });
-  }
-});
-
-// Get all beats (with optional filtering)
+// Get all beats (with optional filtering) - ROOT ROUTE FIRST
 router.get('/', optionalAuth, async (req, res) => {
   try {
     const { 
@@ -146,7 +104,49 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-// Get single beat
+// Upload beat (Producer only)
+router.post('/upload', authenticateToken, requireProducer, upload.fields([
+  { name: 'preview', maxCount: 1 },
+  { name: 'fullBeat', maxCount: 1 },
+  { name: 'thumbnail', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    if (!s3) {
+      return res.status(503).json({ error: 'File upload service not configured' });
+    }
+
+    const { title, description, genre, bpm, key, price, tags } = req.body;
+
+    if (!title || !price || !req.files.preview) {
+      return res.status(400).json({ error: 'Title, price, and preview file are required' });
+    }
+
+    // For now, return a mock response since we're using MongoDB
+    // TODO: Implement MongoDB queries when database is set up
+    res.status(201).json({
+      message: 'Beat uploaded successfully',
+      beat: {
+        id: 'mock-beat-id',
+        title,
+        description,
+        genre,
+        bpm,
+        key,
+        price: parseFloat(price),
+        previewUrl: 'https://example.com/mock-preview.mp3',
+        fullBeatUrl: req.files.fullBeat ? 'https://example.com/mock-full-beat.mp3' : null,
+        thumbnailUrl: req.files.thumbnail ? 'https://example.com/mock-thumbnail.jpg' : null,
+        producer: req.user.id
+      }
+    });
+
+  } catch (error) {
+    console.error('Upload beat error:', error);
+    res.status(500).json({ error: 'Failed to upload beat' });
+  }
+});
+
+// Get single beat (parameterized route)
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -162,7 +162,6 @@ router.get('/:id', optionalAuth, async (req, res) => {
       key: 'C',
       price: 45000,
       previewUrl: 'https://example.com/preview1.mp3',
-      fullBeatUrl: 'https://example.com/full-beat1.mp3',
       thumbnailUrl: 'https://example.com/thumbnail1.jpg',
       playCount: 150,
       likes: [],
@@ -186,12 +185,21 @@ router.get('/:id', optionalAuth, async (req, res) => {
 router.put('/:id', authenticateToken, requireProducer, async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, genre, bpm, key, price, tags } = req.body;
+    const { title, description, genre, bpm, key, price } = req.body;
 
     // TODO: Implement MongoDB update
+    // For now, return mock response
     res.json({
       message: 'Beat updated successfully',
-      beat: { id, title, description, genre, bpm, key, price }
+      beat: {
+        id,
+        title: title || 'Updated Beat',
+        description: description || 'Updated description',
+        genre: genre || 'Hip Hop',
+        bpm: bpm || 140,
+        key: key || 'C',
+        price: price || 45000
+      }
     });
 
   } catch (error) {
