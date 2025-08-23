@@ -2,12 +2,13 @@
   "name": "beatcrest",
   "version": "1.0.0",
   "description": "Music marketplace and social platform for producers and artists",
-  "main": "index.js",
+  "main": "backend/server.js",
   "scripts": {
     "dev": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",
     "start": "cd backend && npm start",
-    "install-deps": "npm install && cd frontend && npm install && cd ../backend && npm install"
+    "install-deps": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "postinstall": "cd backend && npm install"
   },
   "keywords": [
     "music",
@@ -25,5 +26,20 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "aws-sdk": "^2.1490.0",
+    "dotenv": "^16.3.1",
+    "pg": "^8.11.3",
+    "nodemailer": "^6.9.7",
+    "socket.io": "^4.7.4",
+    "stripe": "^14.5.0"
   }
 } 
