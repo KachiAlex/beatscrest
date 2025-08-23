@@ -1,0 +1,29 @@
+{
+  "name": "beatcrest",
+  "version": "1.0.0",
+  "description": "Music marketplace and social platform for producers and artists",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "install-deps": "npm install && cd frontend && npm install && cd ../backend && npm install"
+  },
+  "keywords": [
+    "music",
+    "marketplace",
+    "beats",
+    "producers",
+    "artists",
+    "social-media"
+  ],
+  "author": "BeatCrest Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KachiAlex/beatscrest.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 
