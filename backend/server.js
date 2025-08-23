@@ -56,12 +56,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Temporary endpoint to get IP for MongoDB whitelist
+// Simple IP endpoint (works without database)
 app.get('/api/ip', (req, res) => {
   const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket?.remoteAddress;
   res.json({ 
     ip: ip,
-    headers: req.headers,
+    xForwardedFor: req.headers['x-forwarded-for'],
+    xRealIp: req.headers['x-real-ip'],
     message: 'Use this IP to whitelist in MongoDB Atlas'
   });
 });
@@ -112,18 +113,21 @@ const PORT = process.env.PORT || 5000;
 // Initialize database and start server
 const startServer = async () => {
   try {
-    // Connect to MongoDB
-    await connectDatabase();
-    
-    // Initialize database schemas
-    await initializeDatabase();
-    
-    // Start server
+    // Start server first, then try to connect to database
     server.listen(PORT, () => {
       console.log(`🚀 BeatCrest API server running on port ${PORT}`);
       console.log(`📱 Socket.io server initialized`);
-      console.log(`🍃 MongoDB connected successfully`);
     });
+    
+    // Try to connect to MongoDB (but don't crash if it fails)
+    try {
+      await connectDatabase();
+      console.log(`🍃 MongoDB connected successfully`);
+    } catch (dbError) {
+      console.error('❌ MongoDB connection failed, but server is running:', dbError.message);
+      console.log('⚠️ Server is running without database connection');
+    }
+    
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);

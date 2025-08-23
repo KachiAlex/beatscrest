@@ -5,11 +5,23 @@ const connectDatabase = async () => {
   try {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/beatcrest';
     
+    console.log('🔗 Attempting to connect to MongoDB...');
     await mongoose.connect(mongoURI);
     
     console.log('✅ MongoDB connected successfully');
   } catch (error) {
     console.error('❌ MongoDB connection error:', error.message);
+    
+    // For development/testing, you can uncomment this to use a local fallback
+    // console.log('🔄 Trying local MongoDB fallback...');
+    // try {
+    //   await mongoose.connect('mongodb://localhost:27017/beatcrest');
+    //   console.log('✅ Connected to local MongoDB');
+    // } catch (localError) {
+    //   console.error('❌ Local MongoDB also failed:', localError.message);
+    //   process.exit(1);
+    // }
+    
     process.exit(1);
   }
 };
