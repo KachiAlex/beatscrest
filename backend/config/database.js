@@ -1,160 +1,127 @@
-const { Pool } = require('pg');
-require('dotenv').config();
+const mongoose = require('mongoose');
 
-const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'beatcrest',
-  password: process.env.DB_PASSWORD || 'password',
-  port: process.env.DB_PORT || 5432,
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+// MongoDB connection function
+const connectDatabase = async () => {
+  try {
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/beatcrest';
+    
+    await mongoose.connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    
+    console.log('✅ MongoDB connected successfully');
+  } catch (error) {
+    console.error('❌ MongoDB connection error:', error.message);
+    process.exit(1);
+  }
+};
 
-// Test the connection
-pool.on('connect', () => {
-  console.log('✅ Connected to PostgreSQL database');
-});
-
-pool.on('error', (err) => {
-  console.error('❌ Unexpected error on idle client', err);
-  process.exit(-1);
-});
-
-// Initialize database tables
+// Initialize database with schemas
 const initializeDatabase = async () => {
   try {
-    // Users table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(50) UNIQUE NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password_hash VARCHAR(255),
-        profile_picture VARCHAR(500),
-        bio TEXT,
-        account_type VARCHAR(20) DEFAULT 'artist' CHECK (account_type IN ('producer', 'artist', 'admin')),
-        is_verified BOOLEAN DEFAULT FALSE,
-        followers_count INTEGER DEFAULT 0,
-        following_count INTEGER DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // User Schema
+    const userSchema = new mongoose.Schema({
+      username: { type: String, required: true, unique: true },
+      email: { type: String, required: true, unique: true },
+      password: { type: String, required: true },
+      profilePicture: { type: String, default: '' },
+      bio: { type: String, default: '' },
+      accountType: { 
+        type: String, 
+        enum: ['Producer', 'Artist', 'Fan'], 
+        default: 'Fan' 
+      },
+      followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+      following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+      createdAt: { type: Date, default: Date.now },
+      updatedAt: { type: Date, default: Date.now }
+    });
 
-    // Beats table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS beats (
-        id SERIAL PRIMARY KEY,
-        producer_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        title VARCHAR(255) NOT NULL,
-        description TEXT,
-        genre VARCHAR(100),
-        bpm INTEGER,
-        key VARCHAR(10),
-        price DECIMAL(10,2) NOT NULL,
-        preview_url VARCHAR(500),
-        full_beat_url VARCHAR(500),
-        thumbnail_url VARCHAR(500),
-        tags TEXT[],
-        likes_count INTEGER DEFAULT 0,
-        plays_count INTEGER DEFAULT 0,
-        is_active BOOLEAN DEFAULT TRUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // Beat Schema
+    const beatSchema = new mongoose.Schema({
+      title: { type: String, required: true },
+      description: { type: String },
+      genre: { type: String, required: true },
+      bpm: { type: Number },
+      key: { type: String },
+      price: { type: Number, required: true },
+      producer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+      previewUrl: { type: String, required: true },
+      fullBeatUrl: { type: String, required: true },
+      thumbnailUrl: { type: String },
+      playCount: { type: Number, default: 0 },
+      likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+      isDeleted: { type: Boolean, default: false },
+      createdAt: { type: Date, default: Date.now },
+      updatedAt: { type: Date, default: Date.now }
+    });
 
-    // Purchases table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS purchases (
-        id SERIAL PRIMARY KEY,
-        buyer_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        beat_id INTEGER REFERENCES beats(id) ON DELETE CASCADE,
-        producer_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        amount DECIMAL(10,2) NOT NULL,
-        platform_fee DECIMAL(10,2) NOT NULL,
-        producer_amount DECIMAL(10,2) NOT NULL,
-        payment_status VARCHAR(20) DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
-        payment_method VARCHAR(50),
-        transaction_id VARCHAR(255),
-        download_link VARCHAR(500),
-        is_delivered BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // Purchase Schema
+    const purchaseSchema = new mongoose.Schema({
+      beat: { type: mongoose.Schema.Types.ObjectId, ref: 'Beat', required: true },
+      buyer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+      seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+      amount: { type: Number, required: true },
+      platformFee: { type: Number, required: true },
+      sellerAmount: { type: Number, required: true },
+      downloadUrl: { type: String },
+      paymentIntentId: { type: String },
+      status: { 
+        type: String, 
+        enum: ['pending', 'completed', 'failed'], 
+        default: 'pending' 
+      },
+      createdAt: { type: Date, default: Date.now }
+    });
 
-    // Followers table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS followers (
-        id SERIAL PRIMARY KEY,
-        follower_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        following_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(follower_id, following_id)
-      )
-    `);
+    // Comment Schema
+    const commentSchema = new mongoose.Schema({
+      beat: { type: mongoose.Schema.Types.ObjectId, ref: 'Beat', required: true },
+      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+      content: { type: String, required: true },
+      createdAt: { type: Date, default: Date.now }
+    });
 
-    // Comments table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS comments (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        beat_id INTEGER REFERENCES beats(id) ON DELETE CASCADE,
-        content TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // Message Schema
+    const messageSchema = new mongoose.Schema({
+      sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+      receiver: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+      content: { type: String, required: true },
+      isRead: { type: Boolean, default: false },
+      createdAt: { type: Date, default: Date.now }
+    });
 
-    // Messages table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS messages (
-        id SERIAL PRIMARY KEY,
-        sender_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        recipient_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        content TEXT NOT NULL,
-        is_read BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // Notification Schema
+    const notificationSchema = new mongoose.Schema({
+      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+      type: { 
+        type: String, 
+        enum: ['like', 'comment', 'follow', 'purchase', 'message'], 
+        required: true 
+      },
+      title: { type: String, required: true },
+      message: { type: String, required: true },
+      relatedId: { type: mongoose.Schema.Types.ObjectId },
+      isRead: { type: Boolean, default: false },
+      createdAt: { type: Date, default: Date.now }
+    });
 
-    // Notifications table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS notifications (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        type VARCHAR(50) NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        message TEXT NOT NULL,
-        related_id INTEGER,
-        is_read BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    // Create models if they don't exist
+    const User = mongoose.models.User || mongoose.model('User', userSchema);
+    const Beat = mongoose.models.Beat || mongoose.model('Beat', beatSchema);
+    const Purchase = mongoose.models.Purchase || mongoose.model('Purchase', purchaseSchema);
+    const Comment = mongoose.models.Comment || mongoose.model('Comment', commentSchema);
+    const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
+    const Notification = mongoose.models.Notification || mongoose.model('Notification', notificationSchema);
 
-    // Likes table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS likes (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        beat_id INTEGER REFERENCES beats(id) ON DELETE CASCADE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(user_id, beat_id)
-      )
-    `);
-
-    console.log('✅ Database tables initialized successfully');
+    console.log('✅ Database schemas initialized');
+    
+    return { User, Beat, Purchase, Comment, Message, Notification };
   } catch (error) {
-    console.error('❌ Error initializing database:', error);
+    console.error('❌ Database initialization error:', error.message);
     throw error;
   }
 };
 
-// Initialize database on startup
-initializeDatabase();
-
-module.exports = {
-  query: (text, params) => pool.query(text, params),
-  pool
-}; 
+module.exports = { connectDatabase, initializeDatabase }; 

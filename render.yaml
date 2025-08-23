@@ -12,13 +12,7 @@ services:
         value: 10000
       - key: JWT_SECRET
         generateValue: true
-      - key: DB_HOST
-        value: your-db-host
-      - key: DB_NAME
-        value: beatcrest
-      - key: DB_USER
-        value: your-db-user
-      - key: DB_PASSWORD
-        value: your-db-password
+      - key: MONGODB_URI
+        value: your-mongodb-connection-string
       - key: FRONTEND_URL
         value: https://your-netlify-site.netlify.app 

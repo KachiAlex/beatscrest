@@ -29,7 +29,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Database connection
-const db = require('./config/database');
+const { connectDatabase, initializeDatabase } = require('./config/database');
 
 // Routes
 const authRoutes = require('./routes/auth');
@@ -99,9 +99,27 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
-  console.log(`🚀 BeatCrest API server running on port ${PORT}`);
-  console.log(`📱 Socket.io server initialized`);
-});
+// Initialize database and start server
+const startServer = async () => {
+  try {
+    // Connect to MongoDB
+    await connectDatabase();
+    
+    // Initialize database schemas
+    await initializeDatabase();
+    
+    // Start server
+    server.listen(PORT, () => {
+      console.log(`🚀 BeatCrest API server running on port ${PORT}`);
+      console.log(`📱 Socket.io server initialized`);
+      console.log(`🍃 MongoDB connected successfully`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 module.exports = { app, io }; 
