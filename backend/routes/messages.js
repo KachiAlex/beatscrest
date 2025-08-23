@@ -3,7 +3,7 @@ const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Get conversations list
+// Get conversations list (specific route first)
 router.get('/conversations', authenticateToken, async (req, res) => {
   try {
     // TODO: Implement MongoDB conversations retrieval
@@ -34,7 +34,20 @@ router.get('/conversations', authenticateToken, async (req, res) => {
   }
 });
 
-// Get messages with a specific user
+// Get unread count (specific route)
+router.get('/unread-count', authenticateToken, async (req, res) => {
+  try {
+    // TODO: Implement MongoDB unread count
+    // For now, return mock count
+    res.json({ unreadCount: 5 });
+
+  } catch (error) {
+    console.error('Get unread count error:', error);
+    res.status(500).json({ error: 'Failed to get unread count' });
+  }
+});
+
+// Get messages with a specific user (parameterized route)
 router.get('/conversation/:userId', authenticateToken, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -117,19 +130,6 @@ router.put('/conversation/:userId/read', authenticateToken, async (req, res) => 
   } catch (error) {
     console.error('Mark as read error:', error);
     res.status(500).json({ error: 'Failed to mark messages as read' });
-  }
-});
-
-// Get unread count
-router.get('/unread-count', authenticateToken, async (req, res) => {
-  try {
-    // TODO: Implement MongoDB unread count
-    // For now, return mock count
-    res.json({ unreadCount: 5 });
-
-  } catch (error) {
-    console.error('Get unread count error:', error);
-    res.status(500).json({ error: 'Failed to get unread count' });
   }
 });
 
