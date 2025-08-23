@@ -130,9 +130,20 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
-app.use('/*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+// 404 handler - only for unmatched routes
+app.use('*', (req, res) => {
+  console.log(`404 - Route not found: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({ 
+    error: 'Route not found',
+    path: req.originalUrl,
+    method: req.method,
+    availableEndpoints: [
+      'GET /',
+      'GET /api/health',
+      'GET /api/test',
+      'GET /api/ip'
+    ]
+  });
 });
 
 const PORT = process.env.PORT || 5000;
@@ -140,11 +151,17 @@ const PORT = process.env.PORT || 5000;
 // Initialize database and start server
 const startServer = async () => {
   try {
+    console.log(`🔧 Starting server on port ${PORT}...`);
+    
     // Start server immediately
     server.listen(PORT, () => {
       console.log(`🚀 BeatCrest API server running on port ${PORT}`);
       console.log(`📱 Socket.io server initialized`);
       console.log(`🌐 Server ready to accept requests`);
+      console.log(`🔗 Test URLs:`);
+      console.log(`   - http://localhost:${PORT}/`);
+      console.log(`   - http://localhost:${PORT}/api/health`);
+      console.log(`   - http://localhost:${PORT}/api/test`);
     });
     
     // Temporarily disable MongoDB connection for testing
