@@ -32,35 +32,7 @@ app.use(morgan('combined'));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Database connection
-const { connectDatabase, initializeDatabase } = require('./config/database');
-
-// Routes
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const beatRoutes = require('./routes/beats');
-const paymentRoutes = require('./routes/payments');
-const messageRoutes = require('./routes/messages');
-const adminRoutes = require('./routes/admin');
-
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/beats', beatRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/admin', adminRoutes);
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'BeatCrest API is running',
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Root endpoint for testing
+// Basic endpoints without route imports
 app.get('/', (req, res) => {
   res.json({ 
     message: 'BeatCrest API Root',
@@ -73,7 +45,14 @@ app.get('/', (req, res) => {
   });
 });
 
-// Simple test endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'BeatCrest API is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.get('/api/test', (req, res) => {
   res.json({ 
     message: 'Server is working!',
@@ -83,7 +62,6 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-// Simple IP endpoint (works without database)
 app.get('/api/ip', (req, res) => {
   const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket?.remoteAddress;
   res.json({ 
@@ -97,24 +75,6 @@ app.get('/api/ip', (req, res) => {
 // Socket.io connection handling
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
-  
-  // Join user to their personal room
-  socket.on('join', (userId) => {
-    socket.join(`user_${userId}`);
-    console.log(`User ${userId} joined their room`);
-  });
-  
-  // Handle private messages
-  socket.on('private_message', (data) => {
-    const { recipientId, message } = data;
-    io.to(`user_${recipientId}`).emit('new_message', message);
-  });
-  
-  // Handle notifications
-  socket.on('notification', (data) => {
-    const { userId, notification } = data;
-    io.to(`user_${userId}`).emit('new_notification', notification);
-  });
   
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
@@ -148,12 +108,11 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Initialize database and start server
+// Start server
 const startServer = async () => {
   try {
     console.log(`🔧 Starting server on port ${PORT}...`);
     
-    // Start server immediately
     server.listen(PORT, () => {
       console.log(`🚀 BeatCrest API server running on port ${PORT}`);
       console.log(`📱 Socket.io server initialized`);
@@ -163,20 +122,6 @@ const startServer = async () => {
       console.log(`   - http://localhost:${PORT}/api/health`);
       console.log(`   - http://localhost:${PORT}/api/test`);
     });
-    
-    // Temporarily disable MongoDB connection for testing
-    console.log('⚠️ MongoDB connection temporarily disabled for testing');
-    
-    // Try to connect to MongoDB in background (non-blocking)
-    // setTimeout(async () => {
-    //   try {
-    //     await connectDatabase();
-    //     console.log(`🍃 MongoDB connected successfully`);
-    //   } catch (dbError) {
-    //     console.error('❌ MongoDB connection failed, but server is running:', dbError.message);
-    //     console.log('⚠️ Server is running without database connection');
-    //   }
-    // }, 1000);
     
   } catch (error) {
     console.error('❌ Failed to start server:', error);
