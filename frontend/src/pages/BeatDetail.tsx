@@ -1,0 +1,361 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { Play, Pause, Heart, ShoppingCart, MessageCircle, Share2, Clock, Music } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Card, CardContent } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
+import { Beat, Comment } from '../types';
+import apiService from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+
+export default function BeatDetail() {
+  const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const [beat, setBeat] = useState<Beat | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [comment, setComment] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      loadBeat();
+      loadComments();
+    }
+  }, [id]);
+
+  const loadBeat = async () => {
+    try {
+      setLoading(true);
+      const response = await apiService.getBeat(parseInt(id!));
+      setBeat(response.beat);
+    } catch (error) {
+      console.error('Error loading beat:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadComments = async () => {
+    try {
+      const response = await apiService.getBeatComments(parseInt(id!));
+      setComments(response.comments || []);
+    } catch (error) {
+      console.error('Error loading comments:', error);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!beat) return;
+    
+    try {
+      await apiService.likeBeat(beat.id);
+      setBeat(prev => prev ? {
+        ...prev,
+        is_liked: !prev.is_liked,
+        likes_count: prev.is_liked ? prev.likes_count - 1 : prev.likes_count + 1
+      } : null);
+    } catch (error) {
+      console.error('Error liking beat:', error);
+    }
+  };
+
+  const handleComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!comment.trim() || !beat) return;
+
+    try {
+      setSubmittingComment(true);
+      const response = await apiService.addComment(beat.id, comment.trim());
+      setComments(prev => [response.comment, ...prev]);
+      setComment('');
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const handlePurchase = async () => {
+    if (!beat || !user) return;
+    
+    try {
+      // This would integrate with Stripe payment flow
+      console.log('Initiating purchase for beat:', beat.id);
+      // Redirect to payment page or open payment modal
+    } catch (error) {
+      console.error('Error initiating purchase:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
+  if (!beat) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <Music className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Beat Not Found</h2>
+          <p className="text-gray-600 mb-4">The beat you're looking for doesn't exist or has been removed.</p>
+          <Link to="/marketplace">
+            <Button className="bg-purple-600 hover:bg-purple-700">
+              Browse Beats
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 pt-20">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Beat Header */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex-1">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{beat.title}</h1>
+                    <Link 
+                      to={`/profile/${beat.producer_name}`}
+                      className="text-lg text-purple-600 hover:text-purple-700 font-medium"
+                    >
+                      by {beat.producer_name}
+                    </Link>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-purple-600 mb-2">
+                      ₦{beat.price.toLocaleString()}
+                    </div>
+                    <Button 
+                      onClick={handlePurchase}
+                      className="w-full bg-purple-600 hover:bg-purple-700"
+                      disabled={!user}
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      {user ? 'Buy Now' : 'Sign in to Purchase'}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Audio Player */}
+                <div className="bg-gray-100 rounded-lg p-4 mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-4">
+                      <Button
+                        onClick={() => setIsPlaying(!isPlaying)}
+                        className="bg-purple-600 hover:bg-purple-700"
+                      >
+                        {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                      </Button>
+                      <div>
+                        <div className="font-medium">Preview</div>
+                        <div className="text-sm text-gray-500">30 seconds</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <Button
+                        variant="ghost"
+                        onClick={handleLike}
+                        className={`flex items-center space-x-1 ${
+                          beat.is_liked ? 'text-red-500' : 'text-gray-500'
+                        }`}
+                      >
+                        <Heart className={`h-4 w-4 ${beat.is_liked ? 'fill-current' : ''}`} />
+                        <span>{beat.likes_count}</span>
+                      </Button>
+                      <Button variant="ghost" className="text-gray-500">
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-purple-600 h-2 rounded-full" style={{ width: '30%' }}></div>
+                  </div>
+                </div>
+
+                {/* Beat Info */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">{beat.bpm || 'N/A'}</div>
+                    <div className="text-sm text-gray-500">BPM</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">{beat.key || 'N/A'}</div>
+                    <div className="text-sm text-gray-500">Key</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">{beat.likes_count}</div>
+                    <div className="text-sm text-gray-500">Likes</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">{beat.plays_count}</div>
+                    <div className="text-sm text-gray-500">Plays</div>
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2">
+                  {beat.genre && (
+                    <Badge className="bg-purple-100 text-purple-800">
+                      {beat.genre}
+                    </Badge>
+                  )}
+                  {beat.tags?.map((tag, index) => (
+                    <Badge key={index} variant="outline">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Description */}
+            {beat.description && (
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold mb-4">Description</h3>
+                  <p className="text-gray-700 leading-relaxed">{beat.description}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Comments */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold mb-4">Comments</h3>
+                
+                {/* Add Comment */}
+                {user && (
+                  <form onSubmit={handleComment} className="mb-6">
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Add a comment..."
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        disabled={submittingComment}
+                      />
+                      <Button 
+                        type="submit" 
+                        disabled={!comment.trim() || submittingComment}
+                        className="bg-purple-600 hover:bg-purple-700"
+                      >
+                        {submittingComment ? 'Posting...' : 'Post'}
+                      </Button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Comments List */}
+                <div className="space-y-4">
+                  {comments.map((comment) => (
+                    <div key={comment.id} className="flex space-x-3">
+                      <img
+                        src={comment.profile_picture || 'https://via.placeholder.com/40'}
+                        alt={comment.username}
+                        className="w-10 h-10 rounded-full"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="font-medium">{comment.username}</span>
+                          <span className="text-sm text-gray-500">
+                            {new Date(comment.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-gray-700">{comment.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {comments.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <MessageCircle className="h-8 w-8 mx-auto mb-2" />
+                      <p>No comments yet. Be the first to comment!</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Producer Info */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Producer</h3>
+                <div className="flex items-center space-x-3 mb-4">
+                  <img
+                    src={beat.producer_picture || 'https://via.placeholder.com/60'}
+                    alt={beat.producer_name}
+                    className="w-15 h-15 rounded-full"
+                  />
+                  <div>
+                    <Link 
+                      to={`/profile/${beat.producer_name}`}
+                      className="font-medium text-purple-600 hover:text-purple-700"
+                    >
+                      {beat.producer_name}
+                    </Link>
+                    <div className="text-sm text-gray-500">Producer</div>
+                  </div>
+                </div>
+                <Link to={`/profile/${beat.producer_name}`}>
+                  <Button variant="outline" className="w-full">
+                    View Profile
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* Purchase Info */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Purchase Details</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Beat Price</span>
+                    <span className="font-medium">₦{beat.price.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Platform Fee (5%)</span>
+                    <span className="font-medium">₦{(beat.price * 0.05).toLocaleString()}</span>
+                  </div>
+                  <hr />
+                  <div className="flex justify-between font-semibold">
+                    <span>Total</span>
+                    <span>₦{beat.price.toLocaleString()}</span>
+                  </div>
+                </div>
+                <div className="mt-4 text-sm text-gray-500">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Clock className="h-4 w-4" />
+                    <span>Instant download after purchase</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Music className="h-4 w-4" />
+                    <span>Full quality WAV/MP3 files</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+} 
