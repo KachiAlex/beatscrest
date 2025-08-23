@@ -60,11 +60,26 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Root endpoint for testing
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'BeatCrest API Root',
+    endpoints: {
+      health: '/api/health',
+      test: '/api/test',
+      ip: '/api/ip'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Simple test endpoint
 app.get('/api/test', (req, res) => {
   res.json({ 
     message: 'Server is working!',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    server: 'BeatCrest Backend',
+    status: 'active'
   });
 });
 
