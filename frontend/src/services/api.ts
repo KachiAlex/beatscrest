@@ -5,8 +5,11 @@ class ApiService {
   private api: AxiosInstance;
 
   constructor() {
+    const apiUrl = 'https://beatcrest-backend.onrender.com/api';
+    console.log('🔗 API URL:', apiUrl);
+    
     this.api = axios.create({
-      baseURL: import.meta.env.VITE_API_URL || 'https://beatcrest-backend.onrender.com/api',
+      baseURL: apiUrl,
       headers: {
         'Content-Type': 'application/json',
       },
