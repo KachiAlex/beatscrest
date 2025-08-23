@@ -5,6 +5,7 @@
 [build.environment]
   NODE_VERSION = "18"
   VITE_API_URL = "https://beatcrest-backend.onrender.com/api"
+  VITE_STRIPE_PUBLISHABLE_KEY = "your-stripe-publishable-key"
 
 [[redirects]]
   from = "/*"

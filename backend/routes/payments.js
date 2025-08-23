@@ -31,19 +31,37 @@ router.post('/create-payment-intent', authenticateToken, async (req, res) => {
       return res.status(503).json({ error: 'Payment service not configured' });
     }
 
-    const { beatId } = req.body;
+    const { beatId, amount } = req.body;
 
-    if (!beatId) {
-      return res.status(400).json({ error: 'Beat ID is required' });
+    if (!beatId || !amount) {
+      return res.status(400).json({ error: 'Beat ID and amount are required' });
     }
 
-    // For now, return a mock response since we're using MongoDB
-    // TODO: Implement MongoDB queries when database is set up
+    // Calculate platform fee (5%)
+    const platformFee = Math.round(amount * 0.05);
+    const producerAmount = amount - platformFee;
+
+    // Create payment intent with Stripe
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount, // Amount in cents
+      currency: 'usd',
+      metadata: {
+        beatId: beatId,
+        buyerId: req.user.userId,
+        platformFee: platformFee,
+        producerAmount: producerAmount
+      },
+      application_fee_amount: platformFee,
+      transfer_data: {
+        destination: 'acct_producer_id', // TODO: Get producer's Stripe account ID
+      },
+    });
+
     res.json({
-      clientSecret: 'mock_client_secret',
-      amount: 45000,
-      platformFee: 2250,
-      producerAmount: 42750
+      clientSecret: paymentIntent.client_secret,
+      amount: amount,
+      platformFee: platformFee,
+      producerAmount: producerAmount
     });
 
   } catch (error) {
