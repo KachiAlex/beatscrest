@@ -6,7 +6,7 @@ class ApiService {
 
   constructor() {
     this.api = axios.create({
-      baseURL: '/api',
+      baseURL: import.meta.env.VITE_API_URL || 'https://beatcrest-backend.onrender.com/api',
       headers: {
         'Content-Type': 'application/json',
       },

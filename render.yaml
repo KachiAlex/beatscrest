@@ -15,4 +15,4 @@ services:
       - key: MONGODB_URI
         value: your-mongodb-connection-string
       - key: FRONTEND_URL
-        value: https://your-netlify-site.netlify.app 
+        value: https://*.netlify.app 
