@@ -56,6 +56,14 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Simple test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ 
+    message: 'Server is working!',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Simple IP endpoint (works without database)
 app.get('/api/ip', (req, res) => {
   const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket?.remoteAddress;
@@ -113,20 +121,23 @@ const PORT = process.env.PORT || 5000;
 // Initialize database and start server
 const startServer = async () => {
   try {
-    // Start server first, then try to connect to database
+    // Start server immediately
     server.listen(PORT, () => {
       console.log(`🚀 BeatCrest API server running on port ${PORT}`);
       console.log(`📱 Socket.io server initialized`);
+      console.log(`🌐 Server ready to accept requests`);
     });
     
-    // Try to connect to MongoDB (but don't crash if it fails)
-    try {
-      await connectDatabase();
-      console.log(`🍃 MongoDB connected successfully`);
-    } catch (dbError) {
-      console.error('❌ MongoDB connection failed, but server is running:', dbError.message);
-      console.log('⚠️ Server is running without database connection');
-    }
+    // Try to connect to MongoDB in background (non-blocking)
+    setTimeout(async () => {
+      try {
+        await connectDatabase();
+        console.log(`🍃 MongoDB connected successfully`);
+      } catch (dbError) {
+        console.error('❌ MongoDB connection failed, but server is running:', dbError.message);
+        console.log('⚠️ Server is running without database connection');
+      }
+    }, 1000);
     
   } catch (error) {
     console.error('❌ Failed to start server:', error);
