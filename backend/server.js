@@ -13,24 +13,51 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
 
-// Middleware
-app.use(helmet());
-app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || "http://localhost:3000",
-    "https://*.netlify.app",
-    "https://*.onrender.com",
-    "https://68aa6038b0f0dcb34d8adc83--beatscrest.netlify.app",
-    "https://beatscrest.netlify.app"
-  ],
+// CORS configuration - more permissive
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://beatscrest.netlify.app',
+      'https://68aa6038b0f0dcb34d8adc83--beatscrest.netlify.app',
+      'https://*.netlify.app',
+      'https://*.onrender.com'
+    ];
+    
+    // Check if origin is allowed
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      if (allowedOrigin.includes('*')) {
+        return origin.includes(allowedOrigin.replace('*', ''));
+      }
+      return origin === allowedOrigin;
+    });
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(null, true); // Allow anyway for development
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  optionsSuccessStatus: 200
+};
+
+// Middleware
+app.use(cors(corsOptions));
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 app.use(morgan('combined'));
 app.use(express.json({ limit: '50mb' }));
@@ -40,7 +67,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static('public'));
 
 // Handle CORS preflight requests
-app.options('*', cors());
+app.options('*', cors(corsOptions));
 
 // Routes - Add back one by one
 const authRoutes = require('./routes/auth');
@@ -95,6 +122,15 @@ app.get('/api/ip', (req, res) => {
     xForwardedFor: req.headers['x-forwarded-for'],
     xRealIp: req.headers['x-real-ip'],
     message: 'Use this IP to whitelist in MongoDB Atlas'
+  });
+});
+
+// Simple test endpoint for CORS debugging
+app.get('/cors-test', (req, res) => {
+  res.json({
+    message: 'CORS test successful',
+    origin: req.headers.origin,
+    timestamp: new Date().toISOString()
   });
 });
 
