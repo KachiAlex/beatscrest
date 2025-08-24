@@ -6,6 +6,7 @@ import Marketplace from './pages/Marketplace';
 import BeatDetail from './pages/BeatDetail';
 import Upload from './pages/Upload';
 import Profile from './pages/Profile';
+import ProducerDashboard from './pages/ProducerDashboard';
 
 const App: React.FC = () => {
   return (
@@ -13,6 +14,9 @@ const App: React.FC = () => {
       <Routes>
         {/* Home page with banner slides, about, and beats commerce */}
         <Route path="/" element={<Home />} />
+        
+        {/* Producer Dashboard - self-contained */}
+        <Route path="/dashboard" element={<ProducerDashboard />} />
         
         {/* Other pages use the shared Navbar */}
         <Route path="/marketplace" element={

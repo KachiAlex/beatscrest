@@ -85,7 +85,7 @@ export default function Marketplace() {
                   placeholder="Search beats..."
                   value={filters.search}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
             </div>
@@ -95,7 +95,7 @@ export default function Marketplace() {
               <select
                 value={filters.genre}
                 onChange={(e) => handleFilterChange('genre', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
                 <option value="">All Genres</option>
                 {genres.map(genre => (
@@ -111,7 +111,7 @@ export default function Marketplace() {
                 placeholder="Min Price"
                 value={filters.minPrice}
                 onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
 
@@ -122,7 +122,7 @@ export default function Marketplace() {
                 placeholder="Max Price"
                 value={filters.maxPrice}
                 onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
 
@@ -133,7 +133,7 @@ export default function Marketplace() {
                 placeholder="BPM"
                 value={filters.bpm}
                 onChange={(e) => handleFilterChange('bpm', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function Marketplace() {
         {/* Beats Grid */}
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -150,7 +150,7 @@ export default function Marketplace() {
               <Card key={beat.id} className="beat-card group">
                 <div className="relative">
                   {/* Beat Thumbnail */}
-                  <div className="aspect-square bg-gradient-to-br from-purple-100 to-blue-100 relative overflow-hidden">
+                  <div className="aspect-square bg-gradient-to-br from-purple-100 via-teal-100 to-orange-100 relative overflow-hidden">
                     {beat.thumbnail_url ? (
                       <img
                         src={beat.thumbnail_url}
@@ -159,7 +159,7 @@ export default function Marketplace() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Music className="h-16 w-16 text-purple-400" />
+                        <Music className="h-16 w-16 text-teal-400" />
                       </div>
                     )}
                     
@@ -167,7 +167,7 @@ export default function Marketplace() {
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
                       <Button
                         size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white text-purple-600 hover:bg-gray-100"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white text-teal-600 hover:bg-gray-100"
                       >
                         <Play className="h-4 w-4" />
                       </Button>
@@ -175,7 +175,7 @@ export default function Marketplace() {
 
                     {/* Price Badge */}
                     <div className="absolute top-3 right-3">
-                      <Badge className="bg-purple-600 text-white">
+                      <Badge className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 text-white">
                         ₦{beat.price.toLocaleString()}
                       </Badge>
                     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import SignupModal from "../components/SignupModal";
 import PaymentModal from "../components/PaymentModal";
 
@@ -11,6 +12,7 @@ export default function Home() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedBeat, setSelectedBeat] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
+  const navigate = useNavigate();
 
   // Banner slides data
   const bannerSlides = [
@@ -18,19 +20,25 @@ export default function Home() {
       title: "Discover Amazing Beats",
       subtitle: "Find the perfect sound for your next hit",
       image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=1600&auto=format&fit=crop",
-      cta: "Explore Beats"
+      cta: "Explore Beats",
+      action: () => {
+        // Scroll to beats section
+        document.getElementById('beats-section')?.scrollIntoView({ behavior: 'smooth' });
+      }
     },
     {
       title: "Connect with Producers",
       subtitle: "Build your network in the music industry",
       image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1600&auto=format&fit=crop",
-      cta: "Join Community"
+      cta: "Join Community",
+      action: () => setShowAuthModal(true)
     },
     {
       title: "Sell Your Beats",
       subtitle: "Monetize your talent and reach global audiences",
       image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=1600&auto=format&fit=crop",
-      cta: "Start Selling"
+      cta: "Start Selling",
+      action: () => navigate('/dashboard')
     }
   ];
 
@@ -99,14 +107,15 @@ export default function Home() {
                 e.currentTarget.nextElementSibling?.classList.remove('hidden');
               }}
             />
-            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 hidden"></div>
+            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-purple-600 via-teal-500 to-orange-500 hidden"></div>
             <span className="text-xl font-bold text-gray-900">BeatCrest</span>
           </div>
           <nav className="hidden gap-6 md:flex">
-            <button className="text-gray-700 hover:text-purple-600">Home</button>
-            <button className="text-gray-700 hover:text-purple-600">About</button>
-            <button className="text-gray-700 hover:text-purple-600">Beats</button>
-            <button className="text-gray-700 hover:text-purple-600" onClick={() => setShowAuthModal(true)}>Sign in</button>
+            <button className="text-gray-700 hover:text-teal-600">Home</button>
+            <button className="text-gray-700 hover:text-teal-600">About</button>
+            <button className="text-gray-700 hover:text-teal-600">Beats</button>
+            <Link to="/dashboard" className="text-gray-700 hover:text-teal-600">Dashboard</Link>
+            <button className="text-gray-700 hover:text-teal-600" onClick={() => setShowAuthModal(true)}>Sign in</button>
           </nav>
         </div>
       </header>
@@ -131,7 +140,10 @@ export default function Home() {
                 <div className="text-center text-white">
                   <h1 className="text-4xl md:text-6xl font-bold mb-4">{slide.title}</h1>
                   <p className="text-xl md:text-2xl mb-8 opacity-90">{slide.subtitle}</p>
-                  <button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-full text-lg font-medium transition">
+                  <button 
+                    onClick={slide.action}
+                    className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-8 py-3 rounded-full text-lg font-medium transition-all duration-300 shadow-lg"
+                  >
                     {slide.cta}
                   </button>
                 </div>
@@ -165,21 +177,21 @@ export default function Home() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
               <div className="text-center">
-                <div className="w-16 h-16 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                <div className="w-16 h-16 mx-auto bg-gradient-to-br from-purple-100 via-teal-100 to-orange-100 rounded-full flex items-center justify-center mb-4">
                   <span className="text-2xl">🎵</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Upload & Sell</h3>
                 <p className="text-gray-600">Upload your beats with previews and set your own prices</p>
               </div>
               <div className="text-center">
-                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <div className="w-16 h-16 mx-auto bg-gradient-to-br from-teal-100 to-blue-100 rounded-full flex items-center justify-center mb-4">
                   <span className="text-2xl">👥</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Social Community</h3>
                 <p className="text-gray-600">Connect with producers and artists worldwide</p>
               </div>
               <div className="text-center">
-                <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <div className="w-16 h-16 mx-auto bg-gradient-to-br from-orange-100 to-green-100 rounded-full flex items-center justify-center mb-4">
                   <span className="text-2xl">📈</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Grow Your Brand</h3>
@@ -191,7 +203,7 @@ export default function Home() {
       </section>
 
       {/* Beats Commerce Section */}
-      <section className="py-20">
+      <section id="beats-section" className="py-20">
         <div className="container mx-auto px-4">
           <div className="mb-12">
             <h2 className="text-3xl md:text-5xl font-bold text-center mb-4">Discover Amazing Beats</h2>
@@ -207,13 +219,13 @@ export default function Home() {
                   placeholder="Search beats or producers..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
               <select
                 value={selectedGenre}
                 onChange={(e) => setSelectedGenre(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
                 {genres.map(genre => (
                   <option key={genre} value={genre}>{genre}</option>
@@ -232,7 +244,7 @@ export default function Home() {
                     alt={beat.title}
                     className="w-full h-48 object-cover"
                   />
-                  <div className="absolute top-2 right-2 bg-purple-600 text-white px-2 py-1 rounded text-sm font-medium">
+                  <div className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 text-white px-2 py-1 rounded text-sm font-medium">
                     ₦{beat.price.toLocaleString()}
                   </div>
                   <button className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -246,7 +258,7 @@ export default function Home() {
                     <span className="text-sm text-gray-500">{beat.genre} • {beat.bpm} BPM</span>
                     <button 
                       onClick={() => handleBuyNow(beat)}
-                      className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+                      className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 shadow-lg"
                     >
                       Buy Now
                     </button>
@@ -278,7 +290,7 @@ export default function Home() {
                 e.currentTarget.nextElementSibling?.classList.remove('hidden');
               }}
             />
-            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 hidden"></div>
+            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-purple-600 via-teal-500 to-orange-500 hidden"></div>
             <span className="font-semibold">BeatCrest</span>
           </div>
           <div className="text-gray-500">© {new Date().getFullYear()} BeatCrest. All rights reserved.</div>

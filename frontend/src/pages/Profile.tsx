@@ -65,7 +65,7 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-teal-600"></div>
       </div>
     );
   }
@@ -104,7 +104,7 @@ export default function Profile() {
                   <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">{user.username}</h1>
                     <div className="flex items-center space-x-4 mb-4">
-                      <Badge className="bg-purple-100 text-purple-800">
+                      <Badge className="bg-gradient-to-r from-purple-100 via-teal-100 to-orange-100 text-purple-800">
                         {user.account_type}
                       </Badge>
                       {user.is_verified && (
@@ -125,7 +125,7 @@ export default function Profile() {
                       className={`${
                         isFollowing 
                           ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' 
-                          : 'bg-purple-600 hover:bg-purple-700'
+                          : 'bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600'
                       }`}
                     >
                       {isFollowing ? 'Following' : 'Follow'}
@@ -161,7 +161,7 @@ export default function Profile() {
                 onClick={() => setActiveTab('beats')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'beats'
-                    ? 'border-purple-500 text-purple-600'
+                    ? 'border-teal-500 text-teal-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
@@ -172,7 +172,7 @@ export default function Profile() {
                 onClick={() => setActiveTab('followers')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'followers'
-                    ? 'border-purple-500 text-purple-600'
+                    ? 'border-teal-500 text-teal-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
@@ -183,7 +183,7 @@ export default function Profile() {
                 onClick={() => setActiveTab('following')}
                 className={`py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'following'
-                    ? 'border-purple-500 text-purple-600'
+                    ? 'border-teal-500 text-teal-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
