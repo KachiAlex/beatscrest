@@ -163,9 +163,9 @@ export default function ProducerDashboard() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img 
-                src="/images/beatscrest-logo.svg" 
+                src="/images/beatscrest-logo-large.svg" 
                 alt="BeatCrest Logo" 
-                className="h-8 w-8"
+                className="h-10 w-10"
               />
               <h1 className="text-2xl font-bold text-gray-900">Producer Dashboard</h1>
             </div>

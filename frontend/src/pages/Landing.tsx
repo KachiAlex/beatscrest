@@ -98,16 +98,16 @@ export default function Home() {
         <div className="container mx-auto px-4 flex items-center justify-between py-3">
           <div className="flex items-center gap-3 cursor-pointer">
             <img 
-              src="/images/beatscrest-logo.svg" 
+              src="/images/beatscrest-logo-large.svg" 
               alt="BeatCrest Logo" 
-              className="h-8 w-8"
+              className="h-10 w-10"
               onError={(e) => {
                 // Fallback to gradient div if logo fails to load
                 e.currentTarget.style.display = 'none';
                 e.currentTarget.nextElementSibling?.classList.remove('hidden');
               }}
             />
-            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-purple-600 via-teal-500 to-orange-500 hidden"></div>
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600 via-teal-500 to-orange-500 hidden"></div>
             <span className="text-xl font-bold text-gray-900">BeatCrest</span>
           </div>
           <nav className="hidden gap-6 md:flex">
