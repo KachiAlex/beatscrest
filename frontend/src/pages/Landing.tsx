@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from "react";
+import SignupModal from "../components/SignupModal";
+import PaymentModal from "../components/PaymentModal";
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedBeat, setSelectedBeat] = useState<any>(null);
+  const [userData, setUserData] = useState<any>(null);
 
   // Banner slides data
   const bannerSlides = [
@@ -57,6 +63,25 @@ export default function Home() {
     const matchesGenre = selectedGenre === "All" || beat.genre === selectedGenre;
     return matchesSearch && matchesGenre;
   });
+
+  // Handle buy now button click
+  const handleBuyNow = (beat: any) => {
+    setSelectedBeat(beat);
+    setShowSignupModal(true);
+  };
+
+  // Handle signup completion
+  const handleSignupComplete = (userData: any) => {
+    setUserData(userData);
+    setShowPaymentModal(true);
+  };
+
+  // Handle payment modal close
+  const handlePaymentClose = () => {
+    setShowPaymentModal(false);
+    setSelectedBeat(null);
+    setUserData(null);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -209,7 +234,10 @@ export default function Home() {
                   <p className="text-gray-600 mb-2">{beat.producer}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500">{beat.genre} • {beat.bpm} BPM</span>
-                    <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                    <button 
+                      onClick={() => handleBuyNow(beat)}
+                      className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+                    >
                       Buy Now
                     </button>
                   </div>
@@ -261,6 +289,22 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Signup Modal */}
+      <SignupModal
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
+        beatData={selectedBeat}
+        onProceedToPayment={handleSignupComplete}
+      />
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={handlePaymentClose}
+        beatData={selectedBeat}
+        userData={userData}
+      />
     </div>
   );
 } 
