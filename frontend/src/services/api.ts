@@ -3,7 +3,7 @@ import { User, Beat, Purchase, Comment, Message, Conversation, Notification, Reg
 
 // Simple API configuration
 const api = axios.create({
-  baseURL: 'https://beatcrest-backend.onrender.com/api',
+  baseURL: 'https://beatscrest.onrender.com/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
