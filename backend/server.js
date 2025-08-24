@@ -127,10 +127,14 @@ app.get('/api/ip', (req, res) => {
 
 // Simple test endpoint for CORS debugging
 app.get('/cors-test', (req, res) => {
+  console.log('✅ /cors-test endpoint hit!');
+  console.log('Origin:', req.headers.origin);
   res.json({
     message: 'CORS test successful',
     origin: req.headers.origin,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    server: 'BeatCrest Backend',
+    cors: 'enabled'
   });
 });
 
@@ -163,7 +167,8 @@ app.use('*', (req, res) => {
       'GET /',
       'GET /api/health',
       'GET /api/test',
-      'GET /api/ip'
+      'GET /api/ip',
+      'GET /cors-test'
     ]
   });
 });
@@ -179,10 +184,17 @@ const startServer = async () => {
       console.log(`🚀 BeatCrest API server running on port ${PORT}`);
       console.log(`📱 Socket.io server initialized`);
       console.log(`🌐 Server ready to accept requests`);
+      console.log(`🔗 Available endpoints:`);
+      console.log(`   - GET /`);
+      console.log(`   - GET /api/health`);
+      console.log(`   - GET /api/test`);
+      console.log(`   - GET /api/ip`);
+      console.log(`   - GET /cors-test`);
       console.log(`🔗 Test URLs:`);
       console.log(`   - http://localhost:${PORT}/`);
       console.log(`   - http://localhost:${PORT}/api/health`);
       console.log(`   - http://localhost:${PORT}/api/test`);
+      console.log(`   - http://localhost:${PORT}/cors-test`);
     });
     
   } catch (error) {
