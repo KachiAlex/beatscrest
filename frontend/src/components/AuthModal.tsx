@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { useAuth } from '../contexts/AuthContext';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -18,26 +17,18 @@ export default function AuthModal({ onClose }: AuthModalProps) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
-  const { login, register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    try {
-      if (isLogin) {
-        await login(formData.email, formData.password);
-      } else {
-        await register(formData);
-      }
-      onClose();
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
-    } finally {
+    // Simulate API call
+    setTimeout(() => {
       setLoading(false);
-    }
+      // For now, just close the modal
+      onClose();
+    }, 1000);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -127,9 +118,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
             )}
 
             {error && (
-              <div className="text-red-600 text-sm bg-red-50 p-2 rounded">
-                {error}
-              </div>
+              <div className="text-red-600 text-sm">{error}</div>
             )}
 
             <Button
@@ -137,7 +126,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
               className="w-full bg-purple-600 hover:bg-purple-700"
               disabled={loading}
             >
-              {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Create Account')}
+              {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Sign Up')}
             </Button>
 
             <div className="text-center">
@@ -146,10 +135,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-purple-600 hover:text-purple-700 text-sm"
               >
-                {isLogin 
-                  ? "Don't have an account? Sign up" 
-                  : "Already have an account? Sign in"
-                }
+                {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
               </button>
             </div>
           </form>
