@@ -35,6 +35,22 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Serve static files
 app.use(express.static('public'));
 
+// Routes - Add back one by one
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+const beatRoutes = require('./routes/beats');
+const paymentRoutes = require('./routes/payments');
+const messageRoutes = require('./routes/messages');
+const adminRoutes = require('./routes/admin');
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/beats', beatRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/admin', adminRoutes);
+
 // Basic endpoints without route imports
 app.get('/', (req, res) => {
   res.json({ 
