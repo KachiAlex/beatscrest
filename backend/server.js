@@ -18,44 +18,15 @@ const io = socketIo(server, {
   }
 });
 
-// CORS configuration - more permissive
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://beatscrest.netlify.app',
-      'https://68aa6038b0f0dcb34d8adc83--beatscrest.netlify.app',
-      'https://*.netlify.app',
-      'https://*.onrender.com'
-    ];
-    
-    // Check if origin is allowed
-    const isAllowed = allowedOrigins.some(allowedOrigin => {
-      if (allowedOrigin.includes('*')) {
-        return origin.includes(allowedOrigin.replace('*', ''));
-      }
-      return origin === allowedOrigin;
-    });
-    
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(null, true); // Allow anyway for development
-    }
-  },
-  credentials: true,
+// Super simple CORS - allow everything
+app.use(cors({
+  origin: "*",
+  credentials: false,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  optionsSuccessStatus: 200
-};
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+}));
 
 // Middleware
-app.use(cors(corsOptions));
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
@@ -67,23 +38,33 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static('public'));
 
 // Handle CORS preflight requests
-app.options('*', cors(corsOptions));
+app.options('*', cors());
+
+// Simple test endpoint - no route imports needed
+app.get('/ping', (req, res) => {
+  res.json({
+    message: 'pong',
+    timestamp: new Date().toISOString(),
+    cors: 'enabled',
+    origin: req.headers.origin
+  });
+});
 
 // Routes - Add back one by one
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const beatRoutes = require('./routes/beats');
-const paymentRoutes = require('./routes/payments');
-const messageRoutes = require('./routes/messages');
-const adminRoutes = require('./routes/admin');
+// const authRoutes = require('./routes/auth');
+// const userRoutes = require('./routes/users');
+// const beatRoutes = require('./routes/beats');
+// const paymentRoutes = require('./routes/payments');
+// const messageRoutes = require('./routes/messages');
+// const adminRoutes = require('./routes/admin');
 
 // API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/beats', beatRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/admin', adminRoutes);
+// app.use('/api/auth', authRoutes);
+// app.use('/api/users', userRoutes);
+// app.use('/api/beats', beatRoutes);
+// app.use('/api/payments', paymentRoutes);
+// app.use('/api/messages', messageRoutes);
+// app.use('/api/admin', adminRoutes);
 
 // Basic endpoints without route imports
 app.get('/', (req, res) => {
@@ -186,12 +167,14 @@ const startServer = async () => {
       console.log(`🌐 Server ready to accept requests`);
       console.log(`🔗 Available endpoints:`);
       console.log(`   - GET /`);
+      console.log(`   - GET /ping`);
       console.log(`   - GET /api/health`);
       console.log(`   - GET /api/test`);
       console.log(`   - GET /api/ip`);
       console.log(`   - GET /cors-test`);
       console.log(`🔗 Test URLs:`);
       console.log(`   - http://localhost:${PORT}/`);
+      console.log(`   - http://localhost:${PORT}/ping`);
       console.log(`   - http://localhost:${PORT}/api/health`);
       console.log(`   - http://localhost:${PORT}/api/test`);
       console.log(`   - http://localhost:${PORT}/cors-test`);
