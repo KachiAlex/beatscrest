@@ -4,21 +4,17 @@ services:
     env: node
     plan: free
     buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    startCommand: cd backend && node simple-server.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
-      - key: JWT_SECRET
-        generateValue: true
-      - key: MONGODB_URI
-        value: your-mongodb-connection-string
       - key: FRONTEND_URL
-        value: https://68aa6038b0f0dcb34d8adc83--beatscrest.netlify.app
+        value: https://beatscrest.netlify.app
       - key: STRIPE_SECRET_KEY
-        value: your-stripe-secret-key
+        sync: false
       - key: STRIPE_PUBLISHABLE_KEY
-        value: your-stripe-publishable-key
+        sync: false
       - key: STRIPE_WEBHOOK_SECRET
-        value: your-stripe-webhook-secret 
+        sync: false 
