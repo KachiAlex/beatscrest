@@ -7,7 +7,6 @@ import Marketplace from './pages/Marketplace';
 import BeatDetail from './pages/BeatDetail';
 import Upload from './pages/Upload';
 import Profile from './pages/Profile';
-import ApiTest from './components/ApiTest';
 
 const App: React.FC = () => {
   const { user, loading } = useAuth();
@@ -24,11 +23,6 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <main>
-        {/* API Test Component for debugging */}
-        <div className="container mx-auto px-4 py-4">
-          <ApiTest />
-        </div>
-        
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/marketplace" element={<Marketplace />} />
