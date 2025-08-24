@@ -8,7 +8,7 @@ const ApiTest: React.FC = () => {
   useEffect(() => {
     const testApi = async () => {
       try {
-        const apiUrl = 'https://beatcrest-backend.onrender.com/api/test';
+        const apiUrl = 'https://beatscrest.onrender.com/api/test';
         console.log('🔗 Testing API URL:', apiUrl);
         
         const response = await axios.get(apiUrl);
