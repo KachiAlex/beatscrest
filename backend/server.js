@@ -24,9 +24,13 @@ app.use(cors({
   origin: [
     process.env.FRONTEND_URL || "http://localhost:3000",
     "https://*.netlify.app",
-    "https://*.onrender.com"
+    "https://*.onrender.com",
+    "https://68aa6038b0f0dcb34d8adc83--beatscrest.netlify.app",
+    "https://beatscrest.netlify.app"
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(morgan('combined'));
 app.use(express.json({ limit: '50mb' }));
@@ -34,6 +38,9 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Serve static files
 app.use(express.static('public'));
+
+// Handle CORS preflight requests
+app.options('*', cors());
 
 // Routes - Add back one by one
 const authRoutes = require('./routes/auth');
