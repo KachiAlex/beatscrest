@@ -10,17 +10,52 @@ import Profile from './pages/Profile';
 const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/home" element={<Marketplace />} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/beat/:id" element={<BeatDetail />} />
-          <Route path="/profile/:username" element={<Profile />} />
-          <Route path="/upload" element={<Upload />} />
-        </Routes>
-      </main>
+      <Routes>
+        {/* Landing page is self-contained with its own navigation */}
+        <Route path="/" element={<Landing />} />
+        
+        {/* Other pages use the shared Navbar */}
+        <Route path="/home" element={
+          <>
+            <Navbar />
+            <main>
+              <Marketplace />
+            </main>
+          </>
+        } />
+        <Route path="/marketplace" element={
+          <>
+            <Navbar />
+            <main>
+              <Marketplace />
+            </main>
+          </>
+        } />
+        <Route path="/beat/:id" element={
+          <>
+            <Navbar />
+            <main>
+              <BeatDetail />
+            </main>
+          </>
+        } />
+        <Route path="/profile/:username" element={
+          <>
+            <Navbar />
+            <main>
+              <Profile />
+            </main>
+          </>
+        } />
+        <Route path="/upload" element={
+          <>
+            <Navbar />
+            <main>
+              <Upload />
+            </main>
+          </>
+        } />
+      </Routes>
     </div>
   );
 };
