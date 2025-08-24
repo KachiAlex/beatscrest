@@ -1,132 +1,266 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
-export default function Landing() {
+export default function Home() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedGenre, setSelectedGenre] = useState("All");
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Banner slides data
+  const bannerSlides = [
+    {
+      title: "Discover Amazing Beats",
+      subtitle: "Find the perfect sound for your next hit",
+      image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=1600&auto=format&fit=crop",
+      cta: "Explore Beats"
+    },
+    {
+      title: "Connect with Producers",
+      subtitle: "Build your network in the music industry",
+      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1600&auto=format&fit=crop",
+      cta: "Join Community"
+    },
+    {
+      title: "Sell Your Beats",
+      subtitle: "Monetize your talent and reach global audiences",
+      image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=1600&auto=format&fit=crop",
+      cta: "Start Selling"
+    }
+  ];
+
+  // Mock beats data
+  const mockBeats = [
+    { id: 1, title: "Midnight Groove", producer: "DJ ProBeat", price: 45000, genre: "Hip Hop", bpm: 140, cover: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&auto=format&fit=crop" },
+    { id: 2, title: "Afro Vibes", producer: "Afrobeats King", price: 35000, genre: "Afrobeats", bpm: 120, cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&auto=format&fit=crop" },
+    { id: 3, title: "R&B Soul", producer: "Melody Queen", price: 55000, genre: "R&B", bpm: 90, cover: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&auto=format&fit=crop" },
+    { id: 4, title: "Trap Beat", producer: "Trap Master", price: 40000, genre: "Trap", bpm: 140, cover: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&auto=format&fit=crop" },
+    { id: 5, title: "Reggae Flow", producer: "Reggae Vibes", price: 30000, genre: "Reggae", bpm: 80, cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&auto=format&fit=crop" },
+    { id: 6, title: "Pop Hit", producer: "Pop Producer", price: 60000, genre: "Pop", bpm: 120, cover: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&auto=format&fit=crop" },
+    { id: 7, title: "Gospel Praise", producer: "Gospel Master", price: 25000, genre: "Gospel", bpm: 85, cover: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&auto=format&fit=crop" },
+    { id: 8, title: "Jazz Fusion", producer: "Jazz Artist", price: 70000, genre: "Jazz", bpm: 110, cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&auto=format&fit=crop" }
+  ];
+
+  const genres = ["All", "Hip Hop", "Afrobeats", "R&B", "Trap", "Reggae", "Pop", "Gospel", "Jazz"];
+
+  // Auto-advance slides
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % bannerSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [bannerSlides.length]);
+
+  // Filter beats based on search and genre
+  const filteredBeats = mockBeats.filter(beat => {
+    const matchesSearch = beat.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         beat.producer.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesGenre = selectedGenre === "All" || beat.genre === selectedGenre;
+    return matchesSearch && matchesGenre;
+  });
+
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: 'white', 
-      color: 'black',
-      padding: '20px',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      <h1 style={{ 
-        fontSize: '48px', 
-        color: 'purple', 
-        textAlign: 'center',
-        marginBottom: '20px'
-      }}>
-        BeatCrest
-      </h1>
-      
-      <p style={{ 
-        fontSize: '24px', 
-        textAlign: 'center',
-        color: 'gray',
-        marginBottom: '40px'
-      }}>
-        The ultimate social media and marketplace platform for beat producers
-      </p>
-      
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        gap: '20px',
-        flexWrap: 'wrap'
-      }}>
-        <button style={{
-          backgroundColor: 'purple',
-          color: 'white',
-          padding: '15px 30px',
-          border: 'none',
-          borderRadius: '10px',
-          fontSize: '18px',
-          cursor: 'pointer'
-        }}>
-          Get Started
-        </button>
-        
-        <button style={{
-          backgroundColor: 'white',
-          color: 'purple',
-          padding: '15px 30px',
-          border: '2px solid purple',
-          borderRadius: '10px',
-          fontSize: '18px',
-          cursor: 'pointer'
-        }}>
-          Explore Beats
-        </button>
-      </div>
-      
-      <div style={{ 
-        marginTop: '60px',
-        textAlign: 'center'
-      }}>
-        <h2 style={{ fontSize: '36px', marginBottom: '20px' }}>
-          Features
-        </h2>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '20px',
-          maxWidth: '1200px',
-          margin: '0 auto'
-        }}>
-          {[
-            'Upload & Sell Beats',
-            'Social Community', 
-            'Trending Beats',
-            'Producer Dashboard'
-          ].map((feature, i) => (
-            <div key={i} style={{
-              backgroundColor: '#f8f9fa',
-              padding: '20px',
-              borderRadius: '10px',
-              border: '1px solid #e9ecef'
-            }}>
-              <h3 style={{ color: 'purple', marginBottom: '10px' }}>{feature}</h3>
-              <p style={{ color: 'gray' }}>
-                Feature description goes here for {feature.toLowerCase()}
-              </p>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur">
+        <div className="container mx-auto px-4 flex items-center justify-between py-3">
+          <div className="flex items-center gap-2 cursor-pointer">
+            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600"></div>
+            <span className="text-xl font-bold text-gray-900">BeatCrest</span>
+          </div>
+          <nav className="hidden gap-6 md:flex">
+            <button className="text-gray-700 hover:text-purple-600">Home</button>
+            <button className="text-gray-700 hover:text-purple-600">About</button>
+            <button className="text-gray-700 hover:text-purple-600">Beats</button>
+            <button className="text-gray-700 hover:text-purple-600" onClick={() => setShowAuthModal(true)}>Sign in</button>
+          </nav>
+        </div>
+      </header>
+
+      {/* Banner Slides */}
+      <section className="relative h-96 md:h-[500px] overflow-hidden">
+        {bannerSlides.map((slide, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentSlide ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <div className="relative h-full">
+              <img
+                src={slide.image}
+                alt={slide.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <h1 className="text-4xl md:text-6xl font-bold mb-4">{slide.title}</h1>
+                  <p className="text-xl md:text-2xl mb-8 opacity-90">{slide.subtitle}</p>
+                  <button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-full text-lg font-medium transition">
+                    {slide.cta}
+                  </button>
+                </div>
+              </div>
             </div>
+          </div>
+        ))}
+        
+        {/* Slide indicators */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+          {bannerSlides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-3 h-3 rounded-full transition ${
+                index === currentSlide ? 'bg-white' : 'bg-white/50'
+              }`}
+            />
           ))}
         </div>
-      </div>
-      
-      <div style={{ 
-        marginTop: '60px',
-        textAlign: 'center',
-        backgroundColor: '#f8f9fa',
-        padding: '40px 20px'
-      }}>
-        <h2 style={{ fontSize: '36px', marginBottom: '20px' }}>
-          Ready to Start Your Music Journey?
-        </h2>
-        <p style={{ fontSize: '18px', color: 'gray', marginBottom: '30px' }}>
-          Join BeatCrest today and connect with a community of talented producers
-        </p>
-        <button style={{
-          backgroundColor: 'purple',
-          color: 'white',
-          padding: '15px 30px',
-          border: 'none',
-          borderRadius: '10px',
-          fontSize: '18px',
-          cursor: 'pointer'
-        }}>
-          Join BeatCrest Now
-        </button>
-      </div>
-      
-      <footer style={{ 
-        marginTop: '60px',
-        textAlign: 'center',
-        padding: '20px',
-        borderTop: '1px solid #e9ecef',
-        color: 'gray'
-      }}>
-        © 2024 BeatCrest. All rights reserved.
+      </section>
+
+      {/* About BeatCrest Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">About BeatCrest</h2>
+            <p className="text-xl text-gray-600 mb-8">
+              BeatCrest is the ultimate social media and marketplace platform for beat producers and music entertainers across Africa and beyond. 
+              We connect talented producers with artists, providing a seamless platform for discovery, collaboration, and commerce.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-2xl">🎵</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Upload & Sell</h3>
+                <p className="text-gray-600">Upload your beats with previews and set your own prices</p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-2xl">👥</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Social Community</h3>
+                <p className="text-gray-600">Connect with producers and artists worldwide</p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-2xl">📈</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Grow Your Brand</h3>
+                <p className="text-gray-600">Build your audience and monetize your talent</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Beats Commerce Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="mb-12">
+            <h2 className="text-3xl md:text-5xl font-bold text-center mb-4">Discover Amazing Beats</h2>
+            <p className="text-xl text-gray-600 text-center mb-8">
+              Browse through thousands of high-quality beats from talented producers
+            </p>
+            
+            {/* Search and Filter */}
+            <div className="max-w-4xl mx-auto flex flex-col md:flex-row gap-4 mb-8">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Search beats or producers..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <select
+                value={selectedGenre}
+                onChange={(e) => setSelectedGenre(e.target.value)}
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                {genres.map(genre => (
+                  <option key={genre} value={genre}>{genre}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Beats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredBeats.map((beat) => (
+              <div key={beat.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                <div className="relative">
+                  <img
+                    src={beat.cover}
+                    alt={beat.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute top-2 right-2 bg-purple-600 text-white px-2 py-1 rounded text-sm font-medium">
+                    ₦{beat.price.toLocaleString()}
+                  </div>
+                  <button className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-white font-medium">▶ Preview</span>
+                  </button>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg mb-1">{beat.title}</h3>
+                  <p className="text-gray-600 mb-2">{beat.producer}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">{beat.genre} • {beat.bpm} BPM</span>
+                    <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                      Buy Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredBeats.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No beats found matching your search criteria.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t bg-white py-10 text-sm">
+        <div className="container mx-auto px-4 flex flex-col items-center justify-between gap-4 md:flex-row">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600"></div>
+            <span className="font-semibold">BeatCrest</span>
+          </div>
+          <div className="text-gray-500">© {new Date().getFullYear()} BeatCrest. All rights reserved.</div>
+        </div>
       </footer>
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-xl font-bold">Welcome to BeatCrest</h3>
+              <button onClick={() => setShowAuthModal(false)} className="rounded-xl px-3 py-1 text-sm text-gray-500 hover:bg-gray-100">Close</button>
+            </div>
+            <form className="space-y-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium">Email</label>
+                <input type="email" className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500" placeholder="you@example.com" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium">Password</label>
+                <input type="password" className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500" placeholder="••••••••" />
+              </div>
+              <button className="w-full inline-flex items-center justify-center rounded-2xl bg-purple-600 px-5 py-3 text-white shadow-lg hover:bg-purple-700 transition">
+                <span className="font-medium">Sign In</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
