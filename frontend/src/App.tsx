@@ -25,6 +25,7 @@ const App: React.FC = () => {
       <main>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/home" element={<Navigate to="/marketplace" />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/beat/:id" element={<BeatDetail />} />
           <Route path="/profile/:username" element={<Profile />} />
