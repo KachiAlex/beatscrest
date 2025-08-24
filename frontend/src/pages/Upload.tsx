@@ -24,6 +24,11 @@ export default function Upload() {
     fullBeat: null as File | null,
     thumbnail: null as File | null
   });
+  const [driveLinks, setDriveLinks] = useState({
+    preview: '',
+    fullBeat: '',
+    thumbnail: ''
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const genres = ['Hip Hop', 'R&B', 'Afrobeats', 'Pop', 'Trap', 'Drill', 'Amapiano', 'Gospel', 'Jazz', 'Electronic'];
@@ -52,6 +57,26 @@ export default function Upload() {
     }));
   };
 
+  const handleDriveLinkChange = (field: keyof typeof driveLinks, link: string) => {
+    setDriveLinks(prev => ({
+      ...prev,
+      [field]: link
+    }));
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
+  };
+
+  const validateDriveLink = (link: string): boolean => {
+    // Basic Google Drive link validation
+    return link.includes('drive.google.com') && (link.includes('/file/d/') || link.includes('/open?id='));
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -61,11 +86,15 @@ export default function Upload() {
     if (!formData.price || parseFloat(formData.price) <= 0) {
       newErrors.price = 'Valid price is required';
     }
-    if (!files.preview) {
-      newErrors.preview = 'Preview file is required';
+    if (!driveLinks.preview.trim()) {
+      newErrors.preview = 'Preview Google Drive link is required';
+    } else if (!validateDriveLink(driveLinks.preview)) {
+      newErrors.preview = 'Please enter a valid Google Drive link';
     }
-    if (!files.fullBeat) {
-      newErrors.fullBeat = 'Full beat file is required';
+    if (!driveLinks.fullBeat.trim()) {
+      newErrors.fullBeat = 'Full beat Google Drive link is required';
+    } else if (!validateDriveLink(driveLinks.fullBeat)) {
+      newErrors.fullBeat = 'Please enter a valid Google Drive link';
     }
 
     setErrors(newErrors);
@@ -83,25 +112,12 @@ export default function Upload() {
       setLoading(true);
       setUploadProgress(0);
 
-      const uploadFormData = new FormData();
-      
-      // Add form data
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value) {
-          uploadFormData.append(key, value);
-        }
-      });
-
-      // Add files
-      if (files.preview) {
-        uploadFormData.append('preview', files.preview);
-      }
-      if (files.fullBeat) {
-        uploadFormData.append('fullBeat', files.fullBeat);
-      }
-      if (files.thumbnail) {
-        uploadFormData.append('thumbnail', files.thumbnail);
-      }
+      const uploadData = {
+        ...formData,
+        preview_url: driveLinks.preview,
+        full_beat_url: driveLinks.fullBeat,
+        thumbnail_url: driveLinks.thumbnail || null
+      };
 
       // Simulate upload progress
       const progressInterval = setInterval(() => {
@@ -114,7 +130,7 @@ export default function Upload() {
         });
       }, 200);
 
-      const response = await apiService.uploadBeat(uploadFormData);
+      const response = await apiService.uploadBeat(uploadData);
       
       clearInterval(progressInterval);
       setUploadProgress(100);
@@ -160,7 +176,7 @@ export default function Upload() {
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     placeholder="Enter your beat title"
                   />
                   {errors.title && <p className="text-red-600 text-sm mt-1">{errors.title}</p>}
@@ -236,149 +252,86 @@ export default function Upload() {
               </CardContent>
             </Card>
 
-            {/* File Uploads */}
+            {/* Google Drive Links */}
             <Card>
               <CardHeader>
-                <CardTitle>Upload Files</CardTitle>
+                <CardTitle>Google Drive Links</CardTitle>
+                <p className="text-sm text-gray-600 mt-2">
+                  Share your Google Drive links instead of uploading files directly. This is faster and more reliable!
+                </p>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Preview File */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Preview File *</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    {files.preview ? (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <FileAudio className="h-8 w-8 text-purple-600" />
-                          <div className="text-left">
-                            <p className="font-medium">{files.preview.name}</p>
-                            <p className="text-sm text-gray-500">
-                              {(files.preview.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile('preview')}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
+                  <label className="block text-sm font-medium mb-2">Preview File Google Drive Link *</label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <FileAudio className="h-8 w-8 text-teal-600" />
                       <div>
-                        <FileAudio className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600 mb-2">Upload a 30-second preview (MP3/WAV)</p>
-                        <input
-                          type="file"
-                          accept="audio/*"
-                          onChange={(e) => handleFileChange('preview', e.target.files?.[0] || null)}
-                          className="hidden"
-                          id="preview-upload"
-                        />
-                        <label htmlFor="preview-upload">
-                          <Button variant="outline" className="cursor-pointer">
-                            <UploadIcon className="h-4 w-4 mr-2" />
-                            Choose File
-                          </Button>
-                        </label>
+                        <p className="font-medium">30-second Preview (MP3/WAV)</p>
+                        <p className="text-sm text-gray-500">Share your Google Drive link for the preview file</p>
                       </div>
-                    )}
+                    </div>
+                    <input
+                      type="url"
+                      placeholder="https://drive.google.com/file/d/..."
+                      value={driveLinks.preview}
+                      onChange={(e) => handleDriveLinkChange('preview', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      💡 Make sure your Google Drive file is set to "Anyone with the link can view"
+                    </p>
                   </div>
                   {errors.preview && <p className="text-red-600 text-sm mt-1">{errors.preview}</p>}
                 </div>
 
                 {/* Full Beat File */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Full Beat File *</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    {files.fullBeat ? (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <Music className="h-8 w-8 text-purple-600" />
-                          <div className="text-left">
-                            <p className="font-medium">{files.fullBeat.name}</p>
-                            <p className="text-sm text-gray-500">
-                              {(files.fullBeat.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile('fullBeat')}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
+                  <label className="block text-sm font-medium mb-2">Full Beat File Google Drive Link *</label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <Music className="h-8 w-8 text-teal-600" />
                       <div>
-                        <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600 mb-2">Upload the full beat (WAV/MP3)</p>
-                        <input
-                          type="file"
-                          accept="audio/*"
-                          onChange={(e) => handleFileChange('fullBeat', e.target.files?.[0] || null)}
-                          className="hidden"
-                          id="fullbeat-upload"
-                        />
-                        <label htmlFor="fullbeat-upload">
-                          <Button variant="outline" className="cursor-pointer">
-                            <UploadIcon className="h-4 w-4 mr-2" />
-                            Choose File
-                          </Button>
-                        </label>
+                        <p className="font-medium">Full Beat (WAV/MP3)</p>
+                        <p className="text-sm text-gray-500">Share your Google Drive link for the full beat file</p>
                       </div>
-                    )}
+                    </div>
+                    <input
+                      type="url"
+                      placeholder="https://drive.google.com/file/d/..."
+                      value={driveLinks.fullBeat}
+                      onChange={(e) => handleDriveLinkChange('fullBeat', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      💡 Make sure your Google Drive file is set to "Anyone with the link can view"
+                    </p>
                   </div>
                   {errors.fullBeat && <p className="text-red-600 text-sm mt-1">{errors.fullBeat}</p>}
                 </div>
 
                 {/* Thumbnail */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Thumbnail (Optional)</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    {files.thumbnail ? (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <Image className="h-8 w-8 text-purple-600" />
-                          <div className="text-left">
-                            <p className="font-medium">{files.thumbnail.name}</p>
-                            <p className="text-sm text-gray-500">
-                              {(files.thumbnail.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile('thumbnail')}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
+                  <label className="block text-sm font-medium mb-2">Thumbnail Google Drive Link (Optional)</label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <Image className="h-8 w-8 text-teal-600" />
                       <div>
-                        <Image className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600 mb-2">Upload a thumbnail image (JPG/PNG)</p>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileChange('thumbnail', e.target.files?.[0] || null)}
-                          className="hidden"
-                          id="thumbnail-upload"
-                        />
-                        <label htmlFor="thumbnail-upload">
-                          <Button variant="outline" className="cursor-pointer">
-                            <UploadIcon className="h-4 w-4 mr-2" />
-                            Choose File
-                          </Button>
-                        </label>
+                        <p className="font-medium">Thumbnail Image (JPG/PNG)</p>
+                        <p className="text-sm text-gray-500">Share your Google Drive link for the thumbnail image</p>
                       </div>
-                    )}
+                    </div>
+                    <input
+                      type="url"
+                      placeholder="https://drive.google.com/file/d/... (optional)"
+                      value={driveLinks.thumbnail}
+                      onChange={(e) => handleDriveLinkChange('thumbnail', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      💡 Optional: Add a thumbnail image for your beat
+                    </p>
                   </div>
                 </div>
               </CardContent>
