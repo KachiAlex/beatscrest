@@ -88,8 +88,18 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur">
         <div className="container mx-auto px-4 flex items-center justify-between py-3">
-          <div className="flex items-center gap-2 cursor-pointer">
-            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600"></div>
+          <div className="flex items-center gap-3 cursor-pointer">
+            <img 
+              src="/images/beatscrest-logo.svg" 
+              alt="BeatCrest Logo" 
+              className="h-8 w-8"
+              onError={(e) => {
+                // Fallback to gradient div if logo fails to load
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 hidden"></div>
             <span className="text-xl font-bold text-gray-900">BeatCrest</span>
           </div>
           <nav className="hidden gap-6 md:flex">
@@ -258,7 +268,17 @@ export default function Home() {
       <footer className="border-t bg-white py-10 text-sm">
         <div className="container mx-auto px-4 flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600"></div>
+            <img 
+              src="/images/beatscrest-logo.svg" 
+              alt="BeatCrest Logo" 
+              className="h-6 w-6"
+              onError={(e) => {
+                // Fallback to gradient div if logo fails to load
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 hidden"></div>
             <span className="font-semibold">BeatCrest</span>
           </div>
           <div className="text-gray-500">© {new Date().getFullYear()} BeatCrest. All rights reserved.</div>
