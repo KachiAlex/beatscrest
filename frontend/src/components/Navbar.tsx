@@ -13,7 +13,15 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <Music className="h-8 w-8 text-purple-600" />
+            <img 
+              src="/images/beatscrest-logo.png" 
+              alt="BeatCrest Logo" 
+              className="h-8 w-8"
+              onError={(e) => {
+                // Fallback to icon if image fails to load
+                e.currentTarget.style.display = 'none';
+              }}
+            />
             <span className="text-xl font-bold text-purple-600">BeatCrest</span>
           </Link>
 

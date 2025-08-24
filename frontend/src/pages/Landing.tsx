@@ -10,6 +10,19 @@ export default function Landing() {
       <section className="relative py-20 px-4 text-center bg-gradient-to-br from-purple-50 to-white">
         <div className="container mx-auto max-w-6xl">
           <div className="space-y-8">
+            {/* Logo */}
+            <div className="flex justify-center mb-8">
+              <img 
+                src="/images/beatscrest-logo.png" 
+                alt="BeatCrest Logo" 
+                className="h-24 md:h-32 w-auto"
+                onError={(e) => {
+                  // Fallback to text if image fails to load
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            </div>
+            
             <h1 className="text-4xl md:text-7xl font-bold">
               <span className="text-purple-600">
                 BeatCrest
