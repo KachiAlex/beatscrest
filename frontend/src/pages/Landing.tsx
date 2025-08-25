@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SignupModal from "../components/SignupModal";
 import PaymentModal from "../components/PaymentModal";
+import BeatCrestLogo from "../components/BeatCrestLogo";
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -97,17 +98,7 @@ export default function Home() {
       <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur">
         <div className="container mx-auto px-4 flex items-center justify-between py-3">
           <div className="flex items-center gap-3 cursor-pointer">
-            <img 
-              src="/images/beatscrest-logo-large.svg" 
-              alt="BeatCrest Logo" 
-              className="h-10 w-10"
-              onError={(e) => {
-                // Fallback to gradient div if logo fails to load
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.nextElementSibling?.classList.remove('hidden');
-              }}
-            />
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600 via-teal-500 to-orange-500 hidden"></div>
+            <BeatCrestLogo size={40} />
             <span className="text-xl font-bold text-gray-900">BeatCrest</span>
           </div>
           <nav className="hidden gap-6 md:flex">
@@ -280,17 +271,7 @@ export default function Home() {
       <footer className="border-t bg-white py-10 text-sm">
         <div className="container mx-auto px-4 flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex items-center gap-2">
-            <img 
-              src="/images/beatscrest-logo.svg" 
-              alt="BeatCrest Logo" 
-              className="h-6 w-6"
-              onError={(e) => {
-                // Fallback to gradient div if logo fails to load
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.nextElementSibling?.classList.remove('hidden');
-              }}
-            />
-            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-purple-600 via-teal-500 to-orange-500 hidden"></div>
+            <BeatCrestLogo size={24} />
             <span className="font-semibold">BeatCrest</span>
           </div>
           <div className="text-gray-500">© {new Date().getFullYear()} BeatCrest. All rights reserved.</div>
