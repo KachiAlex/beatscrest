@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload as UploadIcon, Music, Image, FileAudio, X } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import apiService from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Upload() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [formData, setFormData] = useState({
@@ -31,6 +33,36 @@ export default function Upload() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/');
+    }
+  }, [user, authLoading, navigate]);
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Please sign in to upload beats.</p>
+        </div>
+      </div>
+    );
+  }
 
   const genres = ['Hip Hop', 'R&B', 'Afrobeats', 'Pop', 'Trap', 'Drill', 'Amapiano', 'Gospel', 'Jazz', 'Electronic'];
   const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -227,64 +259,7 @@ export default function Upload() {
               </div>
             )}
 
-          {/* Test Upload Button */}
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-yellow-800 mb-2">For testing purposes:</p>
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setFormData({
-                    title: 'Test Beat',
-                    description: 'A test beat for development',
-                    genre: 'Hip Hop',
-                    bpm: '140',
-                    key: 'C',
-                    price: '45000',
-                    tags: 'test, hip-hop'
-                  });
-                  setDriveLinks({
-                    preview: 'https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
-                    fullBeat: 'https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
-                    thumbnail: 'https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms'
-                  });
-                }}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm mr-2"
-              >
-                Fill Test Data
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  console.log('🔍 Testing API service...');
-                  try {
-                    const testData = {
-                      title: 'Test Beat',
-                      description: 'Test description',
-                      genre: 'Hip Hop',
-                      bpm: '140',
-                      key: 'C',
-                      price: '45000',
-                      tags: 'test',
-                      preview_url: 'https://drive.google.com/file/d/test',
-                      full_beat_url: 'https://drive.google.com/file/d/test',
-                      thumbnail_url: null
-                    };
-                    console.log('📤 Sending test data:', testData);
-                    const response = await apiService.uploadBeat(testData);
-                    console.log('✅ Test response:', response);
-                    alert('API test successful! Check console for details.');
-                  } catch (error) {
-                    console.error('❌ Test failed:', error);
-                    alert('API test failed! Check console for details.');
-                  }
-                }}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
-              >
-                Test API Directly
-              </button>
-            </div>
-          </div>
+
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Basic Information */}

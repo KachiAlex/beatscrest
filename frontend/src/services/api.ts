@@ -34,7 +34,60 @@ api.interceptors.response.use(
   }
 );
 
-// Mock upload beat function for now
+// Mock functions for development
+const getProfile = async () => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // Return mock user data
+  return {
+    user: {
+      id: 1,
+      username: 'demo_user',
+      email: 'demo@example.com',
+      full_name: 'Demo User',
+      avatar_url: null,
+      created_at: new Date().toISOString()
+    }
+  };
+};
+
+const login = async (credentials: { email: string; password: string }) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // Return mock response
+  return {
+    user: {
+      id: 1,
+      username: 'demo_user',
+      email: credentials.email,
+      full_name: 'Demo User',
+      avatar_url: null,
+      created_at: new Date().toISOString()
+    },
+    token: 'mock_jwt_token_' + Date.now()
+  };
+};
+
+const register = async (userData: any) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // Return mock response
+  return {
+    user: {
+      id: 1,
+      username: userData.username || 'new_user',
+      email: userData.email,
+      full_name: userData.full_name || 'New User',
+      avatar_url: null,
+      created_at: new Date().toISOString()
+    },
+    token: 'mock_jwt_token_' + Date.now()
+  };
+};
+
 const uploadBeat = async (beatData: any) => {
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 2000));
@@ -52,9 +105,12 @@ const uploadBeat = async (beatData: any) => {
   };
 };
 
-// Add uploadBeat to the api object
+// Add all methods to the api object
 const apiService = {
   ...api,
+  getProfile,
+  login,
+  register,
   uploadBeat
 };
 
