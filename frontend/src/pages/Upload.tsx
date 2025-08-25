@@ -115,17 +115,22 @@ export default function Upload() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Form submitted with data:', { formData, driveLinks });
+    console.log('🎯 Form submitted!');
+    console.log('📝 Form data:', formData);
+    console.log('🔗 Drive links:', driveLinks);
     
     if (!validateForm()) {
-      console.log('Form validation failed');
+      console.log('❌ Form validation failed');
+      console.log('🚨 Validation errors:', errors);
       return;
     }
+
+    console.log('✅ Form validation passed!');
 
     try {
       setLoading(true);
       setUploadProgress(0);
-      console.log('Starting upload process...');
+      console.log('🚀 Starting upload process...');
 
       const uploadData = {
         ...formData,
@@ -225,7 +230,8 @@ export default function Upload() {
           {/* Test Upload Button */}
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-yellow-800 mb-2">For testing purposes:</p>
-                          <button
+            <div className="space-y-2">
+              <button
                 type="button"
                 onClick={() => {
                   setFormData({
@@ -243,10 +249,41 @@ export default function Upload() {
                     thumbnail: 'https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms'
                   });
                 }}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm"
+                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm mr-2"
               >
                 Fill Test Data
               </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  console.log('🔍 Testing API service...');
+                  try {
+                    const testData = {
+                      title: 'Test Beat',
+                      description: 'Test description',
+                      genre: 'Hip Hop',
+                      bpm: '140',
+                      key: 'C',
+                      price: '45000',
+                      tags: 'test',
+                      preview_url: 'https://drive.google.com/file/d/test',
+                      full_beat_url: 'https://drive.google.com/file/d/test',
+                      thumbnail_url: null
+                    };
+                    console.log('📤 Sending test data:', testData);
+                    const response = await apiService.uploadBeat(testData);
+                    console.log('✅ Test response:', response);
+                    alert('API test successful! Check console for details.');
+                  } catch (error) {
+                    console.error('❌ Test failed:', error);
+                    alert('API test failed! Check console for details.');
+                  }
+                }}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
+              >
+                Test API Directly
+              </button>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
@@ -469,7 +506,7 @@ export default function Upload() {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
-                        className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${uploadProgress}%` }}
                       ></div>
                     </div>
@@ -497,8 +534,9 @@ export default function Upload() {
               </Button>
               <Button
                 type="submit"
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white transition-all duration-300 shadow-lg"
                 disabled={loading}
+                onClick={() => console.log('🔘 Submit button clicked!')}
               >
                 {loading ? 'Uploading...' : 'Upload Beat'}
               </Button>

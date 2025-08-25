@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AppLogo from '../components/AppLogo';
 import SimpleLogo from '../components/SimpleLogo';
 
@@ -36,8 +37,8 @@ interface Transaction {
 }
 
 export default function ProducerDashboard() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
-  const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedBeat, setSelectedBeat] = useState<Beat | null>(null);
 
   // Mock data
@@ -169,7 +170,10 @@ export default function ProducerDashboard() {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-gray-600">Welcome back, DJ ProBeat</span>
-              <button className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg">
+              <button 
+                onClick={() => navigate('/upload')}
+                className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg"
+              >
                 Upload New Beat
               </button>
             </div>
@@ -306,7 +310,7 @@ export default function ProducerDashboard() {
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-semibold">My Beats</h3>
                   <button 
-                    onClick={() => setShowUploadModal(true)}
+                    onClick={() => navigate('/upload')}
                     className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg"
                   >
                     Upload New Beat
@@ -540,110 +544,6 @@ export default function ProducerDashboard() {
           </div>
         </div>
       </div>
-
-      {/* Upload Modal */}
-      {showUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
-            <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-xl font-bold">Upload New Beat</h3>
-              <button 
-                onClick={() => setShowUploadModal(false)}
-                className="rounded-xl px-3 py-1 text-sm text-gray-500 hover:bg-gray-100"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form className="space-y-4">
-              <div>
-                <label className="mb-1 block text-sm font-medium">Beat Title</label>
-                <input 
-                  type="text" 
-                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500"
-                  placeholder="Enter beat title"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium">Description</label>
-                <textarea 
-                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500"
-                  rows={3}
-                  placeholder="Describe your beat..."
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1 block text-sm font-medium">Genre</label>
-                  <select className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500">
-                    <option>Hip Hop</option>
-                    <option>Afrobeats</option>
-                    <option>R&B</option>
-                    <option>Trap</option>
-                    <option>Reggae</option>
-                    <option>Pop</option>
-                    <option>Gospel</option>
-                    <option>Jazz</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium">BPM</label>
-                  <input 
-                    type="number" 
-                    className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500"
-                    placeholder="120"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium">Price (₦)</label>
-                <input 
-                  type="number" 
-                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500"
-                  placeholder="45000"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium">Beat File (MP3/WAV)</label>
-                <input 
-                  type="file" 
-                  accept=".mp3,.wav"
-                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium">Preview Video (MP4)</label>
-                <input 
-                  type="file" 
-                  accept=".mp4"
-                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button 
-                  type="button"
-                  onClick={() => setShowUploadModal(false)}
-                  className="flex-1 border border-gray-300 hover:bg-gray-50 py-3 rounded-xl transition"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  className="flex-1 bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white py-3 rounded-xl transition-all duration-300 shadow-lg"
-                >
-                  Upload Beat
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 } 
