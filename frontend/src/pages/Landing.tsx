@@ -4,8 +4,10 @@ import SignupModal from "../components/SignupModal";
 import PaymentModal from "../components/PaymentModal";
 import AppLogo from "../components/AppLogo";
 import SimpleLogo from "../components/SimpleLogo";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Home() {
+  const { user } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("All");
@@ -40,7 +42,13 @@ export default function Home() {
       subtitle: "Monetize your talent and reach global audiences",
       image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=1600&auto=format&fit=crop",
       cta: "Start Selling",
-      action: () => navigate('/dashboard')
+      action: () => {
+        if (user) {
+          navigate('/dashboard');
+        } else {
+          setShowAuthModal(true);
+        }
+      }
     }
   ];
 
@@ -108,7 +116,13 @@ export default function Home() {
               <Link to="/dashboard" className="text-gray-700 hover:text-teal-600">Dashboard</Link>
               <button className="text-gray-700 hover:text-teal-600" onClick={() => setShowAuthModal(true)}>Sign in</button>
               <button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => {
+                  if (user) {
+                    navigate('/dashboard');
+                  } else {
+                    setShowAuthModal(true);
+                  }
+                }}
                 className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 🎵 Sell Beats
@@ -235,7 +249,13 @@ export default function Home() {
 
             <div className="space-y-4">
               <button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => {
+                  if (user) {
+                    navigate('/dashboard');
+                  } else {
+                    setShowAuthModal(true);
+                  }
+                }}
                 className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 🎵 Start Selling Your Beats Now
