@@ -34,7 +34,24 @@ export default function AppLogo({
         height={size}
         className="object-contain mx-auto transition-transform hover:scale-105"
         style={{ maxHeight: `${size}px` }}
+        onError={(e) => {
+          console.error('Logo failed to load:', e);
+          // Fallback to text logo
+          e.currentTarget.style.display = 'none';
+          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+        }}
       />
+      <div 
+        className={`hidden bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 text-white font-bold rounded-lg flex items-center justify-center ${showText ? 'flex-col' : ''}`}
+        style={{ 
+          width: `${size}px`, 
+          height: `${size}px`,
+          fontSize: `${Math.max(12, size * 0.3)}px`
+        }}
+      >
+        <span>BC</span>
+        {showText && <span className="text-xs mt-1">beatcrest</span>}
+      </div>
       {showText && (
         <div 
           className="text-white font-medium tracking-wide mt-2"

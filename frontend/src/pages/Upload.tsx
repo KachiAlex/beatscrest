@@ -30,6 +30,7 @@ export default function Upload() {
     thumbnail: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [successMessage, setSuccessMessage] = useState('');
 
   const genres = ['Hip Hop', 'R&B', 'Afrobeats', 'Pop', 'Trap', 'Drill', 'Amapiano', 'Gospel', 'Jazz', 'Electronic'];
   const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -135,8 +136,13 @@ export default function Upload() {
       clearInterval(progressInterval);
       setUploadProgress(100);
 
-      // Navigate to the beat detail page
-      navigate(`/beat/${response.beat.id}`);
+      // Show success message
+      setSuccessMessage('Beat uploaded successfully! Redirecting...');
+      
+      // Navigate to the beat detail page after a short delay
+      setTimeout(() => {
+        navigate(`/beat/${response.data.beat.id}`);
+      }, 1500);
     } catch (error: any) {
       console.error('Error uploading beat:', error);
       setErrors({ submit: error.message || 'Failed to upload beat' });
@@ -161,6 +167,32 @@ export default function Upload() {
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Upload Your Beat</h1>
             <p className="text-lg text-gray-600">Share your music with the world and start earning</p>
           </div>
+
+          {/* Success Message */}
+          {successMessage && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center">
+                <span className="text-green-600 mr-2">✅</span>
+                <p className="text-green-800 font-medium">{successMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Upload Progress */}
+          {loading && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-blue-800 font-medium">Uploading your beat...</span>
+                <span className="text-blue-600">{uploadProgress}%</span>
+              </div>
+              <div className="w-full bg-blue-200 rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Basic Information */}
@@ -189,7 +221,7 @@ export default function Upload() {
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     placeholder="Describe your beat, inspiration, or any additional information"
                   />
                 </div>

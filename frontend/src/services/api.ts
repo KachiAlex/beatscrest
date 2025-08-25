@@ -34,4 +34,28 @@ api.interceptors.response.use(
   }
 );
 
-export default api; 
+// Mock upload beat function for now
+const uploadBeat = async (beatData: any) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  // Return mock response
+  return {
+    data: {
+      beat: {
+        id: Math.floor(Math.random() * 10000),
+        ...beatData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    }
+  };
+};
+
+// Add uploadBeat to the api object
+const apiService = {
+  ...api,
+  uploadBeat
+};
+
+export default apiService; 
