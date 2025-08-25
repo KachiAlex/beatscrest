@@ -74,8 +74,18 @@ export default function Upload() {
   };
 
   const validateDriveLink = (link: string): boolean => {
-    // Basic Google Drive link validation
-    return link.includes('drive.google.com') && (link.includes('/file/d/') || link.includes('/open?id='));
+    // More flexible Google Drive link validation
+    if (!link.trim()) return false;
+    
+    // Accept various Google Drive link formats
+    const drivePatterns = [
+      /drive\.google\.com\/file\/d\/[a-zA-Z0-9_-]+/,
+      /drive\.google\.com\/open\?id=[a-zA-Z0-9_-]+/,
+      /drive\.google\.com\/uc\?id=[a-zA-Z0-9_-]+/,
+      /docs\.google\.com\/.*\/d\/[a-zA-Z0-9_-]+/
+    ];
+    
+    return drivePatterns.some(pattern => pattern.test(link));
   };
 
   const validateForm = () => {
@@ -90,12 +100,12 @@ export default function Upload() {
     if (!driveLinks.preview.trim()) {
       newErrors.preview = 'Preview Google Drive link is required';
     } else if (!validateDriveLink(driveLinks.preview)) {
-      newErrors.preview = 'Please enter a valid Google Drive link';
+      newErrors.preview = 'Please enter a valid Google Drive link for the preview file';
     }
     if (!driveLinks.fullBeat.trim()) {
       newErrors.fullBeat = 'Full beat Google Drive link is required';
     } else if (!validateDriveLink(driveLinks.fullBeat)) {
-      newErrors.fullBeat = 'Please enter a valid Google Drive link';
+      newErrors.fullBeat = 'Please enter a valid Google Drive link for the full beat';
     }
 
     setErrors(newErrors);
@@ -186,47 +196,57 @@ export default function Upload() {
             </div>
           )}
 
-          {/* Upload Progress */}
-          {loading && (
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-blue-800 font-medium">Uploading your beat...</span>
-                <span className="text-blue-600">{uploadProgress}%</span>
+                      {/* Error Message */}
+            {errors.submit && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center">
+                  <span className="text-red-600 mr-2">❌</span>
+                  <p className="text-red-800 font-medium">{errors.submit}</p>
+                </div>
               </div>
-              <div className="w-full bg-blue-200 rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
-                ></div>
+            )}
+
+            {/* Upload Progress */}
+            {loading && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-blue-800 font-medium">Uploading your beat...</span>
+                  <span className="text-blue-600">{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Test Upload Button */}
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-yellow-800 mb-2">For testing purposes:</p>
-            <button
-              type="button"
-              onClick={() => {
-                setFormData({
-                  title: 'Test Beat',
-                  description: 'A test beat for development',
-                  genre: 'Hip Hop',
-                  bpm: '140',
-                  key: 'C',
-                  price: '45000',
-                  tags: 'test, hip-hop'
-                });
-                setDriveLinks({
-                  preview: 'https://drive.google.com/file/d/test1',
-                  fullBeat: 'https://drive.google.com/file/d/test2',
-                  thumbnail: 'https://drive.google.com/file/d/test3'
-                });
-              }}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm"
-            >
-              Fill Test Data
-            </button>
+                          <button
+                type="button"
+                onClick={() => {
+                  setFormData({
+                    title: 'Test Beat',
+                    description: 'A test beat for development',
+                    genre: 'Hip Hop',
+                    bpm: '140',
+                    key: 'C',
+                    price: '45000',
+                    tags: 'test, hip-hop'
+                  });
+                  setDriveLinks({
+                    preview: 'https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
+                    fullBeat: 'https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
+                    thumbnail: 'https://drive.google.com/file/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms'
+                  });
+                }}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm"
+              >
+                Fill Test Data
+              </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
@@ -344,8 +364,11 @@ export default function Upload() {
                       placeholder="https://drive.google.com/file/d/..."
                       value={driveLinks.preview}
                       onChange={(e) => handleDriveLinkChange('preview', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                        errors.preview ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     />
+                    {errors.preview && <p className="text-red-600 text-sm mt-1">{errors.preview}</p>}
                     <p className="text-xs text-gray-500 mt-2">
                       💡 Make sure your Google Drive file is set to "Anyone with the link can view"
                     </p>
@@ -369,7 +392,9 @@ export default function Upload() {
                       placeholder="https://drive.google.com/file/d/..."
                       value={driveLinks.fullBeat}
                       onChange={(e) => handleDriveLinkChange('fullBeat', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+                        errors.fullBeat ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     />
                     <p className="text-xs text-gray-500 mt-2">
                       💡 Make sure your Google Drive file is set to "Anyone with the link can view"
