@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AppLogo from '../components/AppLogo';
 import SimpleLogo from '../components/SimpleLogo';
 import { useAuth } from '../contexts/AuthContext';
+import apiService from '../services/api';
 
 interface Beat {
   id: string;
@@ -138,13 +139,11 @@ export default function ProducerDashboard() {
   const handleProfileSave = async () => {
     setProfileLoading(true);
     try {
-      // Here you would typically upload the image and update the profile
-      // For now, we'll simulate the process
-      console.log('Saving profile data:', profileData);
-      console.log('Profile image:', selectedProfileImage);
+      // Call the API to update profile
+      const response = await apiService.updateProfile(profileData);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Update the user context with new data
+      // Note: In a real app, you'd update the auth context here
       
       setIsEditingProfile(false);
       setSelectedProfileImage(null);
@@ -152,6 +151,9 @@ export default function ProducerDashboard() {
       
       // Show success message
       alert('Profile updated successfully!');
+      
+      // Refresh the page to show updated data
+      window.location.reload();
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Failed to update profile. Please try again.');

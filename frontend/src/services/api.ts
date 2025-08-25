@@ -39,16 +39,27 @@ const getProfile = async () => {
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 1000));
   
-  // Return mock user data
+  // Get user data from localStorage (simulating stored user data)
+  const storedUser = localStorage.getItem('mockUser');
+  const userData = storedUser ? JSON.parse(storedUser) : {
+    id: 1,
+    username: 'demo_user',
+    email: 'demo@example.com',
+    full_name: 'Demo User',
+    profile_picture: null,
+    bio: '',
+    headline: '',
+    rating: 4.5,
+    total_ratings: 12,
+    account_type: 'producer' as const,
+    is_verified: true,
+    followers_count: 45,
+    following_count: 23,
+    created_at: new Date().toISOString()
+  };
+  
   return {
-    user: {
-      id: 1,
-      username: 'demo_user',
-      email: 'demo@example.com',
-      full_name: 'Demo User',
-      avatar_url: null,
-      created_at: new Date().toISOString()
-    }
+    user: userData
   };
 };
 
@@ -56,16 +67,29 @@ const login = async (credentials: { email: string; password: string }) => {
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 1000));
   
-  // Return mock response
+  // Create user data from credentials
+  const userData = {
+    id: 1,
+    username: credentials.email.split('@')[0], // Use email prefix as username
+    email: credentials.email,
+    full_name: credentials.email.split('@')[0].replace(/[0-9]/g, '').replace(/[^a-zA-Z]/g, ' ') || 'User',
+    profile_picture: null,
+    bio: '',
+    headline: '',
+    rating: 0,
+    total_ratings: 0,
+    account_type: 'producer' as const,
+    is_verified: false,
+    followers_count: 0,
+    following_count: 0,
+    created_at: new Date().toISOString()
+  };
+  
+  // Store user data in localStorage for persistence
+  localStorage.setItem('mockUser', JSON.stringify(userData));
+  
   return {
-    user: {
-      id: 1,
-      username: 'demo_user',
-      email: credentials.email,
-      full_name: 'Demo User',
-      avatar_url: null,
-      created_at: new Date().toISOString()
-    },
+    user: userData,
     token: 'mock_jwt_token_' + Date.now()
   };
 };
@@ -74,16 +98,29 @@ const register = async (userData: any) => {
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 1000));
   
-  // Return mock response
+  // Create user data from registration data
+  const newUser = {
+    id: 1,
+    username: userData.username || 'new_user',
+    email: userData.email,
+    full_name: userData.full_name || userData.username || 'New User',
+    profile_picture: null,
+    bio: '',
+    headline: '',
+    rating: 0,
+    total_ratings: 0,
+    account_type: userData.account_type || 'producer' as const,
+    is_verified: false,
+    followers_count: 0,
+    following_count: 0,
+    created_at: new Date().toISOString()
+  };
+  
+  // Store user data in localStorage for persistence
+  localStorage.setItem('mockUser', JSON.stringify(newUser));
+  
   return {
-    user: {
-      id: 1,
-      username: userData.username || 'new_user',
-      email: userData.email,
-      full_name: userData.full_name || 'New User',
-      avatar_url: null,
-      created_at: new Date().toISOString()
-    },
+    user: newUser,
     token: 'mock_jwt_token_' + Date.now()
   };
 };
@@ -105,13 +142,43 @@ const uploadBeat = async (beatData: any) => {
   };
 };
 
+const updateProfile = async (profileData: any) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // Get current user data
+  const storedUser = localStorage.getItem('mockUser');
+  const currentUser = storedUser ? JSON.parse(storedUser) : {};
+  
+  // Update user data with new profile information
+  const updatedUser = {
+    ...currentUser,
+    username: profileData.username || currentUser.username,
+    email: profileData.email || currentUser.email,
+    full_name: profileData.fullName || currentUser.full_name,
+    bio: profileData.bio || currentUser.bio,
+    headline: profileData.headline || currentUser.headline,
+    profile_picture: profileData.profilePicture || currentUser.profile_picture,
+    // Add social links if needed
+  };
+  
+  // Store updated user data
+  localStorage.setItem('mockUser', JSON.stringify(updatedUser));
+  
+  return {
+    user: updatedUser,
+    message: 'Profile updated successfully'
+  };
+};
+
 // Add all methods to the api object
 const apiService = {
   ...api,
   getProfile,
   login,
   register,
-  uploadBeat
+  uploadBeat,
+  updateProfile
 };
 
 export default apiService; 
