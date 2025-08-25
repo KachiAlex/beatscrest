@@ -268,7 +268,7 @@ export default function Upload() {
                       name="genre"
                       value={formData.genre}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     >
                       <option value="">Select Genre</option>
                       {genres.map(genre => (
@@ -284,7 +284,7 @@ export default function Upload() {
                       name="bpm"
                       value={formData.bpm}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                       placeholder="e.g., 140"
                     />
                   </div>
@@ -295,7 +295,7 @@ export default function Upload() {
                       name="key"
                       value={formData.key}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     >
                       <option value="">Select Key</option>
                       {keys.map(key => (
@@ -312,7 +312,7 @@ export default function Upload() {
                     name="tags"
                     value={formData.tags}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                     placeholder="Enter tags separated by commas (e.g., trap, dark, aggressive)"
                   />
                 </div>
@@ -419,7 +419,7 @@ export default function Upload() {
                       name="price"
                       value={formData.price}
                       onChange={handleInputChange}
-                      className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                       placeholder="0.00"
                       min="0"
                       step="0.01"

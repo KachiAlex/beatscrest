@@ -27,37 +27,40 @@ export default function AppLogo({
       className={`flex flex-col items-center ${clickable ? 'cursor-pointer' : ''} ${className}`}
       onClick={handleClick}
     >
-      <img
-        src={`${window.location.origin}/assets/Beatscrest.png`}
-        alt="BeatCrest Logo"
-        width={size}
-        height={size}
-        className="object-contain mx-auto transition-transform hover:scale-105"
-        style={{ maxHeight: `${size}px` }}
-        onError={(e) => {
-          console.error('Logo failed to load:', e);
-          // Fallback to text logo
-          e.currentTarget.style.display = 'none';
-          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-        }}
-      />
+      {/* Simple logo using CSS - no image dependency */}
       <div 
-        className={`hidden bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 text-white font-bold rounded-lg flex items-center justify-center ${showText ? 'flex-col' : ''}`}
+        className="relative rounded-xl overflow-hidden shadow-lg"
         style={{ 
           width: `${size}px`, 
           height: `${size}px`,
-          fontSize: `${Math.max(12, size * 0.3)}px`
+          background: 'linear-gradient(135deg, #7C3AED 0%, #0D9488 25%, #38BDF8 50%, #D946EF 75%, #F97316 100%)'
         }}
       >
-        <span>BC</span>
-        {showText && <span className="text-xs mt-1">beatcrest</span>}
+        {/* BC text */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span 
+            className="text-white font-bold"
+            style={{ fontSize: `${Math.max(12, size * 0.4)}px` }}
+          >
+            BC
+          </span>
+        </div>
+        
+        {/* Music note icon */}
+        <div 
+          className="absolute bottom-1 right-1"
+          style={{ fontSize: `${Math.max(8, size * 0.2)}px` }}
+        >
+          🎵
+        </div>
       </div>
+      
+      {/* Text "beatcrest" */}
       {showText && (
         <div 
-          className="text-white font-medium tracking-wide mt-2"
+          className="text-gray-900 font-medium tracking-wide mt-1"
           style={{ 
-            fontSize: `${Math.max(14, size * 0.18)}px`,
-            textShadow: '0 2px 4px rgba(0,0,0,0.4)'
+            fontSize: `${Math.max(10, size * 0.15)}px`
           }}
         >
           beatcrest
