@@ -7,7 +7,7 @@ import SimpleLogo from "../components/SimpleLogo";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, login, register } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("All");
@@ -16,6 +16,15 @@ export default function Home() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedBeat, setSelectedBeat] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [authFormData, setAuthFormData] = useState({
+    email: '',
+    password: '',
+    fullName: '',
+    username: ''
+  });
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
   const navigate = useNavigate();
 
   // Banner slides data
@@ -99,6 +108,54 @@ export default function Home() {
     setShowPaymentModal(false);
     setSelectedBeat(null);
     setUserData(null);
+  };
+
+  // Handle auth form input changes
+  const handleAuthInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setAuthFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    setAuthError(''); // Clear error when user types
+  };
+
+  // Handle auth form submission
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError('');
+
+    try {
+      if (authMode === 'signin') {
+        await login(authFormData.email, authFormData.password);
+      } else {
+        await register({
+          email: authFormData.email,
+          password: authFormData.password,
+          username: authFormData.username,
+          account_type: 'producer'
+        });
+      }
+      
+      setShowAuthModal(false);
+      setAuthFormData({ email: '', password: '', fullName: '', username: '' });
+      setAuthMode('signin');
+      
+      // Navigate to dashboard after successful auth
+      navigate('/dashboard');
+    } catch (error: any) {
+      setAuthError(error.message || 'Authentication failed');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Switch between sign in and sign up modes
+  const switchAuthMode = () => {
+    setAuthMode(prev => prev === 'signin' ? 'signup' : 'signin');
+    setAuthError('');
+    setAuthFormData({ email: '', password: '', fullName: '', username: '' });
   };
 
   return (
@@ -355,22 +412,96 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-xl font-bold">Welcome to BeatCrest</h3>
-              <button onClick={() => setShowAuthModal(false)} className="rounded-xl px-3 py-1 text-sm text-gray-500 hover:bg-gray-100">Close</button>
+              <h3 className="text-xl font-bold">
+                {authMode === 'signin' ? 'Welcome Back' : 'Join BeatCrest'}
+              </h3>
+              <button 
+                onClick={() => {
+                  setShowAuthModal(false);
+                  setAuthMode('signin');
+                  setAuthFormData({ email: '', password: '', fullName: '', username: '' });
+                  setAuthError('');
+                }} 
+                className="rounded-xl px-3 py-1 text-sm text-gray-500 hover:bg-gray-100"
+              >
+                Close
+              </button>
             </div>
-            <form className="space-y-3">
+            
+            <form onSubmit={handleAuthSubmit} className="space-y-4">
+              {authMode === 'signup' && (
+                <div>
+                  <label className="mb-1 block text-sm font-medium">Username</label>
+                  <input 
+                    type="text" 
+                    name="username"
+                    value={authFormData.username}
+                    onChange={handleAuthInputChange}
+                    className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500" 
+                    placeholder="your_username" 
+                    required
+                  />
+                </div>
+              )}
+              
               <div>
                 <label className="mb-1 block text-sm font-medium">Email</label>
-                <input type="email" className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500" placeholder="you@example.com" />
+                <input 
+                  type="email" 
+                  name="email"
+                  value={authFormData.email}
+                  onChange={handleAuthInputChange}
+                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500" 
+                  placeholder="you@example.com" 
+                  required
+                />
               </div>
+              
               <div>
                 <label className="mb-1 block text-sm font-medium">Password</label>
-                <input type="password" className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500" placeholder="••••••••" />
+                <input 
+                  type="password" 
+                  name="password"
+                  value={authFormData.password}
+                  onChange={handleAuthInputChange}
+                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500" 
+                  placeholder="••••••••" 
+                  required
+                />
               </div>
-              <button className="w-full inline-flex items-center justify-center rounded-2xl bg-purple-600 px-5 py-3 text-white shadow-lg hover:bg-purple-700 transition">
-                <span className="font-medium">Sign In</span>
+              
+              {authError && (
+                <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+                  {authError}
+                </div>
+              )}
+              
+              <button 
+                type="submit"
+                disabled={authLoading}
+                className="w-full inline-flex items-center justify-center rounded-2xl bg-purple-600 px-5 py-3 text-white shadow-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {authLoading ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  <span className="font-medium">
+                    {authMode === 'signin' ? 'Sign In' : 'Create Account'}
+                  </span>
+                )}
               </button>
             </form>
+            
+            <div className="mt-6 text-center">
+              <p className="text-gray-600 text-sm">
+                {authMode === 'signin' ? "Don't have an account?" : "Already have an account?"}
+                <button 
+                  onClick={switchAuthMode}
+                  className="ml-1 text-purple-600 hover:text-purple-700 font-medium"
+                >
+                  {authMode === 'signin' ? 'Sign up' : 'Sign in'}
+                </button>
+              </p>
+            </div>
           </div>
         </div>
       )}
