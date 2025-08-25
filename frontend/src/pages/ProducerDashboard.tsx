@@ -39,9 +39,10 @@ interface Transaction {
 
 export default function ProducerDashboard() {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedBeat, setSelectedBeat] = useState<Beat | null>(null);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [profileData, setProfileData] = useState({
     username: user?.username || '',
     email: user?.email || '',
@@ -65,6 +66,24 @@ export default function ProducerDashboard() {
       navigate('/');
     }
   }, [user, authLoading, navigate]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.profile-dropdown')) {
+        setShowProfileDropdown(false);
+      }
+    };
+
+    if (showProfileDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProfileDropdown]);
 
   // Show loading while checking auth
   if (authLoading) {
@@ -218,13 +237,72 @@ export default function ProducerDashboard() {
               <h1 className="text-2xl font-bold text-gray-900">Producer Dashboard</h1>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-gray-600">Welcome back, DJ ProBeat</span>
               <button 
                 onClick={() => navigate('/upload')}
                 className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg"
               >
                 Upload New Beat
               </button>
+              
+              {/* Profile Dropdown */}
+              <div className="relative profile-dropdown">
+                <button 
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <img
+                    src={user?.profile_picture || 'https://via.placeholder.com/40'}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                  />
+                  <svg 
+                    className={`w-4 h-4 text-gray-600 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Dropdown Menu */}
+                {showProfileDropdown && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="font-medium text-gray-900">{user?.full_name || user?.username}</p>
+                      <p className="text-sm text-gray-600">{user?.email}</p>
+                    </div>
+                    
+                    <div className="py-1">
+                      <button 
+                        onClick={() => {
+                          setActiveTab('profile');
+                          setShowProfileDropdown(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Edit Profile
+                      </button>
+                      
+                      <button 
+                        onClick={() => {
+                          logout();
+                          setShowProfileDropdown(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 flex items-center gap-3"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
