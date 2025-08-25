@@ -165,6 +165,8 @@ const updateProfile = async (profileData: any) => {
   // Store updated user data
   localStorage.setItem('mockUser', JSON.stringify(updatedUser));
   
+  console.log('Profile updated:', updatedUser);
+  
   return {
     user: updatedUser,
     message: 'Profile updated successfully'

@@ -3,7 +3,7 @@ export interface User {
   username: string;
   email: string;
   full_name?: string;
-  profile_picture?: string;
+  profile_picture?: string | null;
   bio?: string;
   headline?: string;
   rating?: number;
@@ -103,6 +103,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   loading: boolean;
 }
 

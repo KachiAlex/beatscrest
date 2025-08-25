@@ -40,7 +40,7 @@ interface Transaction {
 
 export default function ProducerDashboard() {
   const navigate = useNavigate();
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout, refreshUser } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedBeat, setSelectedBeat] = useState<Beat | null>(null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
@@ -139,11 +139,27 @@ export default function ProducerDashboard() {
   const handleProfileSave = async () => {
     setProfileLoading(true);
     try {
-      // Call the API to update profile
-      const response = await apiService.updateProfile(profileData);
+      // If there's a new profile image, convert it to base64 and include it
+      let updatedProfileData = { ...profileData };
       
-      // Update the user context with new data
-      // Note: In a real app, you'd update the auth context here
+      if (selectedProfileImage) {
+        const reader = new FileReader();
+        const imagePromise = new Promise((resolve) => {
+          reader.onload = (e) => {
+            const base64Image = e.target?.result as string;
+            updatedProfileData.profilePicture = base64Image;
+            resolve(base64Image);
+          };
+        });
+        reader.readAsDataURL(selectedProfileImage);
+        await imagePromise;
+      }
+      
+      // Call the API to update profile
+      const response = await apiService.updateProfile(updatedProfileData);
+      
+      // Refresh the user context with updated data
+      await refreshUser();
       
       setIsEditingProfile(false);
       setSelectedProfileImage(null);
@@ -151,9 +167,6 @@ export default function ProducerDashboard() {
       
       // Show success message
       alert('Profile updated successfully!');
-      
-      // Refresh the page to show updated data
-      window.location.reload();
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Failed to update profile. Please try again.');
@@ -328,7 +341,7 @@ export default function ProducerDashboard() {
                   className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 transition-colors"
                 >
                   <img
-                    src={user?.profile_picture || 'https://via.placeholder.com/40'}
+                    src={user?.profile_picture || profileImagePreview || 'https://via.placeholder.com/40'}
                     alt="Profile"
                     className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
                   />

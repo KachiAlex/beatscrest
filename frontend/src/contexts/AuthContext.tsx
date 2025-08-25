@@ -73,11 +73,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
   };
 
+  const refreshUser = async () => {
+    try {
+      const response = await apiService.getProfile();
+      if (response.user) {
+        setUser(response.user);
+      }
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+    }
+  };
+
   const value: AuthContextType = {
     user,
     login,
     register,
     logout,
+    refreshUser,
     loading,
   };
 
