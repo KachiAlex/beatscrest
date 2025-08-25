@@ -100,13 +100,19 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <AppLogo size={40} clickable={true} />
           </div>
-          <nav className="hidden gap-6 md:flex">
-            <button className="text-gray-700 hover:text-teal-600">Home</button>
-            <button className="text-gray-700 hover:text-teal-600">About</button>
-            <button className="text-gray-700 hover:text-teal-600">Beats</button>
-            <Link to="/dashboard" className="text-gray-700 hover:text-teal-600">Dashboard</Link>
-            <button className="text-gray-700 hover:text-teal-600" onClick={() => setShowAuthModal(true)}>Sign in</button>
-          </nav>
+                      <nav className="hidden gap-6 md:flex items-center">
+              <button className="text-gray-700 hover:text-teal-600">Home</button>
+              <button className="text-gray-700 hover:text-teal-600">About</button>
+              <button className="text-gray-700 hover:text-teal-600">Beats</button>
+              <Link to="/dashboard" className="text-gray-700 hover:text-teal-600">Dashboard</Link>
+              <button className="text-gray-700 hover:text-teal-600" onClick={() => setShowAuthModal(true)}>Sign in</button>
+              <button 
+                onClick={() => navigate('/dashboard')}
+                className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                🎵 Sell Beats
+              </button>
+            </nav>
         </div>
       </header>
 
@@ -187,6 +193,53 @@ export default function Home() {
                 <h3 className="text-xl font-semibold mb-2">Grow Your Brand</h3>
                 <p className="text-gray-600">Build your audience and monetize your talent</p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Producer Call-to-Action Section */}
+      <section className="py-20 bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center text-white">
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">Ready to Turn Your Beats Into Success?</h2>
+            <p className="text-xl mb-8 opacity-90">
+              Join thousands of producers who are already earning from their music. 
+              Upload your beats, set your prices, and start building your brand today.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
+                  <span className="text-2xl">💰</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Earn Money</h3>
+                <p className="opacity-90">Set your own prices and keep 95% of your earnings</p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
+                  <span className="text-2xl">🌍</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Global Reach</h3>
+                <p className="opacity-90">Connect with artists from around the world</p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
+                  <span className="text-2xl">📈</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Grow Fast</h3>
+                <p className="opacity-90">Build your audience and increase your sales</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <button 
+                onClick={() => navigate('/dashboard')}
+                className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                🎵 Start Selling Your Beats Now
+              </button>
+              <p className="text-sm opacity-75">Join 10,000+ producers already earning on BeatCrest</p>
             </div>
           </div>
         </div>
