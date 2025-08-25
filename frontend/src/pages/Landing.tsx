@@ -98,7 +98,7 @@ export default function Home() {
       <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur">
         <div className="container mx-auto px-4 flex items-center justify-between py-3">
           <div className="flex items-center gap-3 cursor-pointer">
-            <BeatCrestLogo size={48} showText={true} />
+            <BeatCrestLogo size={56} showText={true} />
           </div>
           <nav className="hidden gap-6 md:flex">
             <button className="text-gray-700 hover:text-teal-600">Home</button>
@@ -270,7 +270,7 @@ export default function Home() {
       <footer className="border-t bg-white py-10 text-sm">
         <div className="container mx-auto px-4 flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex items-center gap-2">
-            <BeatCrestLogo size={32} showText={true} />
+            <BeatCrestLogo size={40} showText={true} />
           </div>
           <div className="text-gray-500">© {new Date().getFullYear()} BeatCrest. All rights reserved.</div>
         </div>

@@ -6,15 +6,13 @@ interface BeatCrestLogoProps {
   showText?: boolean;
 }
 
-export default function BeatCrestLogo({ size = 32, className = '', showText = false }: BeatCrestLogoProps) {
-  const scale = size / 64; // Base size is 64px
-  
+export default function BeatCrestLogo({ size = 64, className = '', showText = false }: BeatCrestLogoProps) {
   return (
     <div className={`flex flex-col items-center ${className}`}>
       <svg 
         width={size} 
         height={size} 
-        viewBox="0 0 64 64" 
+        viewBox="0 0 120 120" 
         fill="none" 
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -36,44 +34,46 @@ export default function BeatCrestLogo({ size = 32, className = '', showText = fa
           </linearGradient>
           
           <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="rgba(0,0,0,0.3)"/>
+            <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="rgba(0,0,0,0.4)"/>
           </filter>
         </defs>
         
         {/* Background gradient */}
-        <rect width="64" height="64" fill="url(#backgroundGradient)" rx="12"/>
+        <rect width="120" height="120" fill="url(#backgroundGradient)" rx="20"/>
         
-        {/* Main 'G' shape with shadow */}
+        {/* Main 'G' shape - organic, fluid shape with circular cutout */}
         <path 
-          d="M16 20 C16 12 24 8 32 8 C40 8 48 12 48 20 C48 28 40 32 32 32 C24 32 16 28 16 20 Z M32 12 C26 12 20 16 20 20 C20 24 26 28 32 28 C38 28 44 24 44 20 C44 16 38 12 32 12 Z" 
+          d="M30 40 C30 25 45 15 60 15 C75 15 90 25 90 40 C90 55 75 65 60 65 C45 65 30 55 30 40 Z M60 25 C50 25 40 32 40 40 C40 48 50 55 60 55 C70 55 80 48 80 40 C80 32 70 25 60 25 Z" 
           fill="url(#shapeGradient)" 
           filter="url(#shadow)"
         />
         
-        {/* Shopping cart icon in center */}
-        <g transform="translate(24, 16)">
-          {/* Cart handle */}
-          <path d="M2 4 L6 4 L6 2 L8 2 L8 4 L12 4 L12 6 L10 6 L10 12 L6 12 L6 6 L2 6 Z" fill="white"/>
-          {/* Cart basket */}
-          <rect x="2" y="6" width="8" height="6" fill="white" rx="1"/>
-          {/* Cart wheels */}
-          <circle cx="4" cy="14" r="1" fill="white"/>
-          <circle cx="8" cy="14" r="1" fill="white"/>
-        </g>
+        {/* Top-right protrusion/ear */}
+        <path 
+          d="M85 25 C90 20 95 25 95 30 C95 35 90 40 85 35 C80 30 80 25 85 25 Z" 
+          fill="url(#shapeGradient)" 
+          filter="url(#shadow)"
+        />
         
-        {/* Beat lines/equalizer on the right */}
-        <rect x="48" y="12" width="2" height="8" fill="white" rx="1" opacity="0.8"/>
-        <rect x="52" y="8" width="2" height="16" fill="white" rx="1" opacity="0.8"/>
-        <rect x="56" y="16" width="2" height="12" fill="white" rx="1" opacity="0.8"/>
+        {/* Shopping cart icon in the circular center */}
+        <g transform="translate(45, 35)">
+          {/* Cart handle */}
+          <path d="M3 6 L9 6 L9 3 L12 3 L12 6 L18 6 L18 9 L15 9 L15 18 L9 18 L9 9 L3 9 Z" fill="white"/>
+          {/* Cart basket */}
+          <rect x="3" y="9" width="12" height="9" fill="white" rx="1"/>
+          {/* Cart wheels */}
+          <circle cx="6" cy="21" r="1.5" fill="white"/>
+          <circle cx="12" cy="21" r="1.5" fill="white"/>
+        </g>
       </svg>
       
       {/* Text "beatcrest" */}
       {showText && (
         <div 
-          className="text-white font-medium tracking-wide mt-1"
+          className="text-white font-medium tracking-wide mt-2"
           style={{ 
-            fontSize: `${Math.max(12, size * 0.2)}px`,
-            textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+            fontSize: `${Math.max(14, size * 0.18)}px`,
+            textShadow: '0 2px 4px rgba(0,0,0,0.4)'
           }}
         >
           beatcrest
