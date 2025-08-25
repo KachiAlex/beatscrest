@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import SignupModal from "../components/SignupModal";
 import PaymentModal from "../components/PaymentModal";
 import AppLogo from "../components/AppLogo";
+import SimpleLogo from "../components/SimpleLogo";
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -98,7 +99,7 @@ export default function Home() {
       <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur">
         <div className="container mx-auto px-4 flex items-center justify-between py-3">
           <div className="flex items-center gap-3">
-            <AppLogo size={40} clickable={true} />
+            <SimpleLogo size={40} clickable={true} />
           </div>
                       <nav className="hidden gap-6 md:flex items-center">
               <button className="text-gray-700 hover:text-teal-600">Home</button>
@@ -323,7 +324,7 @@ export default function Home() {
       <footer className="border-t bg-white py-10 text-sm">
         <div className="container mx-auto px-4 flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex items-center gap-2">
-            <AppLogo size={32} />
+            <SimpleLogo size={32} />
           </div>
           <div className="text-gray-500">© {new Date().getFullYear()} BeatCrest. All rights reserved.</div>
         </div>

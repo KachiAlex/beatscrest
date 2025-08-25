@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AppLogo from '../components/AppLogo';
+import SimpleLogo from '../components/SimpleLogo';
 
 interface Beat {
   id: string;
@@ -163,7 +164,7 @@ export default function ProducerDashboard() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <AppLogo size={40} />
+              <SimpleLogo size={40} />
               <h1 className="text-2xl font-bold text-gray-900">Producer Dashboard</h1>
             </div>
             <div className="flex items-center gap-4">
