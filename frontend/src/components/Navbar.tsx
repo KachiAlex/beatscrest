@@ -44,9 +44,6 @@ const Navbar: React.FC = () => {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
-                <Link to={`/profile/${user.username}`} className="text-gray-700 hover:text-purple-600 transition">
-                  Profile
-                </Link>
                 <button 
                   onClick={logout}
                   className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"

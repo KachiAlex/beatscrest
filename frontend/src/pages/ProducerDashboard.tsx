@@ -42,6 +42,22 @@ export default function ProducerDashboard() {
   const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedBeat, setSelectedBeat] = useState<Beat | null>(null);
+  const [profileData, setProfileData] = useState({
+    username: user?.username || '',
+    email: user?.email || '',
+    fullName: user?.full_name || '',
+    bio: user?.bio || '',
+    headline: user?.headline || '',
+    profilePicture: user?.profile_picture || '',
+    socialLinks: {
+      instagram: '',
+      twitter: '',
+      youtube: '',
+      soundcloud: ''
+    }
+  });
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -186,6 +202,7 @@ export default function ProducerDashboard() {
     { id: 'beats', label: 'My Beats', icon: '🎵' },
     { id: 'orders', label: 'Orders', icon: '📦' },
     { id: 'transactions', label: 'Transactions', icon: '💰' },
+    { id: 'profile', label: 'Profile', icon: '👤' },
     { id: 'certificates', label: 'Certificates', icon: '🏆' },
     { id: 'analytics', label: 'Analytics', icon: '📈' }
   ];
@@ -478,6 +495,224 @@ export default function ProducerDashboard() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Profile Tab */}
+            {activeTab === 'profile' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Profile Settings</h3>
+                  <button 
+                    onClick={() => setIsEditingProfile(!isEditingProfile)}
+                    className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg"
+                  >
+                    {isEditingProfile ? 'Save Changes' : 'Edit Profile'}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Profile Picture Section */}
+                  <div className="lg:col-span-1">
+                    <div className="bg-gray-50 rounded-xl p-6 text-center">
+                      <div className="relative inline-block mb-4">
+                        <img
+                          src={profileData.profilePicture || 'https://via.placeholder.com/150'}
+                          alt="Profile"
+                          className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                        />
+                        {isEditingProfile && (
+                          <button className="absolute bottom-2 right-2 bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition">
+                            📷
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* Rating Display */}
+                      <div className="mb-4">
+                        <div className="flex items-center justify-center gap-1 mb-2">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <span key={star} className="text-yellow-400 text-xl">
+                              {star <= (user?.rating || 0) ? '★' : '☆'}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          {user?.rating || 0} out of 5 ({user?.total_ratings || 0} ratings)
+                        </p>
+                      </div>
+
+                      <div className="space-y-2 text-sm">
+                        <p className="font-medium">{user?.username}</p>
+                        <p className="text-gray-600">{user?.account_type}</p>
+                        <p className="text-gray-600">Member since {new Date(user?.created_at || '').toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Profile Form */}
+                  <div className="lg:col-span-2">
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <form className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Username</label>
+                            <input
+                              type="text"
+                              value={profileData.username}
+                              onChange={(e) => setProfileData(prev => ({ ...prev, username: e.target.value }))}
+                              disabled={!isEditingProfile}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Email</label>
+                            <input
+                              type="email"
+                              value={profileData.email}
+                              onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
+                              disabled={!isEditingProfile}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Full Name</label>
+                          <input
+                            type="text"
+                            value={profileData.fullName}
+                            onChange={(e) => setProfileData(prev => ({ ...prev, fullName: e.target.value }))}
+                            disabled={!isEditingProfile}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Headline</label>
+                          <input
+                            type="text"
+                            value={profileData.headline}
+                            onChange={(e) => setProfileData(prev => ({ ...prev, headline: e.target.value }))}
+                            disabled={!isEditingProfile}
+                            placeholder="e.g., Professional Music Producer & Sound Engineer"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Bio</label>
+                          <textarea
+                            value={profileData.bio}
+                            onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
+                            disabled={!isEditingProfile}
+                            rows={4}
+                            placeholder="Tell your story, your musical journey, and what makes your beats unique..."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100 resize-none"
+                          />
+                        </div>
+
+                        {/* Social Links */}
+                        <div>
+                          <label className="block text-sm font-medium mb-3">Social Links</label>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">Instagram</label>
+                              <input
+                                type="url"
+                                value={profileData.socialLinks.instagram}
+                                onChange={(e) => setProfileData(prev => ({ 
+                                  ...prev, 
+                                  socialLinks: { ...prev.socialLinks, instagram: e.target.value }
+                                }))}
+                                disabled={!isEditingProfile}
+                                placeholder="https://instagram.com/yourusername"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100 text-sm"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">Twitter</label>
+                              <input
+                                type="url"
+                                value={profileData.socialLinks.twitter}
+                                onChange={(e) => setProfileData(prev => ({ 
+                                  ...prev, 
+                                  socialLinks: { ...prev.socialLinks, twitter: e.target.value }
+                                }))}
+                                disabled={!isEditingProfile}
+                                placeholder="https://twitter.com/yourusername"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100 text-sm"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">YouTube</label>
+                              <input
+                                type="url"
+                                value={profileData.socialLinks.youtube}
+                                onChange={(e) => setProfileData(prev => ({ 
+                                  ...prev, 
+                                  socialLinks: { ...prev.socialLinks, youtube: e.target.value }
+                                }))}
+                                disabled={!isEditingProfile}
+                                placeholder="https://youtube.com/@yourchannel"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100 text-sm"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">SoundCloud</label>
+                              <input
+                                type="url"
+                                value={profileData.socialLinks.soundcloud}
+                                onChange={(e) => setProfileData(prev => ({ 
+                                  ...prev, 
+                                  socialLinks: { ...prev.socialLinks, soundcloud: e.target.value }
+                                }))}
+                                disabled={!isEditingProfile}
+                                placeholder="https://soundcloud.com/yourusername"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100 text-sm"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {isEditingProfile && (
+                          <div className="flex gap-4 pt-4">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsEditingProfile(false);
+                                // Reset form data to original values
+                                setProfileData({
+                                  username: user?.username || '',
+                                  email: user?.email || '',
+                                  fullName: user?.full_name || '',
+                                  bio: user?.bio || '',
+                                  headline: user?.headline || '',
+                                  profilePicture: user?.profile_picture || '',
+                                  socialLinks: {
+                                    instagram: '',
+                                    twitter: '',
+                                    youtube: '',
+                                    soundcloud: ''
+                                  }
+                                });
+                              }}
+                              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="submit"
+                              className="px-6 py-2 bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white rounded-lg transition-all duration-300"
+                            >
+                              Save Changes
+                            </button>
+                          </div>
+                        )}
+                      </form>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

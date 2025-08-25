@@ -2,8 +2,12 @@ export interface User {
   id: number;
   username: string;
   email: string;
+  full_name?: string;
   profile_picture?: string;
   bio?: string;
+  headline?: string;
+  rating?: number;
+  total_ratings?: number;
   account_type: 'producer' | 'artist' | 'admin';
   is_verified: boolean;
   followers_count: number;
