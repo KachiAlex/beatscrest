@@ -57,8 +57,30 @@ export default function ProducerDashboard() {
       soundcloud: ''
     }
   });
+
+  // Update profile data when user changes
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        username: user.username || '',
+        email: user.email || '',
+        fullName: user.full_name || '',
+        bio: user.bio || '',
+        headline: user.headline || '',
+        profilePicture: user.profile_picture || '',
+        socialLinks: {
+          instagram: '',
+          twitter: '',
+          youtube: '',
+          soundcloud: ''
+        }
+      });
+    }
+  }, [user]);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [selectedProfileImage, setSelectedProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string>('');
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -84,6 +106,59 @@ export default function ProducerDashboard() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showProfileDropdown]);
+
+  // Handle profile picture upload
+  const handleProfileImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        return;
+      }
+
+      setSelectedProfileImage(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfileImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle profile save
+  const handleProfileSave = async () => {
+    setProfileLoading(true);
+    try {
+      // Here you would typically upload the image and update the profile
+      // For now, we'll simulate the process
+      console.log('Saving profile data:', profileData);
+      console.log('Profile image:', selectedProfileImage);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setIsEditingProfile(false);
+      setSelectedProfileImage(null);
+      setProfileImagePreview('');
+      
+      // Show success message
+      alert('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile. Please try again.');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   // Show loading while checking auth
   if (authLoading) {
@@ -582,12 +657,49 @@ export default function ProducerDashboard() {
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-semibold">Profile Settings</h3>
-                  <button 
-                    onClick={() => setIsEditingProfile(!isEditingProfile)}
-                    className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg"
-                  >
-                    {isEditingProfile ? 'Save Changes' : 'Edit Profile'}
-                  </button>
+                  <div className="flex gap-3">
+                    {isEditingProfile && (
+                      <button 
+                        onClick={() => {
+                          setIsEditingProfile(false);
+                          setSelectedProfileImage(null);
+                          setProfileImagePreview('');
+                          // Reset form data to original values
+                          setProfileData({
+                            username: user?.username || '',
+                            email: user?.email || '',
+                            fullName: user?.full_name || '',
+                            bio: user?.bio || '',
+                            headline: user?.headline || '',
+                            profilePicture: user?.profile_picture || '',
+                            socialLinks: {
+                              instagram: '',
+                              twitter: '',
+                              youtube: '',
+                              soundcloud: ''
+                            }
+                          });
+                        }}
+                        className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    <button 
+                      onClick={isEditingProfile ? handleProfileSave : () => setIsEditingProfile(true)}
+                      disabled={profileLoading}
+                      className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {profileLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Saving...
+                        </div>
+                      ) : (
+                        isEditingProfile ? 'Save Changes' : 'Edit Profile'
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -596,14 +708,20 @@ export default function ProducerDashboard() {
                     <div className="bg-gray-50 rounded-xl p-6 text-center">
                       <div className="relative inline-block mb-4">
                         <img
-                          src={profileData.profilePicture || 'https://via.placeholder.com/150'}
+                          src={profileImagePreview || profileData.profilePicture || 'https://via.placeholder.com/150'}
                           alt="Profile"
                           className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
                         />
                         {isEditingProfile && (
-                          <button className="absolute bottom-2 right-2 bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition">
+                          <label className="absolute bottom-2 right-2 bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition cursor-pointer">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleProfileImageUpload}
+                              className="hidden"
+                            />
                             📷
-                          </button>
+                          </label>
                         )}
                       </div>
                       
@@ -632,7 +750,7 @@ export default function ProducerDashboard() {
                   {/* Profile Form */}
                   <div className="lg:col-span-2">
                     <div className="bg-gray-50 rounded-xl p-6">
-                      <form className="space-y-6">
+                      <form onSubmit={(e) => { e.preventDefault(); handleProfileSave(); }} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium mb-2">Username</label>
@@ -754,40 +872,7 @@ export default function ProducerDashboard() {
                           </div>
                         </div>
 
-                        {isEditingProfile && (
-                          <div className="flex gap-4 pt-4">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setIsEditingProfile(false);
-                                // Reset form data to original values
-                                setProfileData({
-                                  username: user?.username || '',
-                                  email: user?.email || '',
-                                  fullName: user?.full_name || '',
-                                  bio: user?.bio || '',
-                                  headline: user?.headline || '',
-                                  profilePicture: user?.profile_picture || '',
-                                  socialLinks: {
-                                    instagram: '',
-                                    twitter: '',
-                                    youtube: '',
-                                    soundcloud: ''
-                                  }
-                                });
-                              }}
-                              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              type="submit"
-                              className="px-6 py-2 bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white rounded-lg transition-all duration-300"
-                            >
-                              Save Changes
-                            </button>
-                          </div>
-                        )}
+
                       </form>
                     </div>
                   </div>
