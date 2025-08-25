@@ -28,7 +28,7 @@ export default function AppLogo({
       onClick={handleClick}
     >
       <img
-        src="/assets/Beatscrest.png"
+        src={`${window.location.origin}/assets/Beatscrest.png`}
         alt="BeatCrest Logo"
         width={size}
         height={size}

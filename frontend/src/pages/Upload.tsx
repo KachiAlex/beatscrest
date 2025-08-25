@@ -105,13 +105,17 @@ export default function Upload() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Form submitted with data:', { formData, driveLinks });
+    
     if (!validateForm()) {
+      console.log('Form validation failed');
       return;
     }
 
     try {
       setLoading(true);
       setUploadProgress(0);
+      console.log('Starting upload process...');
 
       const uploadData = {
         ...formData,
@@ -119,6 +123,8 @@ export default function Upload() {
         full_beat_url: driveLinks.fullBeat,
         thumbnail_url: driveLinks.thumbnail || null
       };
+      
+      console.log('Upload data prepared:', uploadData);
 
       // Simulate upload progress
       const progressInterval = setInterval(() => {
@@ -131,7 +137,9 @@ export default function Upload() {
         });
       }, 200);
 
+      console.log('Calling uploadBeat API...');
       const response = await apiService.uploadBeat(uploadData);
+      console.log('Upload response:', response);
       
       clearInterval(progressInterval);
       setUploadProgress(100);
@@ -193,6 +201,33 @@ export default function Upload() {
               </div>
             </div>
           )}
+
+          {/* Test Upload Button */}
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-yellow-800 mb-2">For testing purposes:</p>
+            <button
+              type="button"
+              onClick={() => {
+                setFormData({
+                  title: 'Test Beat',
+                  description: 'A test beat for development',
+                  genre: 'Hip Hop',
+                  bpm: '140',
+                  key: 'C',
+                  price: '45000',
+                  tags: 'test, hip-hop'
+                });
+                setDriveLinks({
+                  preview: 'https://drive.google.com/file/d/test1',
+                  fullBeat: 'https://drive.google.com/file/d/test2',
+                  thumbnail: 'https://drive.google.com/file/d/test3'
+                });
+              }}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm"
+            >
+              Fill Test Data
+            </button>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Basic Information */}
