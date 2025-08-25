@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SignupModal from "../components/SignupModal";
 import PaymentModal from "../components/PaymentModal";
-import BeatCrestLogo from "../components/BeatCrestLogo";
+import AppLogo from "../components/AppLogo";
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -97,8 +97,8 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur">
         <div className="container mx-auto px-4 flex items-center justify-between py-3">
-          <div className="flex items-center gap-3 cursor-pointer">
-            <BeatCrestLogo size={56} showText={true} />
+          <div className="flex items-center gap-3">
+            <AppLogo size={40} clickable={true} />
           </div>
           <nav className="hidden gap-6 md:flex">
             <button className="text-gray-700 hover:text-teal-600">Home</button>
@@ -270,7 +270,7 @@ export default function Home() {
       <footer className="border-t bg-white py-10 text-sm">
         <div className="container mx-auto px-4 flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex items-center gap-2">
-            <BeatCrestLogo size={40} showText={true} />
+            <AppLogo size={32} />
           </div>
           <div className="text-gray-500">© {new Date().getFullYear()} BeatCrest. All rights reserved.</div>
         </div>

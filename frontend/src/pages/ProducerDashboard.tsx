@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import BeatCrestLogo from '../components/BeatCrestLogo';
+import AppLogo from '../components/AppLogo';
 
 interface Beat {
   id: string;
@@ -163,7 +163,7 @@ export default function ProducerDashboard() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <BeatCrestLogo size={48} showText={true} />
+              <AppLogo size={40} />
               <h1 className="text-2xl font-bold text-gray-900">Producer Dashboard</h1>
             </div>
             <div className="flex items-center gap-4">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Landing'; // This is now the Home component
@@ -7,8 +7,24 @@ import BeatDetail from './pages/BeatDetail';
 import Upload from './pages/Upload';
 import Profile from './pages/Profile';
 import ProducerDashboard from './pages/ProducerDashboard';
+import SplashScreen from './components/SplashScreen';
 
 const App: React.FC = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    // Hide splash screen after 2 seconds
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Routes>
