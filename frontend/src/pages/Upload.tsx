@@ -536,7 +536,6 @@ export default function Upload() {
                 type="submit"
                 className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white transition-all duration-300 shadow-lg"
                 disabled={loading}
-                onClick={() => console.log('🔘 Submit button clicked!')}
               >
                 {loading ? 'Uploading...' : 'Upload Beat'}
               </Button>
