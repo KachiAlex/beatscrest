@@ -31,7 +31,14 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Routes>
         {/* Home page with banner slides, about, and beats commerce */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={
+          <>
+            <Navbar />
+            <main>
+              <Home />
+            </main>
+          </>
+        } />
         
         {/* Producer Dashboard - self-contained */}
         <Route path="/dashboard" element={<ProducerDashboard />} />
