@@ -35,6 +35,9 @@ export interface Beat {
   producer_name?: string;
   producer_picture?: string;
   is_liked?: boolean;
+  average_rating?: number;
+  total_ratings?: number;
+  user_rating?: number;
 }
 
 export interface Purchase {
@@ -132,5 +135,25 @@ export interface PaginatedResponse<T> {
     limit: number;
     total: number;
     pages: number;
+  };
+}
+
+export interface BeatFeedback {
+  id: number;
+  beat_id: number;
+  user_id: number;
+  rating: number;
+  comment: string;
+  created_at: string;
+  username?: string;
+  profile_picture?: string;
+  is_verified?: boolean;
+}
+
+export interface FeedbackStats {
+  average_rating: number;
+  total_ratings: number;
+  rating_distribution: {
+    [key: number]: number;
   };
 } 

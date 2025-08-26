@@ -257,6 +257,116 @@ const addComment = async (beatId: number, content: string) => {
   return { comment };
 };
 
+// Feedback-related API methods
+const getBeatFeedback = async (beatId: number) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // Mock feedback data
+  const feedback = [
+    {
+      id: 1,
+      beat_id: beatId,
+      user_id: 2,
+      rating: 5,
+      comment: 'Absolutely love this beat! The production quality is top-notch and the melody is catchy.',
+      created_at: '2024-01-20T15:30:00Z',
+      username: 'MusicLover',
+      profile_picture: 'https://via.placeholder.com/40',
+      is_verified: true
+    },
+    {
+      id: 2,
+      beat_id: beatId,
+      user_id: 3,
+      rating: 4,
+      comment: 'Great beat, perfect for my style. Would definitely buy more from this producer.',
+      created_at: '2024-01-19T12:15:00Z',
+      username: 'Producer123',
+      profile_picture: 'https://via.placeholder.com/40',
+      is_verified: false
+    },
+    {
+      id: 3,
+      beat_id: beatId,
+      user_id: 4,
+      rating: 5,
+      comment: 'Incredible work! The bass hits hard and the arrangement is perfect.',
+      created_at: '2024-01-18T09:45:00Z',
+      username: 'BeatMaker',
+      profile_picture: 'https://via.placeholder.com/40',
+      is_verified: true
+    }
+  ];
+  
+  return { feedback };
+};
+
+const getFeedbackStats = async (beatId: number) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  // Mock feedback stats
+  const stats = {
+    average_rating: 4.7,
+    total_ratings: 3,
+    rating_distribution: {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 1,
+      5: 2
+    }
+  };
+  
+  return { stats };
+};
+
+const submitFeedback = async (beatId: number, rating: number, comment: string) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const feedback = {
+    id: Math.floor(Math.random() * 1000),
+    beat_id: beatId,
+    user_id: 1,
+    rating,
+    comment,
+    created_at: new Date().toISOString(),
+    username: 'CurrentUser',
+    profile_picture: 'https://via.placeholder.com/40',
+    is_verified: false
+  };
+  
+  return { feedback };
+};
+
+const updateFeedback = async (feedbackId: number, rating: number, comment: string) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const feedback = {
+    id: feedbackId,
+    beat_id: 1,
+    user_id: 1,
+    rating,
+    comment,
+    created_at: new Date().toISOString(),
+    username: 'CurrentUser',
+    profile_picture: 'https://via.placeholder.com/40',
+    is_verified: false
+  };
+  
+  return { feedback };
+};
+
+const deleteFeedback = async (feedbackId: number) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  return { success: true };
+};
+
 // Add all methods to the api object
 const apiService = {
   ...api,
@@ -268,7 +378,12 @@ const apiService = {
   getBeat,
   getBeatComments,
   likeBeat,
-  addComment
+  addComment,
+  getBeatFeedback,
+  getFeedbackStats,
+  submitFeedback,
+  updateFeedback,
+  deleteFeedback
 };
 
 export default apiService; 

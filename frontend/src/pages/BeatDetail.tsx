@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Play, Pause, Heart, ShoppingCart, MessageCircle, Share2, Clock, Music } from 'lucide-react';
+import { Play, Pause, Heart, ShoppingCart, MessageCircle, Share2, Clock, Music, Star } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
-import { Beat, Comment } from '../types';
+import { Beat, Comment, BeatFeedback, FeedbackStats as FeedbackStatsType } from '../types';
 import apiService from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import StarRating from '../components/StarRating';
+import FeedbackForm from '../components/FeedbackForm';
+import FeedbackList from '../components/FeedbackList';
+import FeedbackStatsComponent from '../components/FeedbackStats';
 
 export default function BeatDetail() {
   const { id } = useParams<{ id: string }>();
@@ -14,11 +18,17 @@ export default function BeatDetail() {
   const navigate = useNavigate();
   const [beat, setBeat] = useState<Beat | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [feedback, setFeedback] = useState<BeatFeedback[]>([]);
+  const [feedbackStats, setFeedbackStats] = useState<FeedbackStatsType | null>(null);
   const [loading, setLoading] = useState(true);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [comment, setComment] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [editingFeedback, setEditingFeedback] = useState<BeatFeedback | null>(null);
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [authFormData, setAuthFormData] = useState({
     email: '',
@@ -32,6 +42,7 @@ export default function BeatDetail() {
     if (id) {
       loadBeat();
       loadComments();
+      loadFeedback();
     }
   }, [id]);
 
@@ -53,6 +64,25 @@ export default function BeatDetail() {
       setComments(response.comments || []);
     } catch (error) {
       console.error('Error loading comments:', error);
+    }
+  };
+
+  const loadFeedback = async () => {
+    if (!id) return;
+    
+    try {
+      setFeedbackLoading(true);
+      const [feedbackResponse, statsResponse] = await Promise.all([
+        apiService.getBeatFeedback(parseInt(id)),
+        apiService.getFeedbackStats(parseInt(id))
+      ]);
+      
+      setFeedback(feedbackResponse.feedback || []);
+      setFeedbackStats(statsResponse.stats);
+    } catch (error) {
+      console.error('Error loading feedback:', error);
+    } finally {
+      setFeedbackLoading(false);
     }
   };
 
@@ -157,6 +187,54 @@ export default function BeatDetail() {
     setAuthFormData({ email: '', password: '', username: '' });
   };
 
+  // Feedback handling functions
+  const handleSubmitFeedback = async (rating: number, comment: string) => {
+    if (!beat || !user) return;
+
+    try {
+      setSubmittingFeedback(true);
+      
+      if (editingFeedback) {
+        const response = await apiService.updateFeedback(editingFeedback.id, rating, comment);
+        setFeedback(prev => prev.map(f => f.id === editingFeedback.id ? response.feedback : f));
+        setEditingFeedback(null);
+      } else {
+        const response = await apiService.submitFeedback(beat.id, rating, comment);
+        setFeedback(prev => [response.feedback, ...prev]);
+      }
+      
+      setShowFeedbackForm(false);
+      await loadFeedback(); // Reload stats
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      throw error;
+    } finally {
+      setSubmittingFeedback(false);
+    }
+  };
+
+  const handleEditFeedback = (feedbackItem: BeatFeedback) => {
+    setEditingFeedback(feedbackItem);
+    setShowFeedbackForm(true);
+  };
+
+  const handleDeleteFeedback = async (feedbackId: number) => {
+    if (!confirm('Are you sure you want to delete your review?')) return;
+
+    try {
+      await apiService.deleteFeedback(feedbackId);
+      setFeedback(prev => prev.filter(f => f.id !== feedbackId));
+      await loadFeedback(); // Reload stats
+    } catch (error) {
+      console.error('Error deleting feedback:', error);
+    }
+  };
+
+  const handleCancelFeedback = () => {
+    setShowFeedbackForm(false);
+    setEditingFeedback(null);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
@@ -200,6 +278,19 @@ export default function BeatDetail() {
                     >
                       by {beat.producer_name}
                     </Link>
+                    {feedbackStats && (
+                      <div className="flex items-center gap-2 mt-2">
+                        <StarRating
+                          rating={Math.round(feedbackStats.average_rating)}
+                          readonly
+                          size="sm"
+                          showValue
+                        />
+                        <span className="text-sm text-gray-500">
+                          ({feedbackStats.total_ratings} {feedbackStats.total_ratings === 1 ? 'review' : 'reviews'})
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="text-right">
                     <div className="text-3xl font-bold text-purple-600 mb-2">
@@ -254,7 +345,7 @@ export default function BeatDetail() {
                 </div>
 
                 {/* Beat Info */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">{beat.bpm || 'N/A'}</div>
                     <div className="text-sm text-gray-500">BPM</div>
@@ -270,6 +361,12 @@ export default function BeatDetail() {
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">{beat.plays_count}</div>
                     <div className="text-sm text-gray-500">Plays</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {feedbackStats ? feedbackStats.average_rating.toFixed(1) : 'N/A'}
+                    </div>
+                    <div className="text-sm text-gray-500">Rating</div>
                   </div>
                 </div>
 
@@ -355,6 +452,54 @@ export default function BeatDetail() {
                     </div>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Feedback Section */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold">Reviews & Ratings</h3>
+                  {user && !showFeedbackForm && (
+                    <Button
+                      onClick={() => setShowFeedbackForm(true)}
+                      className="bg-purple-600 hover:bg-purple-700"
+                    >
+                      <Star className="h-4 w-4 mr-2" />
+                      Write a Review
+                    </Button>
+                  )}
+                </div>
+
+                {/* Feedback Stats */}
+                {feedbackStats && (
+                  <div className="mb-6">
+                    <FeedbackStatsComponent stats={feedbackStats} />
+                  </div>
+                )}
+
+                {/* Feedback Form */}
+                {showFeedbackForm && user && (
+                  <div className="mb-6">
+                    <FeedbackForm
+                      onSubmit={handleSubmitFeedback}
+                      onCancel={handleCancelFeedback}
+                      initialRating={editingFeedback?.rating || 0}
+                      initialComment={editingFeedback?.comment || ''}
+                      isEditing={!!editingFeedback}
+                      loading={submittingFeedback}
+                    />
+                  </div>
+                )}
+
+                {/* Feedback List */}
+                <FeedbackList
+                  feedback={feedback}
+                  currentUserId={user?.id}
+                  onEdit={handleEditFeedback}
+                  onDelete={handleDeleteFeedback}
+                  loading={feedbackLoading}
+                />
               </CardContent>
             </Card>
           </div>
