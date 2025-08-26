@@ -29,7 +29,7 @@ export default function AppLogo({
     >
       {/* BeatCrest Logo */}
       <img 
-        src="/images/beatscrest logo.png" 
+        src="/images/beatscrest-logo.png" 
         alt="BeatCrest Logo" 
         className="object-contain"
         style={{ 

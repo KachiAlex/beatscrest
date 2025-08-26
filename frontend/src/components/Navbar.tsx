@@ -12,7 +12,7 @@ const Navbar: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
             <img 
-              src="/images/beatscrest logo.png" 
+              src="/images/beatscrest-logo.png" 
               alt="BeatCrest Logo" 
               className="h-8 w-8 object-contain"
               onError={(e) => {
