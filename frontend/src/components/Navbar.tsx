@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/button';
-import apiService from '../services/api';
 
 const Navbar: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, login, register } = useAuth();
+  const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [authFormData, setAuthFormData] = useState({
@@ -52,9 +52,9 @@ const Navbar: React.FC = () => {
 
     try {
       if (authMode === 'signin') {
-        await apiService.login({ email: authFormData.email, password: authFormData.password });
+        await login(authFormData.email, authFormData.password);
       } else {
-        await apiService.register({
+        await register({
           email: authFormData.email,
           password: authFormData.password,
           username: authFormData.username,
@@ -65,6 +65,9 @@ const Navbar: React.FC = () => {
       setShowAuthModal(false);
       setAuthFormData({ email: '', password: '', username: '' });
       setAuthMode('signin');
+      
+      // After auth, go to buyer dashboard
+      navigate('/buyer');
     } catch (error: any) {
       setAuthError(error.message || 'Authentication failed');
     } finally {
@@ -92,7 +95,7 @@ const Navbar: React.FC = () => {
                 className="h-8 w-8 object-contain"
                 onError={(e) => {
                   // Fallback to gradient div if logo fails to load
-                  e.currentTarget.style.display = 'none';
+                  (e.currentTarget as HTMLImageElement).style.display = 'none';
                   e.currentTarget.nextElementSibling?.classList.remove('hidden');
                 }}
               />
