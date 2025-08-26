@@ -28,48 +28,20 @@ export default function SimpleLogo({
       onClick={handleClick}
     >
       {/* BeatCrest Logo */}
-      <img 
-        src="/images/beatscrest-logo.png" 
-        alt="BeatCrest Logo" 
-        className="object-contain"
-        style={{ 
-          width: `${size}px`, 
-          height: `${size}px`
-        }}
-        onError={(e) => {
-          // Fallback to CSS logo if image fails to load
-          e.currentTarget.style.display = 'none';
-          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-        }}
-      />
-      
-      {/* Fallback CSS logo */}
-      <div 
-        className="relative rounded-xl overflow-hidden shadow-lg hidden"
-        style={{ 
-          width: `${size}px`, 
-          height: `${size}px`,
-          background: 'linear-gradient(135deg, #7C3AED 0%, #0D9488 25%, #38BDF8 50%, #D946EF 75%, #F97316 100%)'
-        }}
-      >
-        {/* BC text */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span 
-            className="text-white font-bold"
-            style={{ fontSize: `${Math.max(12, size * 0.4)}px` }}
-          >
-            BC
-          </span>
-        </div>
-        
-        {/* Music note icon */}
-        <div 
-          className="absolute bottom-1 right-1"
-          style={{ fontSize: `${Math.max(8, size * 0.2)}px` }}
-        >
-          🎵
-        </div>
-      </div>
+      <picture>
+        <source srcSet="/images/beatscrest-logo.svg" type="image/svg+xml" />
+        <img 
+          src="/images/beatscrest-logo.png" 
+          alt="BeatCrest Logo" 
+          className="object-contain"
+          style={{ 
+            width: `${size}px`, 
+            height: `${size}px`
+          }}
+          loading="eager"
+          decoding="async"
+        />
+      </picture>
       
       {/* Text "beatcrest" */}
       {showText && (
