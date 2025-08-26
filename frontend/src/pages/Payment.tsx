@@ -37,6 +37,7 @@ const Payment: React.FC = () => {
       // Simulate payment processing
       await new Promise((r) => setTimeout(r, 1500));
       // On success, navigate to buyer dashboard
+      console.log('Payment successful, navigating to buyer dashboard');
       navigate('/buyer');
     } catch (e: any) {
       setError('Payment failed, please try again');

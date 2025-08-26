@@ -92,12 +92,14 @@ export default function BeatDetail() {
     
     if (!user) {
       // Show auth modal for unauthenticated users
+      console.log('User not authenticated, showing auth modal');
       setShowAuthModal(true);
       return;
     }
     
     try {
       // Navigate to payment flow
+      console.log('User authenticated, navigating to payment:', `/payment/${beat.id}`);
       navigate(`/payment/${beat.id}`);
     } catch (error) {
       console.error('Error initiating purchase:', error);
@@ -138,6 +140,7 @@ export default function BeatDetail() {
       
       // Navigate to payment flow after successful auth
       if (beat) {
+        console.log('Authentication successful, navigating to payment:', `/payment/${beat.id}`);
         navigate(`/payment/${beat.id}`);
       }
     } catch (error: any) {
