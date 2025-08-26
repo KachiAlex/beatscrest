@@ -7,6 +7,8 @@ import BeatDetail from './pages/BeatDetail';
 import Upload from './pages/Upload';
 import Profile from './pages/Profile';
 import ProducerDashboard from './pages/ProducerDashboard';
+import BuyerDashboard from './pages/BuyerDashboard';
+import Payment from './pages/Payment';
 import SplashScreen from './components/SplashScreen';
 
 const App: React.FC = () => {
@@ -48,6 +50,22 @@ const App: React.FC = () => {
             <Navbar />
             <main>
               <BeatDetail />
+            </main>
+          </>
+        } />
+        <Route path="/payment/:id" element={
+          <>
+            <Navbar />
+            <main>
+              <Payment />
+            </main>
+          </>
+        } />
+        <Route path="/buyer" element={
+          <>
+            <Navbar />
+            <main>
+              <BuyerDashboard />
             </main>
           </>
         } />

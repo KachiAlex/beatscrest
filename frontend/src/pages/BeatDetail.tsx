@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Play, Pause, Heart, ShoppingCart, MessageCircle, Share2, Clock, Music } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -11,12 +11,22 @@ import { useAuth } from '../contexts/AuthContext';
 export default function BeatDetail() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [beat, setBeat] = useState<Beat | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [comment, setComment] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [authFormData, setAuthFormData] = useState({
+    email: '',
+    password: '',
+    username: ''
+  });
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -78,15 +88,70 @@ export default function BeatDetail() {
   };
 
   const handlePurchase = async () => {
-    if (!beat || !user) return;
+    if (!beat) return;
+    
+    if (!user) {
+      // Show auth modal for unauthenticated users
+      setShowAuthModal(true);
+      return;
+    }
     
     try {
-      // This would integrate with Stripe payment flow
-      console.log('Initiating purchase for beat:', beat.id);
-      // Redirect to payment page or open payment modal
+      // Navigate to payment flow
+      navigate(`/payment/${beat.id}`);
     } catch (error) {
       console.error('Error initiating purchase:', error);
     }
+  };
+
+  // Handle auth form input changes
+  const handleAuthInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setAuthFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    setAuthError('');
+  };
+
+  // Handle auth form submission
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError('');
+
+    try {
+      if (authMode === 'signin') {
+        await apiService.login({ email: authFormData.email, password: authFormData.password });
+      } else {
+        await apiService.register({
+          email: authFormData.email,
+          password: authFormData.password,
+          username: authFormData.username,
+          account_type: 'artist'
+        });
+      }
+      
+      setShowAuthModal(false);
+      setAuthFormData({ email: '', password: '', username: '' });
+      setAuthMode('signin');
+      
+      // Navigate to payment flow after successful auth
+      if (beat) {
+        navigate(`/payment/${beat.id}`);
+      }
+    } catch (error: any) {
+      setAuthError(error.message || 'Authentication failed');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Switch between sign in and sign up modes
+  const switchAuthMode = () => {
+    setAuthMode(prev => prev === 'signin' ? 'signup' : 'signin');
+    setAuthError('');
+    setAuthFormData({ email: '', password: '', username: '' });
   };
 
   if (loading) {
@@ -140,7 +205,6 @@ export default function BeatDetail() {
                     <Button 
                       onClick={handlePurchase}
                       className="w-full bg-purple-600 hover:bg-purple-700"
-                      disabled={!user}
                     >
                       <ShoppingCart className="h-4 w-4 mr-2" />
                       {user ? 'Buy Now' : 'Sign in to Purchase'}
@@ -356,6 +420,105 @@ export default function BeatDetail() {
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-xl font-bold">
+                {authMode === 'signin' ? 'Sign In to Purchase' : 'Create Account to Purchase'}
+              </h3>
+              <button 
+                onClick={() => {
+                  setShowAuthModal(false);
+                  setAuthMode('signin');
+                  setAuthFormData({ email: '', password: '', username: '' });
+                  setAuthError('');
+                }} 
+                className="rounded-xl px-3 py-1 text-sm text-gray-500 hover:bg-gray-100"
+              >
+                Close
+              </button>
+            </div>
+            
+            <form onSubmit={handleAuthSubmit} className="space-y-4">
+              {authMode === 'signup' && (
+                <div>
+                  <label className="mb-1 block text-sm font-medium">Username</label>
+                  <input 
+                    type="text" 
+                    name="username"
+                    value={authFormData.username}
+                    onChange={handleAuthInputChange}
+                    className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500" 
+                    placeholder="your_username" 
+                    required
+                  />
+                </div>
+              )}
+              
+              <div>
+                <label className="mb-1 block text-sm font-medium">Email</label>
+                <input 
+                  type="email" 
+                  name="email"
+                  value={authFormData.email}
+                  onChange={handleAuthInputChange}
+                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500" 
+                  placeholder="you@example.com" 
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="mb-1 block text-sm font-medium">Password</label>
+                <input 
+                  type="password" 
+                  name="password"
+                  value={authFormData.password}
+                  onChange={handleAuthInputChange}
+                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500" 
+                  placeholder="••••••••" 
+                  required
+                />
+              </div>
+              
+              {authError && (
+                <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+                  {authError}
+                </div>
+              )}
+              
+              <button 
+                type="submit"
+                disabled={authLoading}
+                className="w-full inline-flex items-center justify-center rounded-2xl bg-purple-600 px-5 py-3 text-white shadow-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {authLoading ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  <span className="font-medium">
+                    {authMode === 'signin' ? 'Sign In & Continue' : 'Create Account & Continue'}
+                  </span>
+                )}
+              </button>
+            </form>
+            
+            <div className="mt-6 text-center">
+              <p className="text-gray-600 text-sm">
+                {authMode === 'signin' ? "Don't have an account?" : "Already have an account?"}
+                <button 
+                  onClick={switchAuthMode}
+                  className="ml-1 text-purple-600 hover:text-purple-700 font-medium"
+                >
+                  {authMode === 'signin' ? 'Sign up' : 'Sign in'}
+                </button>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

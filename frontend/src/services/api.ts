@@ -173,6 +173,90 @@ const updateProfile = async (profileData: any) => {
   };
 };
 
+// Beat-related API methods
+const getBeat = async (beatId: number) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // Mock beat data
+  const beat = {
+    id: beatId,
+    producer_id: 1,
+    title: 'Midnight Groove',
+    description: 'A smooth hip-hop beat with heavy bass and melodic samples',
+    genre: 'Hip Hop',
+    bpm: 140,
+    key: 'C',
+    price: 45000,
+    preview_url: 'https://example.com/preview.mp3',
+    full_beat_url: 'https://example.com/full.mp3',
+    thumbnail_url: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&auto=format&fit=crop',
+    tags: ['hip-hop', 'bass', 'melodic'],
+    likes_count: 45,
+    plays_count: 120,
+    is_active: true,
+    created_at: '2024-01-15T10:00:00Z',
+    producer_name: 'DJ ProBeat',
+    producer_picture: 'https://via.placeholder.com/60',
+    is_liked: false
+  };
+  
+  return { beat };
+};
+
+const getBeatComments = async (beatId: number) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // Mock comments data
+  const comments = [
+    {
+      id: 1,
+      user_id: 2,
+      beat_id: beatId,
+      content: 'Amazing beat! Love the bass line.',
+      created_at: '2024-01-20T15:30:00Z',
+      username: 'MusicLover',
+      profile_picture: 'https://via.placeholder.com/40'
+    },
+    {
+      id: 2,
+      user_id: 3,
+      beat_id: beatId,
+      content: 'Perfect for my next track!',
+      created_at: '2024-01-19T12:15:00Z',
+      username: 'Producer123',
+      profile_picture: 'https://via.placeholder.com/40'
+    }
+  ];
+  
+  return { comments };
+};
+
+const likeBeat = async (beatId: number) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  return { success: true };
+};
+
+const addComment = async (beatId: number, content: string) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const comment = {
+    id: Math.floor(Math.random() * 1000),
+    user_id: 1,
+    beat_id: beatId,
+    content,
+    created_at: new Date().toISOString(),
+    username: 'CurrentUser',
+    profile_picture: 'https://via.placeholder.com/40'
+  };
+  
+  return { comment };
+};
+
 // Add all methods to the api object
 const apiService = {
   ...api,
@@ -180,7 +264,11 @@ const apiService = {
   login,
   register,
   uploadBeat,
-  updateProfile
+  updateProfile,
+  getBeat,
+  getBeatComments,
+  likeBeat,
+  addComment
 };
 
 export default apiService; 
