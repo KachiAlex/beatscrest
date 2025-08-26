@@ -27,9 +27,25 @@ export default function AppLogo({
       className={`flex flex-col items-center ${clickable ? 'cursor-pointer' : ''} ${className}`}
       onClick={handleClick}
     >
-      {/* Simple logo using CSS - no image dependency */}
+      {/* BeatCrest Logo */}
+      <img 
+        src="/images/beatscrest logo.png" 
+        alt="BeatCrest Logo" 
+        className="object-contain"
+        style={{ 
+          width: `${size}px`, 
+          height: `${size}px`
+        }}
+        onError={(e) => {
+          // Fallback to CSS logo if image fails to load
+          e.currentTarget.style.display = 'none';
+          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+        }}
+      />
+      
+      {/* Fallback CSS logo */}
       <div 
-        className="relative rounded-xl overflow-hidden shadow-lg"
+        className="relative rounded-xl overflow-hidden shadow-lg hidden"
         style={{ 
           width: `${size}px`, 
           height: `${size}px`,

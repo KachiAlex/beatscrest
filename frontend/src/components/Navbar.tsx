@@ -12,9 +12,9 @@ const Navbar: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
             <img 
-              src="/images/beatscrest-logo.svg" 
+              src="/images/beatscrest logo.png" 
               alt="BeatCrest Logo" 
-              className="h-8 w-8"
+              className="h-8 w-8 object-contain"
               onError={(e) => {
                 // Fallback to gradient div if logo fails to load
                 e.currentTarget.style.display = 'none';
