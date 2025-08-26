@@ -11,6 +11,7 @@ import StarRating from '../components/StarRating';
 import FeedbackForm from '../components/FeedbackForm';
 import FeedbackList from '../components/FeedbackList';
 import FeedbackStatsComponent from '../components/FeedbackStats';
+import CommentItem from '../components/CommentItem';
 
 export default function BeatDetail() {
   const { id } = useParams<{ id: string }>();
@@ -235,6 +236,23 @@ export default function BeatDetail() {
     setEditingFeedback(null);
   };
 
+  // New function for adding comment responses
+  const handleAddCommentResponse = async (commentId: number, responseText: string) => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    try {
+      const response = await apiService.addCommentResponse(commentId, responseText);
+      setComments(prev => prev.map(c => 
+        c.id === commentId ? { ...c, responses: [response.response, ...c.responses] } : c
+      ));
+    } catch (error) {
+      console.error('Error adding comment response:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
@@ -427,22 +445,13 @@ export default function BeatDetail() {
                 {/* Comments List */}
                 <div className="space-y-4">
                   {comments.map((comment) => (
-                    <div key={comment.id} className="flex space-x-3">
-                      <img
-                        src={comment.profile_picture || 'https://via.placeholder.com/40'}
-                        alt={comment.username}
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className="font-medium">{comment.username}</span>
-                          <span className="text-sm text-gray-500">
-                            {new Date(comment.created_at).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <p className="text-gray-700">{comment.content}</p>
-                      </div>
-                    </div>
+                    <CommentItem
+                      key={comment.id}
+                      comment={comment}
+                      currentUserId={user?.id}
+                      isProducer={user?.id === beat.producer_id}
+                      onAddResponse={handleAddCommentResponse}
+                    />
                   ))}
                   
                   {comments.length === 0 && (

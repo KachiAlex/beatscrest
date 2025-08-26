@@ -68,6 +68,19 @@ export interface Comment {
   created_at: string;
   username?: string;
   profile_picture?: string;
+  is_producer?: boolean;
+  responses?: CommentResponse[];
+}
+
+export interface CommentResponse {
+  id: number;
+  comment_id: number;
+  user_id: number;
+  content: string;
+  created_at: string;
+  username?: string;
+  profile_picture?: string;
+  is_producer?: boolean;
 }
 
 export interface Message {

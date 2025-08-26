@@ -251,10 +251,51 @@ const addComment = async (beatId: number, content: string) => {
     content,
     created_at: new Date().toISOString(),
     username: 'CurrentUser',
-    profile_picture: 'https://via.placeholder.com/40'
+    profile_picture: 'https://via.placeholder.com/40',
+    is_producer: false,
+    responses: []
   };
   
   return { comment };
+};
+
+const addCommentResponse = async (commentId: number, content: string) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const response = {
+    id: Math.floor(Math.random() * 1000),
+    comment_id: commentId,
+    user_id: 1,
+    content,
+    created_at: new Date().toISOString(),
+    username: 'CurrentUser',
+    profile_picture: 'https://via.placeholder.com/40',
+    is_producer: true
+  };
+  
+  return { response };
+};
+
+const getCommentResponses = async (commentId: number) => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // Mock responses data
+  const responses = [
+    {
+      id: 1,
+      comment_id: commentId,
+      user_id: 1,
+      content: 'Thank you for the feedback! I\'m glad you liked the beat.',
+      created_at: '2024-01-21T10:30:00Z',
+      username: 'DJ ProBeat',
+      profile_picture: 'https://via.placeholder.com/40',
+      is_producer: true
+    }
+  ];
+  
+  return { responses };
 };
 
 // Feedback-related API methods
@@ -379,6 +420,8 @@ const apiService = {
   getBeatComments,
   likeBeat,
   addComment,
+  addCommentResponse,
+  getCommentResponses,
   getBeatFeedback,
   getFeedbackStats,
   submitFeedback,
