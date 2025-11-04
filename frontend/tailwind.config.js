@@ -7,29 +7,39 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Logo-based color palette
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+          // Muted Teal/Blue-Green (background)
+          50: '#e6f5f5',
+          100: '#b3e0e0',
+          200: '#80cccc',
+          300: '#4db8b8',
+          400: '#1aa3a3',
+          500: '#008f8f', // Primary teal
+          600: '#007373',
+          700: '#005757',
+          800: '#003b3b',
+          900: '#001f1f',
         },
-        beatcrest: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+        'beatcrest-teal': {
+          DEFAULT: '#4A9B9D', // Muted teal background
+          light: '#5F9EA0',
+          dark: '#3A7A7C',
+        },
+        'beatcrest-blue': {
+          DEFAULT: '#3B82F6', // Bright blue from hexagon
+          light: '#60A5FA',
+          dark: '#2563EB',
+        },
+        'beatcrest-orange': {
+          DEFAULT: '#F97316', // Orange from hexagon
+          light: '#FB923C',
+          dark: '#EA580C',
+        },
+        'beatcrest-navy': {
+          DEFAULT: '#1E3A8A', // Dark navy blue from hexagon
+          light: '#1E40AF',
+          dark: '#1E293B',
         },
         teal: {
           50: '#f0fdfa',
@@ -84,8 +94,10 @@ export default {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       backgroundImage: {
-        'beatcrest-gradient': 'linear-gradient(135deg, #7c3aed 0%, #0d9488 25%, #38bdf8 50%, #d946ef 75%, #f97316 100%)',
-        'beatcrest-gradient-vertical': 'linear-gradient(180deg, #f97316 0%, #38bdf8 25%, #0d9488 50%, #7c3aed 75%, #d946ef 100%)',
+        // Logo-based gradients
+        'beatcrest-gradient': 'linear-gradient(135deg, #3B82F6 0%, #4A9B9D 25%, #F97316 50%, #1E3A8A 75%, #3B82F6 100%)',
+        'beatcrest-gradient-vertical': 'linear-gradient(180deg, #F97316 0%, #3B82F6 25%, #4A9B9D 50%, #1E3A8A 75%, #3B82F6 100%)',
+        'beatcrest-hexagon': 'linear-gradient(135deg, #3B82F6 0%, #F97316 33%, #1E3A8A 66%, #FFFFFF 100%)',
       },
     },
   },

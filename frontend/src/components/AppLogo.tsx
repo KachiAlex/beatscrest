@@ -29,7 +29,7 @@ export default function AppLogo({
     >
       {/* BeatCrest Logo */}
       <img 
-        src="/images/beatscrest-logo.png" 
+        src="/images/beat-crest-logo.png" 
         alt="BeatCrest Logo" 
         className="object-contain"
         style={{ 
@@ -45,11 +45,10 @@ export default function AppLogo({
       
       {/* Fallback CSS logo */}
       <div 
-        className="relative rounded-xl overflow-hidden shadow-lg hidden"
+        className="relative rounded-xl overflow-hidden shadow-lg hidden bg-gradient-to-br from-blue-600 via-orange-500 to-blue-900"
         style={{ 
           width: `${size}px`, 
-          height: `${size}px`,
-          background: 'linear-gradient(135deg, #7C3AED 0%, #0D9488 25%, #38BDF8 50%, #D946EF 75%, #F97316 100%)'
+          height: `${size}px`
         }}
       >
         {/* BC text */}

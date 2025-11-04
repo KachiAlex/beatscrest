@@ -159,19 +159,19 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-teal-50/30">
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur">
+      <header className="sticky top-0 z-40 w-full border-b border-teal-200/30 bg-white/80 backdrop-blur">
         <div className="container mx-auto px-4 flex items-center justify-between py-3">
           <div className="flex items-center gap-3">
             <SimpleLogo size={40} clickable={true} />
           </div>
                       <nav className="hidden gap-6 md:flex items-center">
-              <button className="text-gray-700 hover:text-teal-600">Home</button>
-              <button className="text-gray-700 hover:text-teal-600">About</button>
-              <button className="text-gray-700 hover:text-teal-600">Beats</button>
-              <Link to="/dashboard" className="text-gray-700 hover:text-teal-600">Dashboard</Link>
-              <button className="text-gray-700 hover:text-teal-600" onClick={() => setShowAuthModal(true)}>Sign in</button>
+              <button className="text-gray-700 hover:text-blue-600">Home</button>
+              <button className="text-gray-700 hover:text-blue-600">About</button>
+              <button className="text-gray-700 hover:text-blue-600">Beats</button>
+              <Link to="/dashboard" className="text-gray-700 hover:text-blue-600">Dashboard</Link>
+              <button className="text-gray-700 hover:text-blue-600" onClick={() => setShowAuthModal(true)}>Sign in</button>
               <button 
                 onClick={() => {
                   if (user) {
@@ -180,7 +180,7 @@ export default function Home() {
                     setShowAuthModal(true);
                   }
                 }}
-                className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="bg-gradient-to-r from-blue-600 via-orange-500 to-blue-900 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 🎵 Sell Beats
               </button>

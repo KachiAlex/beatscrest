@@ -84,13 +84,13 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="bg-white shadow-sm border-b">
+      <nav className="bg-white shadow-sm border-b border-teal-200/20">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
               <img 
-                src="/images/beatscrest-logo.png" 
+                src="/images/beat-crest-logo.png" 
                 alt="BeatCrest Logo" 
                 className="h-8 w-8 object-contain"
                 onError={(e) => {
@@ -99,20 +99,20 @@ const Navbar: React.FC = () => {
                   e.currentTarget.nextElementSibling?.classList.remove('hidden');
                 }}
               />
-              <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 hidden"></div>
-              <span className="text-xl font-bold text-gray-900">BeatCrest</span>
+              <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-600 via-orange-500 to-blue-900 hidden"></div>
+              <span className="text-xl font-bold text-blue-900">BeatCrest</span>
             </Link>
 
             {/* Navigation Links */}
             <div className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="text-gray-700 hover:text-purple-600 transition">
+              <Link to="/" className="text-gray-700 hover:text-blue-600 transition">
                 Home
               </Link>
-              <Link to="/marketplace" className="text-gray-700 hover:text-purple-600 transition">
+              <Link to="/marketplace" className="text-gray-700 hover:text-blue-600 transition">
                 Marketplace
               </Link>
               {user && (
-                <Link to="/upload" className="text-gray-700 hover:text-purple-600 transition">
+                <Link to="/upload" className="text-gray-700 hover:text-blue-600 transition">
                   Upload
                 </Link>
               )}
@@ -133,7 +133,7 @@ const Navbar: React.FC = () => {
                 <>
                   <button 
                     onClick={() => setShowAuthModal(true)}
-                    className="text-gray-700 hover:text-purple-600 transition"
+                    className="text-gray-700 hover:text-blue-600 transition"
                   >
                     Sign In
                   </button>
@@ -175,7 +175,7 @@ const Navbar: React.FC = () => {
                     value={authFormData.username}
                     onChange={handleAuthInputChange}
                     required={authMode === 'signup'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter your username"
                   />
                 </div>
@@ -219,7 +219,7 @@ const Navbar: React.FC = () => {
 
               <Button
                 type="submit"
-                className="w-full bg-purple-600 hover:bg-purple-700"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 disabled={authLoading}
               >
                 {authLoading ? 'Processing...' : authMode === 'signin' ? 'Sign In' : 'Create Account'}
@@ -229,7 +229,7 @@ const Navbar: React.FC = () => {
             <div className="mt-4 text-center">
               <button
                 onClick={switchAuthMode}
-                className="text-purple-600 hover:text-purple-700 text-sm"
+                className="text-blue-600 hover:text-blue-700 text-sm"
               >
                 {authMode === 'signin' 
                   ? "Don't have an account? Sign up" 

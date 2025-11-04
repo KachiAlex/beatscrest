@@ -189,7 +189,7 @@ export default function SignupModal({ isOpen, onClose, beatData, onProceedToPaym
           <button
             type="submit"
             disabled={loading}
-            className="w-full inline-flex items-center justify-center rounded-2xl bg-purple-600 px-5 py-3 text-white shadow-lg hover:bg-purple-700 transition disabled:opacity-50"
+            className="w-full inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-white shadow-lg hover:bg-blue-700 transition disabled:opacity-50"
           >
             {loading ? (
               <span className="flex items-center">
@@ -209,7 +209,7 @@ export default function SignupModal({ isOpen, onClose, beatData, onProceedToPaym
           <button
             type="button"
             onClick={() => setIsLogin(!isLogin)}
-            className="w-full text-purple-600 hover:text-purple-700 text-sm"
+            className="w-full text-blue-600 hover:text-blue-700 text-sm"
           >
             {isLogin 
               ? "Don't have an account? Sign up" 
