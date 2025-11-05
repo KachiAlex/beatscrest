@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import logoImage from '../assets/beat-crest-logo.png';
 
 interface AppLogoProps {
   size?: number;
@@ -29,7 +30,7 @@ export default function AppLogo({
     >
       {/* BeatCrest Logo */}
       <img 
-        src="/images/beat-crest-logo.png" 
+        src={logoImage}
         alt="BeatCrest Logo" 
         className="object-contain"
         style={{ 
@@ -45,7 +46,7 @@ export default function AppLogo({
       
       {/* Fallback CSS logo */}
       <div 
-        className="relative rounded-xl overflow-hidden shadow-lg hidden bg-gradient-to-br from-blue-600 via-orange-500 to-blue-900"
+        className="relative rounded-xl overflow-hidden shadow-lg hidden bg-beatcrest-gradient"
         style={{ 
           width: `${size}px`, 
           height: `${size}px`

@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { authenticateToken } = require('../middleware/auth');
+const { User } = require('../models');
 
 const router = express.Router();
 
@@ -15,41 +16,80 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    // TODO: Implement MongoDB user creation
-    // For now, return mock response
-    const mockUser = {
-      id: 'mock-user-id',
+    // Validate username format (alphanumeric, underscore, hyphen, 3-20 chars)
+    const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
+    if (!usernameRegex.test(username)) {
+      return res.status(400).json({ error: 'Username must be 3-20 characters and contain only letters, numbers, underscores, or hyphens' });
+    }
+
+    // Validate password strength (minimum 8 characters)
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+    }
+
+    // Check password complexity (at least one letter and one number)
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    if (!hasLetter || !hasNumber) {
+      return res.status(400).json({ error: 'Password must contain at least one letter and one number' });
+    }
+
+    // Check if user already exists
+    const existingUserByEmail = await User.findByEmail(email);
+    if (existingUserByEmail) {
+      return res.status(400).json({ error: 'Email already registered' });
+    }
+
+    const existingUserByUsername = await User.findByUsername(username);
+    if (existingUserByUsername) {
+      return res.status(400).json({ error: 'Username already taken' });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    const newUser = await User.create({
       username,
       email,
-      account_type,
-      created_at: new Date().toISOString()
-    };
+      password: hashedPassword,
+      accountType: account_type === 'producer' ? 'Producer' : account_type === 'artist' ? 'Artist' : 'Fan',
+      profilePicture: '',
+      bio: ''
+    });
 
     // Generate JWT token
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not set in environment variables');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+
     const token = jwt.sign(
-      { userId: mockUser.id },
-      process.env.JWT_SECRET || 'your-secret-key',
+      { userId: newUser.id },
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
     res.status(201).json({
       message: 'User registered successfully',
       user: {
-        id: mockUser.id,
-        username: mockUser.username,
-        email: mockUser.email,
-        account_type: mockUser.account_type
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+        account_type: newUser.accountType
       },
       token
     });
 
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ error: 'Registration failed' });
+    res.status(500).json({ error: 'Registration failed', details: error.message });
   }
 });
 
@@ -62,62 +102,76 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    // TODO: Implement MongoDB user authentication
-    // For now, return mock response
-    const mockUser = {
-      id: 'mock-user-id',
-      username: 'mockuser',
-      email,
-      account_type: 'artist',
-      is_verified: true
-    };
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    // Find user by email
+    const user = await User.findByEmail(email);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
 
     // Generate JWT token
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not set in environment variables');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+
     const token = jwt.sign(
-      { userId: mockUser.id },
-      process.env.JWT_SECRET || 'your-secret-key',
+      { userId: user.id },
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
     res.json({
       message: 'Login successful',
       user: {
-        id: mockUser.id,
-        username: mockUser.username,
-        email: mockUser.email,
-        account_type: mockUser.account_type
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        account_type: user.accountType?.toLowerCase() || 'artist'
       },
       token
     });
 
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    res.status(500).json({ error: 'Login failed', details: error.message });
   }
 });
 
 // Get current user profile
 router.get('/me', authenticateToken, async (req, res) => {
   try {
-    // TODO: Implement MongoDB user retrieval
-    // For now, return mock user data
-    const mockUser = {
-      id: req.user.userId,
-      username: 'mockuser',
-      email: 'mock@example.com',
-      account_type: 'artist',
-      profile_picture: 'https://example.com/profile.jpg',
-      bio: 'Mock user bio',
-      followers_count: 0,
-      following_count: 0,
-      created_at: new Date().toISOString()
-    };
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-    res.json({ user: mockUser });
+    // Remove password from response
+    const { password, ...userData } = user;
+
+    res.json({
+      user: {
+        ...userData,
+        followers_count: user.followers?.length || 0,
+        following_count: user.following?.length || 0,
+        account_type: user.accountType?.toLowerCase() || 'artist'
+      }
+    });
 
   } catch (error) {
     console.error('Get profile error:', error);
-    res.status(500).json({ error: 'Failed to get profile' });
+    res.status(500).json({ error: 'Failed to get profile', details: error.message });
   }
 });
 
@@ -125,24 +179,33 @@ router.get('/me', authenticateToken, async (req, res) => {
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
     const { username, bio, profile_picture } = req.body;
+    const updates = {};
 
-    // TODO: Implement MongoDB profile update
-    // For now, return mock response
-    const updatedUser = {
-      id: req.user.userId,
-      username: username || 'mockuser',
-      bio: bio || 'Mock user bio',
-      profile_picture: profile_picture || 'https://example.com/profile.jpg'
-    };
+    // Check if username is being changed and if it's available
+    if (username) {
+      const existingUser = await User.findByUsername(username);
+      if (existingUser && existingUser.id !== req.user.userId) {
+        return res.status(400).json({ error: 'Username already taken' });
+      }
+      updates.username = username;
+    }
+
+    if (bio !== undefined) updates.bio = bio;
+    if (profile_picture !== undefined) updates.profilePicture = profile_picture;
+
+    const updatedUser = await User.update(req.user.userId, updates);
+
+    // Remove password from response
+    const { password, ...userData } = updatedUser;
 
     res.json({
       message: 'Profile updated successfully',
-      user: updatedUser
+      user: userData
     });
 
   } catch (error) {
     console.error('Update profile error:', error);
-    res.status(500).json({ error: 'Failed to update profile' });
+    res.status(500).json({ error: 'Failed to update profile', details: error.message });
   }
 });
 
@@ -155,17 +218,38 @@ router.put('/change-password', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Current and new password are required' });
     }
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({ error: 'New password must be at least 6 characters' });
+    // Validate password strength (minimum 8 characters)
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters long' });
     }
 
-    // TODO: Implement MongoDB password change
-    // For now, return mock response
+    // Check password complexity (at least one letter and one number)
+    const hasLetter = /[a-zA-Z]/.test(newPassword);
+    const hasNumber = /[0-9]/.test(newPassword);
+    if (!hasLetter || !hasNumber) {
+      return res.status(400).json({ error: 'New password must contain at least one letter and one number' });
+    }
+
+    // Get user and verify current password
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    // Hash new password and update
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await User.update(req.user.userId, { password: hashedPassword });
+
     res.json({ message: 'Password changed successfully' });
 
   } catch (error) {
     console.error('Change password error:', error);
-    res.status(500).json({ error: 'Failed to change password' });
+    res.status(500).json({ error: 'Failed to change password', details: error.message });
   }
 });
 

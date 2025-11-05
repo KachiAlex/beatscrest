@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { User } = require('../models');
 
 const authenticateToken = async (req, res, next) => {
   try {
@@ -9,20 +10,27 @@ const authenticateToken = async (req, res, next) => {
       return res.status(401).json({ error: 'Access token required' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not set in environment variables');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // TODO: Implement MongoDB user retrieval
-    // For now, use mock user data
-    const mockUser = {
-      id: decoded.userId,
-      userId: decoded.userId, // Keep both for compatibility
-      username: 'mockuser',
-      email: 'mock@example.com',
-      account_type: 'artist',
+    // Get user from Firestore
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    req.user = {
+      id: user.id,
+      userId: user.id, // Keep both for compatibility
+      username: user.username,
+      email: user.email,
+      account_type: user.accountType?.toLowerCase() || 'artist',
       is_verified: true
     };
-
-    req.user = mockUser;
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
@@ -56,19 +64,24 @@ const optionalAuth = async (req, res, next) => {
     const token = authHeader && authHeader.split(' ')[1];
 
     if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not set in environment variables');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
-      // TODO: Implement MongoDB user retrieval
-      // For now, use mock user data
-      const mockUser = {
-        id: decoded.userId,
-        userId: decoded.userId,
-        username: 'mockuser',
-        email: 'mock@example.com',
-        account_type: 'artist'
-      };
-      
-      req.user = mockUser;
+      // Get user from Firestore
+      const user = await User.findById(decoded.userId);
+      if (user) {
+        req.user = {
+          id: user.id,
+          userId: user.id,
+          username: user.username,
+          email: user.email,
+          account_type: user.accountType?.toLowerCase() || 'artist'
+        };
+      }
     }
     next();
   } catch (error) {

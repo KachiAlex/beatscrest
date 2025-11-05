@@ -27,7 +27,7 @@ export default function SplashScreen({ onComplete, duration = 2000 }: SplashScre
   }, [onComplete, duration]);
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-purple-600 via-teal-500 to-orange-500 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-beatcrest-gradient flex items-center justify-center z-50">
       <div 
         className={`transition-opacity duration-1000 ease-in-out ${
           isVisible ? 'opacity-100' : 'opacity-0'

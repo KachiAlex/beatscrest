@@ -108,7 +108,7 @@ export default function SignupModal({ isOpen, onClose, beatData, onProceedToPaym
                   value={formData.fullName}
                   onChange={handleInputChange}
                   required={!isLogin}
-                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-beatcrest-blue"
                   placeholder="John Doe"
                 />
               </div>
@@ -120,7 +120,7 @@ export default function SignupModal({ isOpen, onClose, beatData, onProceedToPaym
                   value={formData.username}
                   onChange={handleInputChange}
                   required={!isLogin}
-                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-beatcrest-blue"
                   placeholder="johndoe"
                 />
               </div>
@@ -132,7 +132,7 @@ export default function SignupModal({ isOpen, onClose, beatData, onProceedToPaym
                   value={formData.phone}
                   onChange={handleInputChange}
                   required={!isLogin}
-                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-beatcrest-blue"
                   placeholder="+234 801 234 5678"
                 />
               </div>
@@ -189,7 +189,7 @@ export default function SignupModal({ isOpen, onClose, beatData, onProceedToPaym
           <button
             type="submit"
             disabled={loading}
-            className="w-full inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-white shadow-lg hover:bg-blue-700 transition disabled:opacity-50"
+            className="w-full inline-flex items-center justify-center rounded-2xl bg-beatcrest-blue px-5 py-3 text-white shadow-lg hover:bg-beatcrest-blue-dark transition disabled:opacity-50"
           >
             {loading ? (
               <span className="flex items-center">
@@ -209,7 +209,7 @@ export default function SignupModal({ isOpen, onClose, beatData, onProceedToPaym
           <button
             type="button"
             onClick={() => setIsLogin(!isLogin)}
-            className="w-full text-blue-600 hover:text-blue-700 text-sm"
+            className="w-full text-beatcrest-blue hover:text-beatcrest-blue-dark text-sm"
           >
             {isLogin 
               ? "Don't have an account? Sign up" 

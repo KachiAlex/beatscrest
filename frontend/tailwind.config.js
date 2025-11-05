@@ -21,26 +21,18 @@ export default {
           800: '#003b3b',
           900: '#001f1f',
         },
-        'beatcrest-teal': {
-          DEFAULT: '#4A9B9D', // Muted teal background
-          light: '#5F9EA0',
-          dark: '#3A7A7C',
-        },
-        'beatcrest-blue': {
-          DEFAULT: '#3B82F6', // Bright blue from hexagon
-          light: '#60A5FA',
-          dark: '#2563EB',
-        },
-        'beatcrest-orange': {
-          DEFAULT: '#F97316', // Orange from hexagon
-          light: '#FB923C',
-          dark: '#EA580C',
-        },
-        'beatcrest-navy': {
-          DEFAULT: '#1E3A8A', // Dark navy blue from hexagon
-          light: '#1E40AF',
-          dark: '#1E293B',
-        },
+        'beatcrest-teal': '#4A9B9D', // Muted teal background
+        'beatcrest-teal-light': '#5F9EA0',
+        'beatcrest-teal-dark': '#3A7A7C',
+        'beatcrest-blue': '#3B82F6', // Bright blue from hexagon
+        'beatcrest-blue-light': '#60A5FA',
+        'beatcrest-blue-dark': '#2563EB',
+        'beatcrest-orange': '#F97316', // Orange from hexagon
+        'beatcrest-orange-light': '#FB923C',
+        'beatcrest-orange-dark': '#EA580C',
+        'beatcrest-navy': '#1E3A8A', // Dark navy blue from hexagon
+        'beatcrest-navy-light': '#1E40AF',
+        'beatcrest-navy-dark': '#1E293B',
         teal: {
           50: '#f0fdfa',
           100: '#ccfbf1',
@@ -94,10 +86,15 @@ export default {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       backgroundImage: {
-        // Logo-based gradients
+        // Logo-based gradients - matching exact logo colors
         'beatcrest-gradient': 'linear-gradient(135deg, #3B82F6 0%, #4A9B9D 25%, #F97316 50%, #1E3A8A 75%, #3B82F6 100%)',
         'beatcrest-gradient-vertical': 'linear-gradient(180deg, #F97316 0%, #3B82F6 25%, #4A9B9D 50%, #1E3A8A 75%, #3B82F6 100%)',
         'beatcrest-hexagon': 'linear-gradient(135deg, #3B82F6 0%, #F97316 33%, #1E3A8A 66%, #FFFFFF 100%)',
+        'beatcrest-subtle': 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(74, 155, 157, 0.1) 25%, rgba(249, 115, 22, 0.1) 50%, rgba(30, 58, 138, 0.1) 75%, rgba(59, 130, 246, 0.1) 100%)',
+      },
+      backgroundColor: {
+        'beatcrest-bg': 'rgba(74, 155, 157, 0.05)', // Subtle teal background
+        'beatcrest-surface': 'rgba(255, 255, 255, 0.95)', // Slightly transparent white
       },
     },
   },

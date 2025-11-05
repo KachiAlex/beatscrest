@@ -8,46 +8,49 @@
   }
   
   body {
-    @apply bg-white text-gray-900;
+    @apply text-beatcrest-navy;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.02) 0%, rgba(74, 155, 157, 0.03) 25%, rgba(249, 115, 22, 0.02) 50%, rgba(30, 58, 138, 0.03) 75%, rgba(59, 130, 246, 0.02) 100%);
     background-color: rgba(74, 155, 157, 0.05); /* beatcrest-teal with 5% opacity */
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
-    /* Logo colors: blue-600 matches logo blue, hover to blue-700 */
+    @apply bg-beatcrest-blue hover:bg-beatcrest-blue-dark text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
   }
   
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+    @apply bg-beatcrest-teal/10 hover:bg-beatcrest-teal/20 text-beatcrest-navy font-medium py-2 px-4 rounded-lg transition-colors duration-200;
   }
   
   .btn-outline {
-    @apply border border-gray-300 hover:border-gray-400 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+    @apply border border-beatcrest-teal/30 hover:border-beatcrest-blue text-beatcrest-navy font-medium py-2 px-4 rounded-lg transition-colors duration-200;
   }
   
   .card {
-    @apply bg-white text-gray-900 rounded-xl shadow-sm border border-gray-200 p-6;
+    @apply bg-white text-beatcrest-navy rounded-xl shadow-sm border border-beatcrest-teal/20 p-6;
   }
   
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    @apply w-full px-3 py-2 border border-beatcrest-teal/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-beatcrest-blue focus:border-beatcrest-blue transition-colors duration-200;
   }
   
   .beat-card {
-    @apply bg-white text-gray-900 rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200;
+    @apply bg-white text-beatcrest-navy rounded-xl shadow-sm border border-beatcrest-teal/20 overflow-hidden hover:shadow-md hover:border-beatcrest-blue/50 transition-all duration-200;
   }
   
   .gradient-bg {
-    @apply bg-gradient-to-br from-blue-500 to-teal-500;
+    @apply bg-beatcrest-gradient;
   }
 }
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-blue-600 via-orange-500 to-blue-900 bg-clip-text text-transparent;
-    /* Logo colors: blue, orange, navy */
+    background: linear-gradient(135deg, #3B82F6 0%, #4A9B9D 25%, #F97316 50%, #1E3A8A 75%, #3B82F6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
   }
   
   .scrollbar-hide {

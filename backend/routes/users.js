@@ -1,5 +1,6 @@
 const express = require('express');
 const { authenticateToken, optionalAuth } = require('../middleware/auth');
+const { User, Beat } = require('../models');
 
 const router = express.Router();
 
@@ -12,36 +13,28 @@ router.get('/search', optionalAuth, async (req, res) => {
       return res.status(400).json({ error: 'Search query is required' });
     }
 
-    // TODO: Implement MongoDB user search
-    // For now, return mock search results
-    const mockSearchResults = [
-      {
-        id: 'user1',
-        username: 'producer1',
-        profile_picture: 'https://example.com/user1.jpg',
-        account_type: 'producer'
-      },
-      {
-        id: 'user2',
-        username: 'artist1',
-        profile_picture: 'https://example.com/user2.jpg',
-        account_type: 'artist'
-      }
-    ];
+    const users = await User.search(q, parseInt(limit) * parseInt(page));
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const paginatedUsers = users.slice(offset, offset + parseInt(limit));
 
     res.json({
-      users: mockSearchResults,
+      users: paginatedUsers.map(u => ({
+        id: u.id,
+        username: u.username,
+        profile_picture: u.profilePicture,
+        account_type: u.accountType?.toLowerCase() || 'artist'
+      })),
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
-        total: mockSearchResults.length,
-        pages: 1
+        total: users.length,
+        pages: Math.ceil(users.length / parseInt(limit))
       }
     });
 
   } catch (error) {
     console.error('Search users error:', error);
-    res.status(500).json({ error: 'Failed to search users' });
+    res.status(500).json({ error: 'Failed to search users', details: error.message });
   }
 });
 
@@ -50,26 +43,28 @@ router.get('/profile/:username', optionalAuth, async (req, res) => {
   try {
     const { username } = req.params;
 
-    // TODO: Implement MongoDB user retrieval
-    // For now, return mock user data
-    const mockUser = {
-      id: 'mock-user-id',
-      username,
-      profile_picture: 'https://example.com/profile.jpg',
-      bio: 'Mock user bio',
-      account_type: 'artist',
-      is_verified: true,
-      followers_count: 150,
-      following_count: 75,
-      created_at: new Date().toISOString(),
-      is_following: false
-    };
+    const user = await User.findByUsername(username);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-    res.json({ user: mockUser });
+    const { password, ...userData } = user;
+    const isFollowing = req.user && user.followers?.includes(req.user.userId);
+
+    res.json({
+      user: {
+        ...userData,
+        profile_picture: userData.profilePicture,
+        account_type: userData.accountType?.toLowerCase() || 'artist',
+        followers_count: userData.followers?.length || 0,
+        following_count: userData.following?.length || 0,
+        is_following: isFollowing || false
+      }
+    });
 
   } catch (error) {
     console.error('Get user profile error:', error);
-    res.status(500).json({ error: 'Failed to get user profile' });
+    res.status(500).json({ error: 'Failed to get user profile', details: error.message });
   }
 });
 
@@ -79,36 +74,38 @@ router.get('/:username/beats', optionalAuth, async (req, res) => {
     const { username } = req.params;
     const { page = 1, limit = 20 } = req.query;
 
-    // TODO: Implement MongoDB beats retrieval
-    // For now, return mock beats data
-    const mockBeats = [
-      {
-        id: 'beat1',
-        title: 'Amazing Beat',
-        description: 'A fire beat',
-        genre: 'Hip Hop',
-        bpm: 140,
-        price: 45000,
-        preview_url: 'https://example.com/preview1.mp3',
-        thumbnail_url: 'https://example.com/thumbnail1.jpg',
-        created_at: new Date().toISOString(),
-        is_liked: false
-      }
-    ];
+    const user = await User.findByUsername(username);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const beats = await Beat.findMany(
+      { producerId: user.id },
+      parseInt(page),
+      parseInt(limit)
+    );
+
+    // Check if user has liked beats
+    const beatsWithLikes = beats.map(beat => ({
+      ...beat,
+      preview_url: beat.previewUrl,
+      thumbnail_url: beat.thumbnailUrl,
+      is_liked: req.user && beat.likes?.includes(req.user.userId) || false
+    }));
 
     res.json({
-      beats: mockBeats,
+      beats: beatsWithLikes,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
-        total: mockBeats.length,
-        pages: 1
+        total: beats.length,
+        pages: Math.ceil(beats.length / parseInt(limit))
       }
     });
 
   } catch (error) {
     console.error('Get user beats error:', error);
-    res.status(500).json({ error: 'Failed to get user beats' });
+    res.status(500).json({ error: 'Failed to get user beats', details: error.message });
   }
 });
 
@@ -117,12 +114,26 @@ router.post('/:username/follow', authenticateToken, async (req, res) => {
   try {
     const { username } = req.params;
 
-    // TODO: Implement MongoDB follow functionality
+    if (username === req.user.username) {
+      return res.status(400).json({ error: 'Cannot follow yourself' });
+    }
+
+    const followee = await User.findByUsername(username);
+    if (!followee) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const result = await User.follow(req.user.userId, followee.id);
+    
+    if (!result.followed) {
+      return res.status(400).json({ error: result.message || 'Already following' });
+    }
+
     res.json({ message: 'User followed successfully' });
 
   } catch (error) {
     console.error('Follow user error:', error);
-    res.status(500).json({ error: 'Failed to follow user' });
+    res.status(500).json({ error: 'Failed to follow user', details: error.message });
   }
 });
 
@@ -131,12 +142,22 @@ router.delete('/:username/follow', authenticateToken, async (req, res) => {
   try {
     const { username } = req.params;
 
-    // TODO: Implement MongoDB unfollow functionality
+    const followee = await User.findByUsername(username);
+    if (!followee) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const result = await User.unfollow(req.user.userId, followee.id);
+    
+    if (!result.unfollowed) {
+      return res.status(400).json({ error: result.message || 'Not following' });
+    }
+
     res.json({ message: 'User unfollowed successfully' });
 
   } catch (error) {
     console.error('Unfollow user error:', error);
-    res.status(500).json({ error: 'Failed to unfollow user' });
+    res.status(500).json({ error: 'Failed to unfollow user', details: error.message });
   }
 });
 
@@ -146,29 +167,42 @@ router.get('/:username/followers', optionalAuth, async (req, res) => {
     const { username } = req.params;
     const { page = 1, limit = 20 } = req.query;
 
-    // TODO: Implement MongoDB followers retrieval
-    const mockFollowers = [
-      {
-        id: 'follower1',
-        username: 'follower1',
-        profile_picture: 'https://example.com/follower1.jpg',
-        is_following: false
-      }
-    ];
+    const user = await User.findByUsername(username);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const followerIds = user.followers || [];
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const paginatedIds = followerIds.slice(offset, offset + parseInt(limit));
+
+    const followers = await Promise.all(
+      paginatedIds.map(async (followerId) => {
+        const follower = await User.findById(followerId);
+        if (!follower) return null;
+        const isFollowing = req.user && req.user.following?.includes(followerId);
+        return {
+          id: follower.id,
+          username: follower.username,
+          profile_picture: follower.profilePicture,
+          is_following: isFollowing || false
+        };
+      })
+    );
 
     res.json({
-      followers: mockFollowers,
+      followers: followers.filter(f => f !== null),
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
-        total: mockFollowers.length,
-        pages: 1
+        total: followerIds.length,
+        pages: Math.ceil(followerIds.length / parseInt(limit))
       }
     });
 
   } catch (error) {
     console.error('Get followers error:', error);
-    res.status(500).json({ error: 'Failed to get followers' });
+    res.status(500).json({ error: 'Failed to get followers', details: error.message });
   }
 });
 
@@ -178,29 +212,41 @@ router.get('/:username/following', optionalAuth, async (req, res) => {
     const { username } = req.params;
     const { page = 1, limit = 20 } = req.query;
 
-    // TODO: Implement MongoDB following retrieval
-    const mockFollowing = [
-      {
-        id: 'following1',
-        username: 'following1',
-        profile_picture: 'https://example.com/following1.jpg',
-        is_following: true
-      }
-    ];
+    const user = await User.findByUsername(username);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const followingIds = user.following || [];
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const paginatedIds = followingIds.slice(offset, offset + parseInt(limit));
+
+    const following = await Promise.all(
+      paginatedIds.map(async (followingId) => {
+        const followee = await User.findById(followingId);
+        if (!followee) return null;
+        return {
+          id: followee.id,
+          username: followee.username,
+          profile_picture: followee.profilePicture,
+          is_following: true
+        };
+      })
+    );
 
     res.json({
-      following: mockFollowing,
+      following: following.filter(f => f !== null),
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
-        total: mockFollowing.length,
-        pages: 1
+        total: followingIds.length,
+        pages: Math.ceil(followingIds.length / parseInt(limit))
       }
     });
 
   } catch (error) {
     console.error('Get following error:', error);
-    res.status(500).json({ error: 'Failed to get following' });
+    res.status(500).json({ error: 'Failed to get following', details: error.message });
   }
 });
 

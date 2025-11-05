@@ -1,94 +1,110 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import SignupModal from "../components/SignupModal";
 import PaymentModal from "../components/PaymentModal";
-import AppLogo from "../components/AppLogo";
-import SimpleLogo from "../components/SimpleLogo";
 import { useAuth } from "../contexts/AuthContext";
+import { Search, Filter, Play, Heart, MessageCircle, Share2, ShoppingCart } from 'lucide-react';
+import { mockBeats } from "../data/mockBeats";
+import { getProfileByUsername } from "../data/mockProfiles";
 
 export default function Home() {
-  const { user, login, register } = useAuth();
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const { login, register } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("All");
+  const [selectedPrice, setSelectedPrice] = useState("All");
+  const [activeCategory, setActiveCategory] = useState("All Beats");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedBeat, setSelectedBeat] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
   const [authFormData, setAuthFormData] = useState({
     email: '',
     password: '',
     fullName: '',
-    username: ''
+    username: '',
+    account_type: 'buyer' as 'buyer' | 'producer'
   });
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState('');
   const navigate = useNavigate();
 
-  // Banner slides data
-  const bannerSlides = [
-    {
-      title: "Discover Amazing Beats",
-      subtitle: "Find the perfect sound for your next hit",
-      image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=1600&auto=format&fit=crop",
-      cta: "Explore Beats",
-      action: () => {
-        // Scroll to beats section
-        document.getElementById('beats-section')?.scrollIntoView({ behavior: 'smooth' });
-      }
-    },
-    {
-      title: "Connect with Producers",
-      subtitle: "Build your network in the music industry",
-      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1600&auto=format&fit=crop",
-      cta: "Join Community",
-      action: () => setShowAuthModal(true)
-    },
-    {
-      title: "Sell Your Beats",
-      subtitle: "Monetize your talent and reach global audiences",
-      image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=1600&auto=format&fit=crop",
-      cta: "Start Selling",
-      action: () => {
-        if (user) {
-          navigate('/dashboard');
-        } else {
-          setShowAuthModal(true);
-        }
-      }
-    }
-  ];
-
-  // Mock beats data
-  const mockBeats = [
-    { id: 1, title: "Midnight Groove", producer: "DJ ProBeat", price: 45000, genre: "Hip Hop", bpm: 140, cover: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&auto=format&fit=crop" },
-    { id: 2, title: "Afro Vibes", producer: "Afrobeats King", price: 35000, genre: "Afrobeats", bpm: 120, cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&auto=format&fit=crop" },
-    { id: 3, title: "R&B Soul", producer: "Melody Queen", price: 55000, genre: "R&B", bpm: 90, cover: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&auto=format&fit=crop" },
-    { id: 4, title: "Trap Beat", producer: "Trap Master", price: 40000, genre: "Trap", bpm: 140, cover: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&auto=format&fit=crop" },
-    { id: 5, title: "Reggae Flow", producer: "Reggae Vibes", price: 30000, genre: "Reggae", bpm: 80, cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&auto=format&fit=crop" },
-    { id: 6, title: "Pop Hit", producer: "Pop Producer", price: 60000, genre: "Pop", bpm: 120, cover: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&auto=format&fit=crop" },
-    { id: 7, title: "Gospel Praise", producer: "Gospel Master", price: 25000, genre: "Gospel", bpm: 85, cover: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&auto=format&fit=crop" },
-    { id: 8, title: "Jazz Fusion", producer: "Jazz Artist", price: 70000, genre: "Jazz", bpm: 110, cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&auto=format&fit=crop" }
-  ];
+  const [beats, setBeats] = useState(mockBeats);
 
   const genres = ["All", "Hip Hop", "Afrobeats", "R&B", "Trap", "Reggae", "Pop", "Gospel", "Jazz"];
+  const categories = ["All Beats", "Trending", "Featured", "New Releases"];
 
-  // Auto-advance slides
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % bannerSlides.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [bannerSlides.length]);
+  // Handle like button
+  const handleLike = (beatId: number) => {
+    setBeats(prevBeats => prevBeats.map(beat => 
+      beat.id === beatId 
+        ? { ...beat, isLiked: !beat.isLiked, likes: beat.isLiked ? beat.likes - 1 : beat.likes + 1 }
+        : beat
+    ));
+  };
 
-  // Filter beats based on search and genre
-  const filteredBeats = mockBeats.filter(beat => {
+  // Handle comment button
+  const handleComment = (beatId: number) => {
+    // Navigate to beat detail page or open comment modal
+    navigate(`/beat/${beatId}`);
+  };
+
+  // Handle share button
+  const handleShare = async (beat: any) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: beat.title,
+          text: beat.description,
+          url: window.location.origin + `/beat/${beat.id}`
+        });
+      } catch (err) {
+        console.log('Error sharing:', err);
+      }
+    } else {
+      // Fallback: copy to clipboard
+      const url = window.location.origin + `/beat/${beat.id}`;
+      navigator.clipboard.writeText(url);
+      alert('Link copied to clipboard!');
+    }
+  };
+
+  // Handle play button
+  const handlePlay = (beat: any) => {
+    // Navigate to beat detail page to play
+    navigate(`/beat/${beat.id}`);
+  };
+
+  // Filter beats based on search, genre, price, and category
+  const filteredBeats = beats.filter(beat => {
     const matchesSearch = beat.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         beat.producer.toLowerCase().includes(searchTerm.toLowerCase());
+                         beat.producerUsername.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         beat.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesGenre = selectedGenre === "All" || beat.genre === selectedGenre;
-    return matchesSearch && matchesGenre;
+    
+    // Price filter
+    let matchesPrice = true;
+    if (selectedPrice === "Under ₦30,000") {
+      matchesPrice = beat.price < 30000;
+    } else if (selectedPrice === "₦30,000 - ₦50,000") {
+      matchesPrice = beat.price >= 30000 && beat.price <= 50000;
+    } else if (selectedPrice === "Over ₦50,000") {
+      matchesPrice = beat.price > 50000;
+    }
+    
+    // Category filter
+    let matchesCategory = true;
+    if (activeCategory === "Trending") {
+      matchesCategory = beat.plays > 2000;
+    } else if (activeCategory === "Featured") {
+      matchesCategory = beat.verified && beat.likes > 200;
+    } else if (activeCategory === "New Releases") {
+      matchesCategory = true; // For demo, all beats are new
+    }
+    
+    return matchesSearch && matchesGenre && matchesPrice && matchesCategory;
   });
 
   // Handle buy now button click
@@ -111,13 +127,13 @@ export default function Home() {
   };
 
   // Handle auth form input changes
-  const handleAuthInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAuthInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setAuthFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    setAuthError(''); // Clear error when user types
+    setAuthError('');
   };
 
   // Handle auth form submission
@@ -130,20 +146,36 @@ export default function Home() {
       if (authMode === 'signin') {
         await login(authFormData.email, authFormData.password);
       } else {
+        if (authFormData.password.length < 8) {
+          setAuthError('Password must be at least 8 characters long');
+          setAuthLoading(false);
+          return;
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(authFormData.email)) {
+          setAuthError('Please enter a valid email address');
+          setAuthLoading(false);
+          return;
+        }
+
         await register({
           email: authFormData.email,
           password: authFormData.password,
           username: authFormData.username,
-          account_type: 'producer'
+          account_type: authFormData.account_type === 'producer' ? 'producer' : 'artist'
         });
       }
       
       setShowAuthModal(false);
-      setAuthFormData({ email: '', password: '', fullName: '', username: '' });
+      setAuthFormData({ email: '', password: '', fullName: '', username: '', account_type: 'buyer' });
       setAuthMode('signin');
       
-      // Navigate to dashboard after successful auth
-      navigate('/dashboard');
+      if (authMode === 'signup' && authFormData.account_type === 'producer') {
+        navigate('/producer');
+      } else {
+        navigate('/buyer');
+      }
     } catch (error: any) {
       setAuthError(error.message || 'Authentication failed');
     } finally {
@@ -155,255 +187,262 @@ export default function Home() {
   const switchAuthMode = () => {
     setAuthMode(prev => prev === 'signin' ? 'signup' : 'signin');
     setAuthError('');
-    setAuthFormData({ email: '', password: '', fullName: '', username: '' });
+    setAuthFormData({ email: '', password: '', fullName: '', username: '', account_type: 'buyer' });
   };
 
   return (
-    <div className="min-h-screen bg-teal-50/30">
-      {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-teal-200/30 bg-white/80 backdrop-blur">
-        <div className="container mx-auto px-4 flex items-center justify-between py-3">
-          <div className="flex items-center gap-3">
-            <SimpleLogo size={40} clickable={true} />
-          </div>
-                      <nav className="hidden gap-6 md:flex items-center">
-              <button className="text-gray-700 hover:text-blue-600">Home</button>
-              <button className="text-gray-700 hover:text-blue-600">About</button>
-              <button className="text-gray-700 hover:text-blue-600">Beats</button>
-              <Link to="/dashboard" className="text-gray-700 hover:text-blue-600">Dashboard</Link>
-              <button className="text-gray-700 hover:text-blue-600" onClick={() => setShowAuthModal(true)}>Sign in</button>
-              <button 
-                onClick={() => {
-                  if (user) {
-                    navigate('/dashboard');
-                  } else {
-                    setShowAuthModal(true);
-                  }
-                }}
-                className="bg-gradient-to-r from-blue-600 via-orange-500 to-blue-900 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                🎵 Sell Beats
-              </button>
-            </nav>
-        </div>
-      </header>
-
-      {/* Banner Slides */}
-      <section className="relative h-96 md:h-[500px] overflow-hidden">
-        {bannerSlides.map((slide, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            <div className="relative h-full">
-              <img
-                src={slide.image}
-                alt={slide.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/40"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-white">
-                  <h1 className="text-4xl md:text-6xl font-bold mb-4">{slide.title}</h1>
-                  <p className="text-xl md:text-2xl mb-8 opacity-90">{slide.subtitle}</p>
-                  <button 
-                    onClick={slide.action}
-                    className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-8 py-3 rounded-full text-lg font-medium transition-all duration-300 shadow-lg"
-                  >
-                    {slide.cta}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-        
-        {/* Slide indicators */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-          {bannerSlides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`w-3 h-3 rounded-full transition ${
-                index === currentSlide ? 'bg-white' : 'bg-white/50'
-              }`}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* About BeatCrest Section */}
-      <section className="py-20 bg-gray-50">
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="py-16 md:py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">About BeatCrest</h2>
-            <p className="text-xl text-gray-600 mb-8">
-              BeatCrest is the ultimate social media and marketplace platform for beat producers and music entertainers across Africa and beyond. 
-              We connect talented producers with artists, providing a seamless platform for discovery, collaboration, and commerce.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto bg-gradient-to-br from-purple-100 via-teal-100 to-orange-100 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-2xl">🎵</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Upload & Sell</h3>
-                <p className="text-gray-600">Upload your beats with previews and set your own prices</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto bg-gradient-to-br from-teal-100 to-blue-100 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-2xl">👥</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Social Community</h3>
-                <p className="text-gray-600">Connect with producers and artists worldwide</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto bg-gradient-to-br from-orange-100 to-green-100 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-2xl">📈</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Grow Your Brand</h3>
-                <p className="text-gray-600">Build your audience and monetize your talent</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Producer Call-to-Action Section */}
-      <section className="py-20 bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">Ready to Turn Your Beats Into Success?</h2>
-            <p className="text-xl mb-8 opacity-90">
-              Join thousands of producers who are already earning from their music. 
-              Upload your beats, set your prices, and start building your brand today.
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
-                  <span className="text-2xl">💰</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Earn Money</h3>
-                <p className="opacity-90">Set your own prices and keep 95% of your earnings</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
-                  <span className="text-2xl">🌍</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Global Reach</h3>
-                <p className="opacity-90">Connect with artists from around the world</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
-                  <span className="text-2xl">📈</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Grow Fast</h3>
-                <p className="opacity-90">Build your audience and increase your sales</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <button 
-                onClick={() => {
-                  if (user) {
-                    navigate('/dashboard');
-                  } else {
-                    setShowAuthModal(true);
-                  }
-                }}
-                className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                🎵 Start Selling Your Beats Now
-              </button>
-              <p className="text-sm opacity-75">Join 10,000+ producers already earning on BeatCrest</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Beats Commerce Section */}
-      <section id="beats-section" className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="mb-12">
-            <h2 className="text-3xl md:text-5xl font-bold text-center mb-4">Discover Amazing Beats</h2>
-            <p className="text-xl text-gray-600 text-center mb-8">
-              Browse through thousands of high-quality beats from talented producers
-            </p>
-            
-            {/* Search and Filter */}
-            <div className="max-w-4xl mx-auto flex flex-col md:flex-row gap-4 mb-8">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  placeholder="Search beats or producers..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
-              </div>
-              <select
-                value={selectedGenre}
-                onChange={(e) => setSelectedGenre(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              >
-                {genres.map(genre => (
-                  <option key={genre} value={genre}>{genre}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Beats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredBeats.map((beat) => (
-              <div key={beat.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                <div className="relative">
-                  <img
-                    src={beat.cover}
-                    alt={beat.title}
-                    className="w-full h-48 object-cover"
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+                <span className="text-beatcrest-blue">Discover</span>{" "}
+                <span className="text-beatcrest-navy">Amazing</span>{" "}
+                <span className="text-beatcrest-blue">Beats</span>
+              </h1>
+              <p className="text-lg md:text-xl lg:text-2xl text-beatcrest-navy/70 mb-10">
+                Connect with top producers and find your perfect sound
+              </p>
+              
+              {/* Search and Filters */}
+              <div className="flex flex-col md:flex-row gap-4 mb-8">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-beatcrest-teal" />
+                  <input
+                    type="text"
+                    placeholder="Search beats, producers, tags..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 border border-beatcrest-teal/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-beatcrest-blue focus:border-beatcrest-blue text-beatcrest-navy"
                   />
-                  <div className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 text-white px-2 py-1 rounded text-sm font-medium">
-                    ₦{beat.price.toLocaleString()}
-                  </div>
-                  <button className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-white font-medium">▶ Preview</span>
-                  </button>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-1">{beat.title}</h3>
-                  <p className="text-gray-600 mb-2">{beat.producer}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">{beat.genre} • {beat.bpm} BPM</span>
-                    <button 
-                      onClick={() => handleBuyNow(beat)}
-                      className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 shadow-lg"
-                    >
-                      Buy Now
-                    </button>
+                <select
+                  value={selectedGenre}
+                  onChange={(e) => setSelectedGenre(e.target.value)}
+                  className="px-4 py-3 border border-beatcrest-teal/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-beatcrest-blue focus:border-beatcrest-blue text-beatcrest-navy bg-white"
+                >
+                  <option value="All">All Genres</option>
+                  {genres.filter(g => g !== "All").map(genre => (
+                    <option key={genre} value={genre}>{genre}</option>
+                  ))}
+                </select>
+                <select
+                  value={selectedPrice}
+                  onChange={(e) => setSelectedPrice(e.target.value)}
+                  className="px-4 py-3 border border-beatcrest-teal/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-beatcrest-blue focus:border-beatcrest-blue text-beatcrest-navy bg-white"
+                >
+                  <option value="All">All Prices</option>
+                  <option value="Under ₦30,000">Under ₦30,000</option>
+                  <option value="₦30,000 - ₦50,000">₦30,000 - ₦50,000</option>
+                  <option value="Over ₦50,000">Over ₦50,000</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Category Navigation */}
+            <div className="flex gap-4 mb-8 border-b border-beatcrest-teal/20 pb-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setActiveCategory(category)}
+                  className={`px-4 py-2 font-medium transition-colors duration-200 ${
+                    activeCategory === category
+                      ? 'text-beatcrest-blue border-b-2 border-beatcrest-blue bg-beatcrest-teal/5'
+                      : 'text-beatcrest-navy/70 hover:text-beatcrest-blue'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+
+            {/* Beat Listings Header */}
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-beatcrest-navy">
+                All Beats ({filteredBeats.length})
+              </h2>
+              <button 
+                onClick={() => setShowMoreFilters(!showMoreFilters)}
+                className="flex items-center gap-2 px-4 py-2 border border-beatcrest-teal/30 rounded-lg text-beatcrest-navy hover:bg-beatcrest-teal/10 transition-colors duration-200"
+              >
+                <Filter className="w-4 h-4" />
+                <span>More Filters</span>
+              </button>
+            </div>
+
+            {/* More Filters Panel */}
+            {showMoreFilters && (
+              <div className="mb-6 p-4 bg-beatcrest-teal/5 rounded-lg border border-beatcrest-teal/20">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-beatcrest-navy mb-2">BPM Range</label>
+                    <input type="range" min="60" max="200" className="w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-beatcrest-navy mb-2">Sort By</label>
+                    <select className="w-full px-3 py-2 border border-beatcrest-teal/30 rounded-lg text-beatcrest-navy bg-white">
+                      <option>Newest First</option>
+                      <option>Oldest First</option>
+                      <option>Price: Low to High</option>
+                      <option>Price: High to Low</option>
+                      <option>Most Popular</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-beatcrest-navy mb-2">Verified Only</label>
+                    <input type="checkbox" className="w-4 h-4 text-beatcrest-blue" />
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            )}
 
-          {filteredBeats.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No beats found matching your search criteria.</p>
+            {/* Beats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+              {filteredBeats.map((beat) => (
+                <div key={beat.id} className="bg-white rounded-lg border border-beatcrest-teal/20 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+                  {/* Play Progress Bar */}
+                  <div className="h-1.5 bg-beatcrest-teal/20 relative">
+                    <div className="h-full bg-beatcrest-blue w-0"></div>
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-beatcrest-navy/60">
+                      0:00 / 0:00
+                    </div>
+                  </div>
+
+                  {/* Engagement Metrics */}
+                  <div className="px-6 pt-4 pb-3 flex items-center gap-6 text-sm text-beatcrest-navy/70">
+                    <span>{beat.plays.toLocaleString()} plays</span>
+                    <span>{beat.likes.toLocaleString()} likes</span>
+                    <span>{beat.downloads.toLocaleString()} downloads</span>
+                  </div>
+
+                  {/* Interaction Buttons */}
+                  <div className="px-6 pb-4 flex items-center gap-4 flex-wrap">
+                    <button 
+                      onClick={() => handleLike(beat.id)}
+                      className={`flex items-center gap-1 transition-colors ${
+                        beat.isLiked 
+                          ? 'text-red-500 hover:text-red-600' 
+                          : 'text-beatcrest-navy hover:text-beatcrest-blue'
+                      }`}
+                    >
+                      <Heart className={`w-4 h-4 ${beat.isLiked ? 'fill-current' : ''}`} />
+                      <span className="text-sm">{beat.likes}</span>
+                    </button>
+                    <button 
+                      onClick={() => handleComment(beat.id)}
+                      className="flex items-center gap-1 text-beatcrest-navy hover:text-beatcrest-blue transition-colors"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <span className="text-sm">Comment</span>
+                    </button>
+                    <button 
+                      onClick={() => handleShare(beat)}
+                      className="flex items-center gap-1 text-beatcrest-navy hover:text-beatcrest-blue transition-colors"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      <span className="text-sm">Share</span>
+                    </button>
+                    <div className="ml-auto flex items-center gap-2">
+                      <span className="text-sm font-semibold text-beatcrest-navy">₦{beat.price.toLocaleString()}</span>
+                      <button 
+                        onClick={() => handleBuyNow(beat)}
+                        className="flex items-center gap-1 px-3 py-1 bg-beatcrest-blue text-white rounded-lg text-sm font-medium hover:bg-beatcrest-blue-dark transition-colors"
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                        <span>Buy</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Producer Info */}
+                  {(() => {
+                    const producerProfile = getProfileByUsername(beat.producerUsername);
+                    return (
+                      <div className="px-6 pb-4 flex items-center gap-3">
+                        <img 
+                          src={producerProfile?.profile_picture || `https://ui-avatars.com/api/?name=${beat.producerUsername}&background=random`}
+                          alt={producerProfile?.full_name || beat.producerUsername}
+                          className="w-10 h-10 rounded-full object-cover border-2 border-beatcrest-teal/20"
+                          onError={(e) => {
+                            // Fallback to gradient avatar if image fails
+                            e.currentTarget.style.display = 'none';
+                            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                        <div className="w-10 h-10 rounded-full bg-beatcrest-gradient flex items-center justify-center text-white text-sm font-bold hidden">
+                          {beat.producerUsername.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <span className="text-sm font-medium text-beatcrest-navy">{producerProfile?.full_name || beat.producerUsername}</span>
+                            <span className="text-xs text-beatcrest-navy/60">{beat.date}</span>
+                            {(producerProfile?.is_verified || beat.verified) && (
+                              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Verified</span>
+                            )}
+                          </div>
+                          {producerProfile && (
+                            <div className="text-xs text-beatcrest-navy/60 mt-0.5">
+                              {producerProfile.followers_count.toLocaleString()} followers
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Beat Title */}
+                  <div className="px-6 pb-3">
+                    <h3 className="text-xl font-bold text-beatcrest-navy">{beat.title}</h3>
+                  </div>
+
+                  {/* Description */}
+                  <div className="px-6 pb-4">
+                    <p className="text-base text-beatcrest-navy/70 leading-relaxed">{beat.description}</p>
+                  </div>
+
+                  {/* Tags */}
+                  <div className="px-6 pb-4 flex flex-wrap gap-2">
+                    <span className="text-xs px-2 py-1 bg-beatcrest-teal/10 text-beatcrest-navy rounded">{beat.genre}</span>
+                    <span className="text-xs px-2 py-1 bg-beatcrest-teal/10 text-beatcrest-navy rounded">{beat.bpm} BPM</span>
+                    <span className="text-xs px-2 py-1 bg-beatcrest-teal/10 text-beatcrest-navy rounded">{beat.key}</span>
+                    {beat.tags.map((tag, idx) => (
+                      <span key={idx} className="text-xs px-2 py-1 bg-beatcrest-teal/10 text-beatcrest-navy rounded">{tag}</span>
+                    ))}
+                  </div>
+
+                  {/* Cover Image */}
+                  <div className="relative group cursor-pointer" onClick={() => handlePlay(beat)}>
+                    <img
+                      src={beat.cover}
+                      alt={beat.title}
+                      className="w-full h-72 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3">
+                        <Play className="w-6 h-6 text-beatcrest-blue fill-current" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
+
+            {filteredBeats.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-beatcrest-teal text-lg">No beats found matching your search criteria.</p>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-white py-10 text-sm">
+      <footer className="border-t border-beatcrest-teal/20 bg-beatcrest-surface py-10 text-sm">
         <div className="container mx-auto px-4 flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex items-center gap-2">
-            <SimpleLogo size={32} />
-          </div>
-          <div className="text-gray-500">© {new Date().getFullYear()} BeatCrest. All rights reserved.</div>
+          <div className="text-beatcrest-teal">© {new Date().getFullYear()} BeatCrest. All rights reserved.</div>
         </div>
       </footer>
 
@@ -412,17 +451,17 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-xl font-bold">
+              <h3 className="text-xl font-bold text-gradient">
                 {authMode === 'signin' ? 'Welcome Back' : 'Join BeatCrest'}
               </h3>
               <button 
                 onClick={() => {
                   setShowAuthModal(false);
                   setAuthMode('signin');
-                  setAuthFormData({ email: '', password: '', fullName: '', username: '' });
+                  setAuthFormData({ email: '', password: '', fullName: '', username: '', account_type: 'buyer' });
                   setAuthError('');
                 }} 
-                className="rounded-xl px-3 py-1 text-sm text-gray-500 hover:bg-gray-100"
+                className="rounded-xl px-3 py-1 text-sm text-beatcrest-teal hover:bg-beatcrest-teal/10 transition-colors duration-200"
               >
                 Close
               </button>
@@ -431,13 +470,13 @@ export default function Home() {
             <form onSubmit={handleAuthSubmit} className="space-y-4">
               {authMode === 'signup' && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium">Username</label>
+                  <label className="mb-1 block text-sm font-medium text-beatcrest-navy">Username</label>
                   <input 
                     type="text" 
                     name="username"
                     value={authFormData.username}
                     onChange={handleAuthInputChange}
-                    className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500" 
+                    className="input-field" 
                     placeholder="your_username" 
                     required
                   />
@@ -445,30 +484,99 @@ export default function Home() {
               )}
               
               <div>
-                <label className="mb-1 block text-sm font-medium">Email</label>
+                <label className="mb-1 block text-sm font-medium text-beatcrest-navy">Email</label>
                 <input 
                   type="email" 
                   name="email"
                   value={authFormData.email}
                   onChange={handleAuthInputChange}
-                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500" 
+                  className="input-field" 
                   placeholder="you@example.com" 
                   required
                 />
               </div>
               
               <div>
-                <label className="mb-1 block text-sm font-medium">Password</label>
+                <label className="mb-1 block text-sm font-medium text-beatcrest-navy">Password</label>
                 <input 
                   type="password" 
                   name="password"
                   value={authFormData.password}
                   onChange={handleAuthInputChange}
-                  className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-purple-500" 
-                  placeholder="••••••••" 
+                  className="input-field" 
+                  placeholder="At least 8 characters" 
                   required
+                  minLength={8}
                 />
+                {authMode === 'signup' && (
+                  <p className="text-xs text-beatcrest-teal mt-1">
+                    Must be at least 8 characters long
+                  </p>
+                )}
               </div>
+
+              {authMode === 'signup' && (
+                <>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-beatcrest-navy">I want to</label>
+                    <select
+                      name="account_type"
+                      value={authFormData.account_type}
+                      onChange={handleAuthInputChange}
+                      className="input-field"
+                      required
+                    >
+                      <option value="buyer">Buy Beats (Artist/Buyer)</option>
+                      <option value="producer">Sell Beats (Producer)</option>
+                    </select>
+                    <p className="text-xs text-beatcrest-teal mt-1">
+                      {authFormData.account_type === 'producer' 
+                        ? 'Producers can upload and sell beats' 
+                        : 'Buyers can purchase and license beats'}
+                    </p>
+                  </div>
+                  
+                  {/* Dashboard Assignment Indicator */}
+                  <div className={`mt-4 p-4 rounded-lg border-2 transition-all duration-200 ${
+                    authFormData.account_type === 'producer'
+                      ? 'bg-beatcrest-orange/10 border-beatcrest-orange/30'
+                      : 'bg-beatcrest-blue/10 border-beatcrest-blue/30'
+                  }`}>
+                    <div className="flex items-start gap-3">
+                      <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
+                        authFormData.account_type === 'producer'
+                          ? 'bg-beatcrest-orange/20'
+                          : 'bg-beatcrest-blue/20'
+                      }`}>
+                        {authFormData.account_type === 'producer' ? (
+                          <span className="text-xl">🎵</span>
+                        ) : (
+                          <span className="text-xl">🛒</span>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-beatcrest-navy mb-1">
+                          You'll be assigned to:
+                        </p>
+                        <p className={`text-base font-semibold ${
+                          authFormData.account_type === 'producer'
+                            ? 'text-beatcrest-orange'
+                            : 'text-beatcrest-blue'
+                        }`}>
+                          {authFormData.account_type === 'producer' 
+                            ? 'Producer Dashboard' 
+                            : 'Buyer Dashboard'}
+                        </p>
+                        <p className="text-xs text-beatcrest-teal mt-1">
+                          {authFormData.account_type === 'producer'
+                            ? 'Upload beats, manage sales, and track earnings'
+                            : 'Browse beats, make purchases, and manage licenses'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
               
               {authError && (
                 <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
@@ -479,7 +587,7 @@ export default function Home() {
               <button 
                 type="submit"
                 disabled={authLoading}
-                className="w-full inline-flex items-center justify-center rounded-2xl bg-purple-600 px-5 py-3 text-white shadow-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full inline-flex items-center justify-center rounded-2xl bg-beatcrest-blue px-5 py-3 text-white shadow-lg hover:bg-beatcrest-blue-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {authLoading ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -492,11 +600,11 @@ export default function Home() {
             </form>
             
             <div className="mt-6 text-center">
-              <p className="text-gray-600 text-sm">
+              <p className="text-beatcrest-navy/70 text-sm">
                 {authMode === 'signin' ? "Don't have an account?" : "Already have an account?"}
                 <button 
                   onClick={switchAuthMode}
-                  className="ml-1 text-purple-600 hover:text-purple-700 font-medium"
+                  className="ml-1 text-beatcrest-blue hover:text-beatcrest-blue-dark font-medium transition-colors duration-200"
                 >
                   {authMode === 'signin' ? 'Sign up' : 'Sign in'}
                 </button>
@@ -523,4 +631,4 @@ export default function Home() {
       />
     </div>
   );
-} 
+}
