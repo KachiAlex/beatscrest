@@ -256,7 +256,7 @@ export default function BeatDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-beatcrest-blue"></div>
       </div>
     );
   }
@@ -269,7 +269,7 @@ export default function BeatDetail() {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Beat Not Found</h2>
           <p className="text-gray-600 mb-4">The beat you're looking for doesn't exist or has been removed.</p>
           <Link to="/marketplace">
-            <Button className="bg-purple-600 hover:bg-purple-700">
+            <Button className="bg-beatcrest-blue hover:bg-beatcrest-blue-dark">
               Browse Beats
             </Button>
           </Link>

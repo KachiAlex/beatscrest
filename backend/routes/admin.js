@@ -24,9 +24,16 @@ router.get('/stats', async (req, res) => {
     const producers = allUsers.filter(u => u.accountType === 'Producer').length;
     const artists = allUsers.filter(u => u.accountType === 'Artist').length;
     
-    // New users (simplified - would need timestamp comparison)
-    const newUsersWeek = 0; // Placeholder - would need to compare createdAt
-    const newUsersMonth = 0; // Placeholder
+    // Calculate new users with date comparison
+    const newUsersWeek = allUsers.filter(u => {
+      const createdAt = u.createdAt?.toDate ? u.createdAt.toDate() : (u.createdAt instanceof Date ? u.createdAt : new Date(u.createdAt));
+      return createdAt >= weekAgo;
+    }).length;
+    
+    const newUsersMonth = allUsers.filter(u => {
+      const createdAt = u.createdAt?.toDate ? u.createdAt.toDate() : (u.createdAt instanceof Date ? u.createdAt : new Date(u.createdAt));
+      return createdAt >= monthAgo;
+    }).length;
 
     // Get all beats
     const beatsSnapshot = await db.collection(COLLECTIONS.BEATS)
@@ -41,8 +48,16 @@ router.get('/stats', async (req, res) => {
       ? allBeats.reduce((sum, beat) => sum + (beat.price || 0), 0) / allBeats.length
       : 0;
     
-    const newBeatsWeek = 0; // Placeholder
-    const newBeatsMonth = 0; // Placeholder
+    // Calculate new beats with date comparison
+    const newBeatsWeek = allBeats.filter(b => {
+      const createdAt = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt));
+      return createdAt >= weekAgo;
+    }).length;
+    
+    const newBeatsMonth = allBeats.filter(b => {
+      const createdAt = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt));
+      return createdAt >= monthAgo;
+    }).length;
 
     // Get all purchases
     const purchasesSnapshot = await db.collection(COLLECTIONS.PURCHASES)
@@ -57,8 +72,16 @@ router.get('/stats', async (req, res) => {
       ? totalRevenue / allPurchases.length
       : 0;
     
-    const salesWeek = 0; // Placeholder
-    const salesMonth = 0; // Placeholder
+    // Calculate sales with date comparison
+    const salesWeek = allPurchases.filter(p => {
+      const createdAt = p.createdAt?.toDate ? p.createdAt.toDate() : (p.createdAt instanceof Date ? p.createdAt : new Date(p.createdAt));
+      return createdAt >= weekAgo;
+    }).length;
+    
+    const salesMonth = allPurchases.filter(p => {
+      const createdAt = p.createdAt?.toDate ? p.createdAt.toDate() : (p.createdAt instanceof Date ? p.createdAt : new Date(p.createdAt));
+      return createdAt >= monthAgo;
+    }).length;
 
     res.json({
       userStats: {
@@ -84,7 +107,31 @@ router.get('/stats', async (req, res) => {
         total_platform_fees: totalPlatformFees,
         avg_sale_amount: Math.round(avgSaleAmount)
       },
-      monthlyRevenue: [] // Placeholder - would need date-based aggregation
+      monthlyRevenue: (() => {
+        // Group purchases by month
+        const monthlyMap = new Map();
+        allPurchases.forEach(purchase => {
+          const createdAt = purchase.createdAt?.toDate ? purchase.createdAt.toDate() : (purchase.createdAt instanceof Date ? purchase.createdAt : new Date(purchase.createdAt));
+          const monthKey = `${createdAt.getFullYear()}-${String(createdAt.getMonth() + 1).padStart(2, '0')}`;
+          
+          if (!monthlyMap.has(monthKey)) {
+            monthlyMap.set(monthKey, {
+              date: monthKey,
+              monthly_revenue: 0,
+              monthly_fees: 0,
+              monthly_sales: 0
+            });
+          }
+          
+          const monthData = monthlyMap.get(monthKey);
+          monthData.monthly_revenue += purchase.amount || 0;
+          monthData.monthly_fees += purchase.platformFee || 0;
+          monthData.monthly_sales += 1;
+        });
+        
+        // Sort by date and return as array
+        return Array.from(monthlyMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+      })()
     });
 
   } catch (error) {

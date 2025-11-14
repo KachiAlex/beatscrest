@@ -528,11 +528,28 @@ const Notification = {
     const db = getFirestore();
     const userRef = db.doc(`${COLLECTIONS.USERS}/${userId}`);
     let query = this.collection.where('user', '==', userRef);
+    
     if (unreadOnly) {
       query = query.where('isRead', '==', false);
     }
-    const snapshot = await query.orderBy('createdAt', 'desc').get();
-    return snapshot.docs.map(doc => docToObject(doc));
+    
+    try {
+      const snapshot = await query.orderBy('createdAt', 'desc').get();
+      return snapshot.docs.map(doc => docToObject(doc));
+    } catch (error) {
+      // If orderBy fails (needs index), try without orderBy
+      if (error.code === 9) { // FAILED_PRECONDITION - index needed
+        const snapshot = await query.get();
+        const notifications = snapshot.docs.map(doc => docToObject(doc));
+        // Sort in memory
+        return notifications.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+      }
+      throw error;
+    }
   }
 };
 

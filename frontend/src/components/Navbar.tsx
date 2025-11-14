@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/button';
+import NotificationDropdown from './NotificationDropdown';
 import logoImage from '../assets/beat-crest-logo.png';
 
 const Navbar: React.FC = () => {
@@ -136,10 +137,20 @@ const Navbar: React.FC = () => {
               <Link to="/marketplace" className="text-beatcrest-navy hover:text-beatcrest-blue transition-colors duration-200 font-medium">
                 Marketplace
               </Link>
-              {user && (
-                <Link to="/upload" className="text-beatcrest-navy hover:text-beatcrest-blue transition-colors duration-200 font-medium">
-                  Upload
+              {user && user.account_type === 'admin' && (
+                <Link to="/admin" className="text-beatcrest-navy hover:text-beatcrest-blue transition-colors duration-200 font-medium">
+                  Admin
                 </Link>
+              )}
+              {user && (
+                <>
+                  <Link to="/upload" className="text-beatcrest-navy hover:text-beatcrest-blue transition-colors duration-200 font-medium">
+                    Upload
+                  </Link>
+                  <Link to="/messages" className="text-beatcrest-navy hover:text-beatcrest-blue transition-colors duration-200 font-medium">
+                    Messages
+                  </Link>
+                </>
               )}
             </div>
 
@@ -147,6 +158,7 @@ const Navbar: React.FC = () => {
             <div className="flex items-center space-x-4">
               {user ? (
                 <>
+                  <NotificationDropdown />
                   <button 
                     onClick={logout}
                     className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"

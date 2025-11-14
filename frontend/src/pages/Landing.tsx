@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SignupModal from "../components/SignupModal";
 import PaymentModal from "../components/PaymentModal";
 import { useAuth } from "../contexts/AuthContext";
 import { Search, Filter, Play, Heart, MessageCircle, Share2, ShoppingCart } from 'lucide-react';
 import { mockBeats } from "../data/mockBeats";
+import apiService from "../services/api";
 import { getProfileByUsername } from "../data/mockProfiles";
 
 export default function Home() {
@@ -32,6 +33,85 @@ export default function Home() {
   const navigate = useNavigate();
 
   const [beats, setBeats] = useState(mockBeats);
+  const [loadingBeats, setLoadingBeats] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Banner slides data
+  const bannerSlides = [
+    {
+      id: 1,
+      title: 'Top Afrobeats Producers',
+      subtitle: 'Discover chart-ready sounds from Africa\'s best',
+      image: 'https://images.unsplash.com/photo-1495562569060-2eec283d3391?w=1600&auto=format&fit=crop'
+    },
+    {
+      id: 2,
+      title: 'Sell Your Beats Effortlessly',
+      subtitle: 'Upload, set your price, and get paid securely',
+      image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1600&auto=format&fit=crop'
+    },
+    {
+      id: 3,
+      title: 'Find Your Perfect Sound',
+      subtitle: 'Search by genre, BPM, key, and mood',
+      image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=1600&auto=format&fit=crop'
+    }
+  ];
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [isSlideHovered, setIsSlideHovered] = useState(false);
+
+  useEffect(() => {
+    if (isSlideHovered) return;
+    const id = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % bannerSlides.length);
+    }, 5000);
+    return () => clearInterval(id);
+  }, [isSlideHovered]);
+
+  // Fetch beats from backend (fallback to local mock)
+  useEffect(() => {
+    const fetchBeats = async () => {
+      try {
+        setLoadingBeats(true);
+        const data: any = await apiService.getBeats({});
+        if (Array.isArray(data.beats)) {
+          // Normalize to UI shape if coming from API
+          const normalized = data.beats.map((b: any, idx: number) => ({
+            id: b.id ?? idx + 1,
+            title: b.title,
+            producer: b.producer?.username || b.producer || 'unknown',
+            producerUsername: b.producer?.username || b.producerUsername || 'unknown',
+            price: b.price,
+            genre: b.genre,
+            bpm: b.bpm ?? 0,
+            key: b.key ?? '',
+            cover: b.thumbnailUrl || b.thumbnail_url || b.previewUrl || b.preview_url || 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&auto=format&fit=crop',
+            plays: b.playCount || b.plays_count || 0,
+            likes: b.likesCount || b.likes_count || 0,
+            downloads: b.downloads || 0,
+            date: b.createdAt || b.created_at || new Date().toLocaleDateString(),
+            verified: true,
+            description: b.description || '',
+            tags: b.tags || [],
+            isLiked: b.isLiked || b.is_liked || false,
+          }));
+          setBeats(normalized);
+        }
+      } catch (e) {
+        // silently keep local mock
+        console.warn('Using local mock beats due to API error');
+      } finally {
+        setLoadingBeats(false);
+      }
+    };
+    fetchBeats();
+  }, []);
+
+  // Trigger entrance animations once mounted
+  useEffect(() => {
+    const id = setTimeout(() => setMounted(true), 50);
+    return () => clearTimeout(id);
+  }, []);
 
   const genres = ["All", "Hip Hop", "Afrobeats", "R&B", "Trap", "Reggae", "Pop", "Gospel", "Jazz"];
   const categories = ["All Beats", "Trending", "Featured", "New Releases"];
@@ -192,10 +272,126 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Banner Slider */}
+      <section className="pt-4 md:pt-6">
+        <div className="container mx-auto px-4">
+          <div 
+            className="relative overflow-hidden rounded-2xl border border-beatcrest-teal/20 shadow-sm h-56 md:h-72 lg:h-80"
+            onMouseEnter={() => setIsSlideHovered(true)}
+            onMouseLeave={() => setIsSlideHovered(false)}
+          >
+            {bannerSlides.map((slide, idx) => (
+              <div
+                key={slide.id}
+                className={`absolute inset-0 transition-opacity duration-700 ${idx === activeSlide ? 'opacity-100' : 'opacity-0'}`}
+                style={{
+                  backgroundImage: `linear-gradient(rgba(30,58,138,0.25), rgba(0,0,0,0.35)), url('${slide.image}')`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              >
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="px-6 md:px-10 text-center">
+                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white drop-shadow-sm">
+                      {slide.title}
+                    </h2>
+                    <p className="mt-2 text-white/90 text-sm md:text-base lg:text-lg max-w-2xl mx-auto">
+                      {slide.subtitle}
+                    </p>
+                    <div className="mt-4">
+                      <button 
+                        onClick={() => window.scrollTo({ top: document.body.clientHeight / 4, behavior: 'smooth' })}
+                        className="bg-beatcrest-blue hover:bg-beatcrest-blue-dark text-white px-4 py-2 rounded-lg text-sm md:text-base"
+                      >
+                        Explore Beats
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* Controls */}
+            <button
+              aria-label="Previous slide"
+              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-beatcrest-navy rounded-full w-9 h-9 flex items-center justify-center shadow"
+              onClick={() => setActiveSlide((prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length)}
+            >
+              ‹
+            </button>
+            <button
+              aria-label="Next slide"
+              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-beatcrest-navy rounded-full w-9 h-9 flex items-center justify-center shadow"
+              onClick={() => setActiveSlide((prev) => (prev + 1) % bannerSlides.length)}
+            >
+              ›
+            </button>
+
+            {/* Indicators */}
+            <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2">
+              {bannerSlides.map((_, idx) => (
+                <button
+                  key={idx}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  onClick={() => setActiveSlide(idx)}
+                  className={`h-2.5 rounded-full transition-all ${idx === activeSlide ? 'w-6 bg-white' : 'w-2.5 bg-white/60'}`}
+                />
+              ))}
+            </div>
+          </div>
+          {/* Quick stats strip */}
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="rounded-xl bg-white shadow-sm border border-beatcrest-teal/20 p-4 text-center">
+              <div className="text-2xl">🎵</div>
+              <div className="mt-1 text-2xl font-bold text-beatcrest-navy">10k+</div>
+              <div className="text-xs text-beatcrest-navy/70">Beats Uploaded</div>
+            </div>
+            <div className="rounded-xl bg-white shadow-sm border border-beatcrest-teal/20 p-4 text-center">
+              <div className="text-2xl">🧑‍🎤</div>
+              <div className="mt-1 text-2xl font-bold text-beatcrest-navy">5k+</div>
+              <div className="text-xs text-beatcrest-navy/70">Artists & Buyers</div>
+            </div>
+            <div className="rounded-xl bg-white shadow-sm border border-beatcrest-teal/20 p-4 text-center">
+              <div className="text-2xl">💳</div>
+              <div className="mt-1 text-2xl font-bold text-beatcrest-navy">₦45k</div>
+              <div className="text-xs text-beatcrest-navy/70">Avg. Beat Price</div>
+            </div>
+            <div className="rounded-xl bg-white shadow-sm border border-beatcrest-teal/20 p-4 text-center">
+              <div className="text-2xl">⚡</div>
+              <div className="mt-1 text-2xl font-bold text-beatcrest-navy">Instant</div>
+              <div className="text-xs text-beatcrest-navy/70">Delivery</div>
+            </div>
+          </div>
+        </div>
+      </section>
       {/* Hero Section */}
       <section className="py-16 md:py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
+            {/* Feature badges */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="rounded-xl border border-beatcrest-teal/20 bg-beatcrest-teal/5 p-4 flex items-start gap-3">
+                <div className="text-beatcrest-blue text-xl">🔍</div>
+                <div>
+                  <div className="font-semibold text-beatcrest-navy">Powerful Search</div>
+                  <div className="text-sm text-beatcrest-navy/70">Filter by genre, BPM, key and more</div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-beatcrest-teal/20 bg-beatcrest-teal/5 p-4 flex items-start gap-3">
+                <div className="text-beatcrest-orange text-xl">💼</div>
+                <div>
+                  <div className="font-semibold text-beatcrest-navy">Fair Pricing</div>
+                  <div className="text-sm text-beatcrest-navy/70">Transparent licensing and payouts</div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-beatcrest-teal/20 bg-beatcrest-teal/5 p-4 flex items-start gap-3">
+                <div className="text-beatcrest-navy text-xl">🛡️</div>
+                <div>
+                  <div className="font-semibold text-beatcrest-navy">Secure Platform</div>
+                  <div className="text-sm text-beatcrest-navy/70">Protected payments and delivery</div>
+                </div>
+              </div>
+            </div>
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
                 <span className="text-beatcrest-blue">Discover</span>{" "}
@@ -298,10 +494,32 @@ export default function Home() {
               </div>
             )}
 
+            {/* Loading skeletons */}
+            {loadingBeats && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 mb-8">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="rounded-2xl border border-beatcrest-teal/20 bg-white overflow-hidden shadow-sm animate-pulse">
+                    <div className="h-1.5 bg-beatcrest-teal/10" />
+                    <div className="h-72 bg-beatcrest-teal/10" />
+                    <div className="p-6 space-y-3">
+                      <div className="h-4 bg-beatcrest-teal/10 rounded" />
+                      <div className="h-3 bg-beatcrest-teal/10 rounded w-2/3" />
+                      <div className="h-3 bg-beatcrest-teal/10 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Beats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
-              {filteredBeats.map((beat) => (
-                <div key={beat.id} className="bg-white rounded-lg border border-beatcrest-teal/20 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+              {filteredBeats.map((beat, idx) => (
+                <div 
+                  key={beat.id}
+                  className={`rounded-2xl p-[1px] bg-gradient-to-br from-beatcrest-teal/30 via-beatcrest-blue/20 to-transparent hover:from-beatcrest-blue/40 hover:via-beatcrest-teal/30 transition-all duration-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
+                  style={{ transitionDelay: `${idx * 40}ms` }}
+                >
+                  <div className="bg-white rounded-2xl border border-beatcrest-teal/20 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
                   {/* Play Progress Bar */}
                   <div className="h-1.5 bg-beatcrest-teal/20 relative">
                     <div className="h-full bg-beatcrest-blue w-0"></div>
@@ -310,51 +528,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Engagement Metrics */}
-                  <div className="px-6 pt-4 pb-3 flex items-center gap-6 text-sm text-beatcrest-navy/70">
-                    <span>{beat.plays.toLocaleString()} plays</span>
-                    <span>{beat.likes.toLocaleString()} likes</span>
-                    <span>{beat.downloads.toLocaleString()} downloads</span>
-                  </div>
-
-                  {/* Interaction Buttons */}
-                  <div className="px-6 pb-4 flex items-center gap-4 flex-wrap">
-                    <button 
-                      onClick={() => handleLike(beat.id)}
-                      className={`flex items-center gap-1 transition-colors ${
-                        beat.isLiked 
-                          ? 'text-red-500 hover:text-red-600' 
-                          : 'text-beatcrest-navy hover:text-beatcrest-blue'
-                      }`}
-                    >
-                      <Heart className={`w-4 h-4 ${beat.isLiked ? 'fill-current' : ''}`} />
-                      <span className="text-sm">{beat.likes}</span>
-                    </button>
-                    <button 
-                      onClick={() => handleComment(beat.id)}
-                      className="flex items-center gap-1 text-beatcrest-navy hover:text-beatcrest-blue transition-colors"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      <span className="text-sm">Comment</span>
-                    </button>
-                    <button 
-                      onClick={() => handleShare(beat)}
-                      className="flex items-center gap-1 text-beatcrest-navy hover:text-beatcrest-blue transition-colors"
-                    >
-                      <Share2 className="w-4 h-4" />
-                      <span className="text-sm">Share</span>
-                    </button>
-                    <div className="ml-auto flex items-center gap-2">
-                      <span className="text-sm font-semibold text-beatcrest-navy">₦{beat.price.toLocaleString()}</span>
-                      <button 
-                        onClick={() => handleBuyNow(beat)}
-                        className="flex items-center gap-1 px-3 py-1 bg-beatcrest-blue text-white rounded-lg text-sm font-medium hover:bg-beatcrest-blue-dark transition-colors"
-                      >
-                        <ShoppingCart className="w-4 h-4" />
-                        <span>Buy</span>
-                      </button>
-                    </div>
-                  </div>
+                  {/* (moved) Engagement & Actions now placed below thumbnail */}
 
                   {/* Producer Info */}
                   {(() => {
@@ -418,7 +592,8 @@ export default function Home() {
                     <img
                       src={beat.cover}
                       alt={beat.title}
-                      className="w-full h-72 object-cover"
+                      loading="lazy"
+                      className="w-full h-72 object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3">
@@ -426,8 +601,67 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Engagement Metrics (below thumbnail) */}
+                  <div className="px-6 pt-3 pb-2 flex items-center gap-6 text-sm text-beatcrest-navy/70">
+                    <span>{beat.plays.toLocaleString()} plays</span>
+                    <span>{beat.likes.toLocaleString()} likes</span>
+                    <span>{beat.downloads.toLocaleString()} downloads</span>
+                  </div>
+
+                  {/* Interaction Buttons (below thumbnail) */}
+                  <div className="px-6 pb-4 flex items-center gap-4 flex-wrap">
+                    <button 
+                      onClick={() => handleLike(beat.id)}
+                      className={`flex items-center gap-1 transition-colors ${
+                        beat.isLiked 
+                          ? 'text-red-500 hover:text-red-600' 
+                          : 'text-beatcrest-navy hover:text-beatcrest-blue'
+                      }`}
+                    >
+                      <Heart className={`w-4 h-4 ${beat.isLiked ? 'fill-current' : ''}`} />
+                      <span className="text-sm">{beat.likes}</span>
+                    </button>
+                    <button 
+                      onClick={() => handleComment(beat.id)}
+                      className="flex items-center gap-1 text-beatcrest-navy hover:text-beatcrest-blue transition-colors"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <span className="text-sm">Comment</span>
+                    </button>
+                    <button 
+                      onClick={() => handleShare(beat)}
+                      className="flex items-center gap-1 text-beatcrest-navy hover:text-beatcrest-blue transition-colors"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      <span className="text-sm">Share</span>
+                    </button>
+                    <div className="ml-auto flex items-center gap-2">
+                      <span className="text-sm font-semibold text-beatcrest-navy">₦{beat.price.toLocaleString()}</span>
+                      <button 
+                        onClick={() => handleBuyNow(beat)}
+                        className="flex items-center gap-1 px-3 py-1 bg-beatcrest-blue text-white rounded-lg text-sm font-medium hover:bg-beatcrest-blue-dark transition-colors"
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                        <span>Buy</span>
+                      </button>
+                    </div>
+                  </div>
+                  </div>
                 </div>
               ))}
+            </div>
+
+            {/* CTA Section */}
+            <div className="mt-12 rounded-2xl bg-beatcrest-gradient p-8 text-center text-white shadow">
+              <h3 className="text-2xl md:text-3xl font-bold">Ready to sell your first beat?</h3>
+              <p className="mt-2 text-white/90">Join thousands of producers earning on BeatCrest today.</p>
+              <button
+                onClick={() => navigate('/upload')}
+                className="mt-4 bg-white text-beatcrest-navy hover:text-beatcrest-blue px-5 py-3 rounded-xl font-semibold"
+              >
+                Upload a Beat
+              </button>
             </div>
 
             {filteredBeats.length === 0 && (

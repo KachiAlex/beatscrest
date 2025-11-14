@@ -22,7 +22,7 @@ A music-focused social media + marketplace platform where producers upload beats
 
 ### Backend
 - **Node.js** + **Express.js** - API server
-- **PostgreSQL** - Database
+- **Firebase Firestore** - Database (NoSQL)
 - **JWT** - Authentication
 - **AWS S3** - File storage
 - **Stripe** - Payment processing
@@ -63,9 +63,9 @@ beatcrest/
 
 ### Prerequisites
 - Node.js (v16 or higher)
-- PostgreSQL
-- AWS S3 account
-- Stripe account
+- Firebase account (Firestore)
+- AWS S3 account (optional, for file storage)
+- Stripe account (optional, for payments)
 
 ### Backend Setup
 
@@ -86,23 +86,30 @@ beatcrest/
    
    Update `.env` with your configuration:
    ```env
-   # Database
-   DB_HOST=localhost
-   DB_PORT=5432
-   DB_NAME=beatcrest
-   DB_USER=postgres
-   DB_PASSWORD=your_password
+   # Server Configuration
+   PORT=5000
+   NODE_ENV=development
+   FRONTEND_URL=http://localhost:3000
+
+   # Firebase Configuration
+   # Option 1: Service Account JSON (recommended for production)
+   FIREBASE_SERVICE_ACCOUNT={"type":"service_account","project_id":"your-project-id",...}
+
+   # Option 2: Individual credentials (alternative)
+   FIREBASE_PROJECT_ID=your-firebase-project-id
+   FIREBASE_CLIENT_EMAIL=your-service-account@your-project.iam.gserviceaccount.com
+   FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nYour Private Key\n-----END PRIVATE KEY-----\n
 
    # JWT
    JWT_SECRET=your-super-secret-jwt-key
 
-   # AWS S3
+   # AWS S3 (optional - for file storage)
    AWS_ACCESS_KEY_ID=your_aws_access_key
    AWS_SECRET_ACCESS_KEY=your_aws_secret_key
    AWS_REGION=us-east-1
    AWS_S3_BUCKET=beatcrest-storage
 
-   # Stripe
+   # Stripe (optional - for payments)
    STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
    STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
    ```
@@ -185,6 +192,24 @@ beatcrest/
 - `GET /api/messages/conversations` - Get conversations
 - `GET /api/messages/conversation/:userId` - Get messages
 - `POST /api/messages/send` - Send message
+- `PUT /api/messages/conversation/:userId/read` - Mark conversation as read
+
+### Notifications
+- `GET /api/notifications` - Get all notifications
+- `GET /api/notifications/unread-count` - Get unread count
+- `PUT /api/notifications/:id/read` - Mark notification as read
+- `PUT /api/notifications/read-all` - Mark all notifications as read
+- `DELETE /api/notifications/:id` - Delete notification
+
+### Admin
+- `GET /api/admin/stats` - Get platform statistics
+- `GET /api/admin/users` - Get all users (paginated)
+- `PUT /api/admin/users/:id/status` - Update user status
+- `GET /api/admin/beats` - Get all beats (paginated)
+- `PUT /api/admin/beats/:id/status` - Update beat status
+- `GET /api/admin/purchases` - Get all purchases
+- `GET /api/admin/revenue` - Get revenue breakdown
+- `GET /api/admin/top-producers` - Get top producers
 
 ## 🎨 UI Components
 
@@ -206,23 +231,37 @@ The frontend uses a modern component library with:
 
 ## 📊 Database Schema
 
-### Core Tables
+### Firebase Firestore Collections
 - **users**: User accounts and profiles
 - **beats**: Beat information and metadata
 - **purchases**: Transaction records
 - **comments**: Beat comments
 - **messages**: Direct messages
-- **followers**: User relationships
-- **likes**: Beat likes
 - **notifications**: User notifications
+
+### Data Structure
+- Users contain arrays for `followers` and `following` (user IDs)
+- Beats contain arrays for `likes` (user IDs)
+- Messages are stored with sender/receiver references
+- All collections use Firestore timestamps for `createdAt` and `updatedAt`
+
+> **Note**: See `FIREBASE_SETUP.md` for detailed Firebase setup instructions and security rules.
 
 ## 🚀 Deployment
 
 ### Backend Deployment
-1. Set up PostgreSQL database
-2. Configure environment variables
-3. Deploy to Heroku/AWS/DigitalOcean
-4. Set up SSL certificates
+1. Set up Firebase Firestore database
+2. Configure Firebase service account credentials
+3. Set environment variables in your hosting platform
+4. Deploy to Heroku/Render/AWS/DigitalOcean
+5. Set up SSL certificates
+
+### Firebase Setup
+See `FIREBASE_SETUP.md` for detailed instructions on:
+- Creating a Firebase project
+- Setting up Firestore
+- Configuring service account
+- Security rules
 
 ### Frontend Deployment
 1. Build the application: `npm run build`

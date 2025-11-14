@@ -8,6 +8,8 @@ import Upload from './pages/Upload';
 import Profile from './pages/Profile';
 import ProducerDashboard from './pages/ProducerDashboard';
 import BuyerDashboard from './pages/BuyerDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import Messages from './pages/Messages';
 import Payment from './pages/Payment';
 import SplashScreen from './components/SplashScreen';
 
@@ -42,6 +44,9 @@ const App: React.FC = () => {
         
         {/* Producer Dashboard - self-contained */}
         <Route path="/dashboard" element={<ProducerDashboard />} />
+        
+        {/* Admin Dashboard - self-contained */}
+        <Route path="/admin" element={<AdminDashboard />} />
         
         {/* Other pages use the shared Navbar */}
         <Route path="/marketplace" element={
@@ -89,6 +94,14 @@ const App: React.FC = () => {
             <Navbar />
             <main>
               <Upload />
+            </main>
+          </>
+        } />
+        <Route path="/messages" element={
+          <>
+            <Navbar />
+            <main>
+              <Messages />
             </main>
           </>
         } />
