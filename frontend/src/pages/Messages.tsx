@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
 import apiService from '../services/api';
-import { Message as MessageIcon, Send, Search, User } from 'lucide-react';
+import { MessageSquare as MessageIcon, Send, Search, User } from 'lucide-react';
 
 interface Message {
   id: string;
