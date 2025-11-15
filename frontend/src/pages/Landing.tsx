@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import SignupModal from "../components/SignupModal";
 import PaymentModal from "../components/PaymentModal";
 import { useAuth } from "../contexts/AuthContext";
-import { Search, Filter, Play, Heart, MessageCircle, Share2, ShoppingCart } from 'lucide-react';
+import { Search, Filter, Play, Heart, MessageCircle, ShoppingCart } from 'lucide-react';
 import { mockBeats } from "../data/mockBeats";
 import apiService from "../services/api";
 import { getProfileByUsername } from "../data/mockProfiles";
@@ -34,7 +34,6 @@ export default function Home() {
 
   const [beats, setBeats] = useState(mockBeats);
   const [loadingBeats, setLoadingBeats] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   // Banner slides data
   const bannerSlides = [
@@ -107,12 +106,6 @@ export default function Home() {
     fetchBeats();
   }, []);
 
-  // Trigger entrance animations once mounted
-  useEffect(() => {
-    const id = setTimeout(() => setMounted(true), 50);
-    return () => clearTimeout(id);
-  }, []);
-
   const genres = ["All", "Hip Hop", "Afrobeats", "R&B", "Trap", "Reggae", "Pop", "Gospel", "Jazz"];
   const categories = ["All Beats", "Trending", "Featured", "New Releases"];
 
@@ -127,28 +120,7 @@ export default function Home() {
 
   // Handle comment button
   const handleComment = (beatId: number) => {
-    // Navigate to beat detail page or open comment modal
     navigate(`/beat/${beatId}`);
-  };
-
-  // Handle share button
-  const handleShare = async (beat: any) => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: beat.title,
-          text: beat.description,
-          url: window.location.origin + `/beat/${beat.id}`
-        });
-      } catch (err) {
-        console.log('Error sharing:', err);
-      }
-    } else {
-      // Fallback: copy to clipboard
-      const url = window.location.origin + `/beat/${beat.id}`;
-      navigator.clipboard.writeText(url);
-      alert('Link copied to clipboard!');
-    }
   };
 
   // Handle play button
@@ -271,12 +243,12 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       {/* Banner Slider */}
-      <section className="pt-4 md:pt-6">
-        <div className="container mx-auto px-4">
+      <section className="section-container pt-6 md:pt-8 pb-0">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div 
-            className="relative overflow-hidden rounded-2xl border border-beatcrest-teal/20 shadow-sm h-56 md:h-72 lg:h-80"
+            className="relative overflow-hidden rounded-3xl border-2 border-slate-200/60 shadow-2xl h-64 md:h-80 lg:h-96 group"
             onMouseEnter={() => setIsSlideHovered(true)}
             onMouseLeave={() => setIsSlideHovered(false)}
           >
@@ -285,23 +257,23 @@ export default function Home() {
                 key={slide.id}
                 className={`absolute inset-0 transition-opacity duration-700 ${idx === activeSlide ? 'opacity-100' : 'opacity-0'}`}
                 style={{
-                  backgroundImage: `linear-gradient(rgba(30,58,138,0.25), rgba(0,0,0,0.35)), url('${slide.image}')`,
+                  backgroundImage: `linear-gradient(135deg, rgba(30,58,138,0.4), rgba(59,130,246,0.3), rgba(0,0,0,0.4)), url('${slide.image}')`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}
               >
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="px-6 md:px-10 text-center">
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white drop-shadow-sm">
+                  <div className="px-6 md:px-10 text-center animate-slide-up">
+                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg mb-4">
                       {slide.title}
                     </h2>
-                    <p className="mt-2 text-white/90 text-sm md:text-base lg:text-lg max-w-2xl mx-auto">
+                    <p className="mt-3 text-white/95 text-base md:text-lg lg:text-xl max-w-2xl mx-auto font-medium drop-shadow-md">
                       {slide.subtitle}
                     </p>
-                    <div className="mt-4">
+                    <div className="mt-6">
                       <button 
                         onClick={() => window.scrollTo({ top: document.body.clientHeight / 4, behavior: 'smooth' })}
-                        className="bg-beatcrest-blue hover:bg-beatcrest-blue-dark text-white px-4 py-2 rounded-lg text-sm md:text-base"
+                        className="btn-primary text-base md:text-lg px-8 py-3 shadow-xl shadow-blue-500/30"
                       >
                         Explore Beats
                       </button>
@@ -314,139 +286,183 @@ export default function Home() {
             {/* Controls */}
             <button
               aria-label="Previous slide"
-              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-beatcrest-navy rounded-full w-9 h-9 flex items-center justify-center shadow"
+              className="absolute left-4 top-1/2 -translate-y-1/2 glass-dark text-white/80 hover:text-teal-400 rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100 border border-white/20"
               onClick={() => setActiveSlide((prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length)}
             >
-              ‹
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
             </button>
             <button
               aria-label="Next slide"
-              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-beatcrest-navy rounded-full w-9 h-9 flex items-center justify-center shadow"
+              className="absolute right-4 top-1/2 -translate-y-1/2 glass-dark text-white/80 hover:text-teal-400 rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100 border border-white/20"
               onClick={() => setActiveSlide((prev) => (prev + 1) % bannerSlides.length)}
             >
-              ›
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </button>
 
             {/* Indicators */}
-            <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2">
+            <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-2">
               {bannerSlides.map((_, idx) => (
                 <button
                   key={idx}
                   aria-label={`Go to slide ${idx + 1}`}
                   onClick={() => setActiveSlide(idx)}
-                  className={`h-2.5 rounded-full transition-all ${idx === activeSlide ? 'w-6 bg-white' : 'w-2.5 bg-white/60'}`}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    idx === activeSlide 
+                      ? 'w-8 bg-white shadow-lg' 
+                      : 'w-2 bg-white/50 hover:bg-white/70'
+                  }`}
                 />
               ))}
             </div>
           </div>
+          
           {/* Quick stats strip */}
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="rounded-xl bg-white shadow-sm border border-beatcrest-teal/20 p-4 text-center">
-              <div className="text-2xl">🎵</div>
-              <div className="mt-1 text-2xl font-bold text-beatcrest-navy">10k+</div>
-              <div className="text-xs text-beatcrest-navy/70">Beats Uploaded</div>
-            </div>
-            <div className="rounded-xl bg-white shadow-sm border border-beatcrest-teal/20 p-4 text-center">
-              <div className="text-2xl">🧑‍🎤</div>
-              <div className="mt-1 text-2xl font-bold text-beatcrest-navy">5k+</div>
-              <div className="text-xs text-beatcrest-navy/70">Artists & Buyers</div>
-            </div>
-            <div className="rounded-xl bg-white shadow-sm border border-beatcrest-teal/20 p-4 text-center">
-              <div className="text-2xl">💳</div>
-              <div className="mt-1 text-2xl font-bold text-beatcrest-navy">₦45k</div>
-              <div className="text-xs text-beatcrest-navy/70">Avg. Beat Price</div>
-            </div>
-            <div className="rounded-xl bg-white shadow-sm border border-beatcrest-teal/20 p-4 text-center">
-              <div className="text-2xl">⚡</div>
-              <div className="mt-1 text-2xl font-bold text-beatcrest-navy">Instant</div>
-              <div className="text-xs text-beatcrest-navy/70">Delivery</div>
-            </div>
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon: '🎵', value: '10k+', label: 'Beats Uploaded', color: 'from-blue-400 to-blue-600' },
+              { icon: '🧑‍🎤', value: '5k+', label: 'Artists & Buyers', color: 'from-teal-400 to-teal-600' },
+              { icon: '💳', value: '₦45k', label: 'Avg. Beat Price', color: 'from-orange-400 to-orange-600' },
+              { icon: '⚡', value: 'Instant', label: 'Delivery', color: 'from-purple-400 to-purple-600' }
+            ].map((stat, idx) => (
+              <div key={idx} className="glass-dark rounded-2xl p-6 text-center group hover:scale-105 transition-transform duration-300 border border-white/20">
+                <div className="text-3xl mb-2">{stat.icon}</div>
+                <div className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  {stat.value}
+                </div>
+                <div className="text-sm text-white/90 mt-1 font-medium">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
       {/* Hero Section */}
-      <section className="py-16 md:py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            {/* Feature badges */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <div className="rounded-xl border border-beatcrest-teal/20 bg-beatcrest-teal/5 p-4 flex items-start gap-3">
-                <div className="text-beatcrest-blue text-xl">🔍</div>
+      <section className="section-container pt-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Main Hero Layout - Left Hero, Right Stats */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 mb-20">
+              {/* Left: Hero Content */}
+              <div className="flex flex-col justify-center space-y-8">
                 <div>
-                  <div className="font-semibold text-beatcrest-navy">Powerful Search</div>
-                  <div className="text-sm text-beatcrest-navy/70">Filter by genre, BPM, key and more</div>
+                  <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+                    Beat operations, reimagined for creativity and artist delight.
+                  </h1>
+                  <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-xl">
+                    Our cloud-first music marketplace brings discovery, licensing, sales, and analytics into a single secure platform, delivering measurable impact in weeks — even in low-connectivity environments.
+                  </p>
+                  <button 
+                    onClick={() => navigate('/marketplace')}
+                    className="btn-primary text-lg px-8 py-4"
+                  >
+                    Explore BeatCrest Core
+                  </button>
                 </div>
               </div>
-              <div className="rounded-xl border border-beatcrest-teal/20 bg-beatcrest-teal/5 p-4 flex items-start gap-3">
-                <div className="text-beatcrest-orange text-xl">💼</div>
-                <div>
-                  <div className="font-semibold text-beatcrest-navy">Fair Pricing</div>
-                  <div className="text-sm text-beatcrest-navy/70">Transparent licensing and payouts</div>
-                </div>
-              </div>
-              <div className="rounded-xl border border-beatcrest-teal/20 bg-beatcrest-teal/5 p-4 flex items-start gap-3">
-                <div className="text-beatcrest-navy text-xl">🛡️</div>
-                <div>
-                  <div className="font-semibold text-beatcrest-navy">Secure Platform</div>
-                  <div className="text-sm text-beatcrest-navy/70">Protected payments and delivery</div>
+
+              {/* Right: Executive Snapshot */}
+              <div className="flex items-center justify-center lg:justify-end">
+                <div className="glass-dark rounded-3xl p-8 w-full max-w-md border border-white/20">
+                  <h3 className="text-2xl font-bold text-white mb-2">Executive Snapshot</h3>
+                  <p className="text-white/90 mb-8 text-sm leading-relaxed">
+                    Built for African music creators navigating distribution, royalties, and growth constraints.
+                  </p>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { value: '60%', desc: 'Target reduction in discovery-to-purchase time.', color: 'from-teal-400 to-teal-600' },
+                      { value: '99.5%', desc: 'Cloud + hybrid uptime backed by resilient architecture.', color: 'from-blue-400 to-blue-600' },
+                      { value: '80%', desc: 'Revenue accuracy via automated royalty validation.', color: 'from-teal-400 to-teal-600' }
+                    ].map((stat, idx) => (
+                      <div key={idx} className="glass-dark rounded-2xl p-5 border border-white/20 hover:border-teal-500/60 transition-all duration-300 hover:scale-105">
+                        <div className={`text-3xl md:text-4xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-2`}>
+                          {stat.value}
+                        </div>
+                        <p className="text-xs text-white/80 leading-relaxed">
+                          {stat.desc}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
+            
+            {/* Feature badges */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+              {[
+                { icon: '🔍', title: 'Powerful Search', desc: 'Filter by genre, BPM, key and more', gradient: 'from-blue-400 to-blue-600' },
+                { icon: '💼', title: 'Fair Pricing', desc: 'Transparent licensing and payouts', gradient: 'from-orange-400 to-orange-600' },
+                { icon: '🛡️', title: 'Secure Platform', desc: 'Protected payments and delivery', gradient: 'from-teal-400 to-teal-600' }
+              ].map((feature, idx) => (
+                <div key={idx} className="glass-dark rounded-2xl p-6 group hover:shadow-xl hover:border-teal-500/60 transition-all duration-300 border border-white/20">
+                  <div className="flex items-start gap-4">
+                    <div className={`text-3xl p-3 rounded-xl bg-gradient-to-br ${feature.gradient} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                      {feature.icon}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-bold text-lg text-white mb-1">{feature.title}</div>
+                      <div className="text-sm text-white/90">{feature.desc}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                <span className="text-beatcrest-blue">Discover</span>{" "}
-                <span className="text-beatcrest-navy">Amazing</span>{" "}
-                <span className="text-beatcrest-blue">Beats</span>
-              </h1>
-              <p className="text-lg md:text-xl lg:text-2xl text-beatcrest-navy/70 mb-10">
-                Connect with top producers and find your perfect sound
-              </p>
               
               {/* Search and Filters */}
-              <div className="flex flex-col md:flex-row gap-4 mb-8">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-beatcrest-teal" />
-                  <input
-                    type="text"
-                    placeholder="Search beats, producers, tags..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 border border-beatcrest-teal/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-beatcrest-blue focus:border-beatcrest-blue text-beatcrest-navy"
-                  />
+              <div className="max-w-4xl mx-auto mb-12">
+                <div className="glass-dark rounded-2xl p-6 border border-white/20">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-1 relative">
+                      <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/80" />
+                      <input
+                        type="text"
+                        placeholder="Search beats, producers, tags..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="input-field pl-12"
+                      />
+                    </div>
+                    <select
+                      value={selectedGenre}
+                      onChange={(e) => setSelectedGenre(e.target.value)}
+                      className="input-field min-w-[180px]"
+                    >
+                      <option value="All">All Genres</option>
+                      {genres.filter(g => g !== "All").map(genre => (
+                        <option key={genre} value={genre}>{genre}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={selectedPrice}
+                      onChange={(e) => setSelectedPrice(e.target.value)}
+                      className="input-field min-w-[180px]"
+                    >
+                      <option value="All">All Prices</option>
+                      <option value="Under ₦30,000">Under ₦30,000</option>
+                      <option value="₦30,000 - ₦50,000">₦30,000 - ₦50,000</option>
+                      <option value="Over ₦50,000">Over ₦50,000</option>
+                    </select>
+                  </div>
                 </div>
-                <select
-                  value={selectedGenre}
-                  onChange={(e) => setSelectedGenre(e.target.value)}
-                  className="px-4 py-3 border border-beatcrest-teal/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-beatcrest-blue focus:border-beatcrest-blue text-beatcrest-navy bg-white"
-                >
-                  <option value="All">All Genres</option>
-                  {genres.filter(g => g !== "All").map(genre => (
-                    <option key={genre} value={genre}>{genre}</option>
-                  ))}
-                </select>
-                <select
-                  value={selectedPrice}
-                  onChange={(e) => setSelectedPrice(e.target.value)}
-                  className="px-4 py-3 border border-beatcrest-teal/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-beatcrest-blue focus:border-beatcrest-blue text-beatcrest-navy bg-white"
-                >
-                  <option value="All">All Prices</option>
-                  <option value="Under ₦30,000">Under ₦30,000</option>
-                  <option value="₦30,000 - ₦50,000">₦30,000 - ₦50,000</option>
-                  <option value="Over ₦50,000">Over ₦50,000</option>
-                </select>
               </div>
             </div>
 
             {/* Category Navigation */}
-            <div className="flex gap-4 mb-8 border-b border-beatcrest-teal/20 pb-2">
+              <div className="flex gap-2 mb-10 pb-4 border-b-2 border-white/20 overflow-x-auto scrollbar-hide">
               {categories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setActiveCategory(category)}
-                  className={`px-4 py-2 font-medium transition-colors duration-200 ${
+                  className={`px-6 py-3 font-semibold rounded-xl whitespace-nowrap transition-all duration-300 ${
                     activeCategory === category
-                      ? 'text-beatcrest-blue border-b-2 border-beatcrest-blue bg-beatcrest-teal/5'
-                      : 'text-beatcrest-navy/70 hover:text-beatcrest-blue'
+                      ? 'bg-gradient-to-r from-teal-500 via-blue-500 to-teal-600 text-white shadow-lg shadow-teal-500/40 scale-105'
+                      : 'text-white/90 hover:text-teal-400 hover:bg-white/10'
                   }`}
                 >
                   {category}
@@ -455,13 +471,18 @@ export default function Home() {
             </div>
 
             {/* Beat Listings Header */}
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-beatcrest-navy">
-                All Beats ({filteredBeats.length})
-              </h2>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+              <div>
+                <h2 className="text-3xl font-bold text-white mb-1">
+                  All Beats
+                </h2>
+                <p className="text-white/90">
+                  {filteredBeats.length} {filteredBeats.length === 1 ? 'beat' : 'beats'} available
+                </p>
+              </div>
               <button 
                 onClick={() => setShowMoreFilters(!showMoreFilters)}
-                className="flex items-center gap-2 px-4 py-2 border border-beatcrest-teal/30 rounded-lg text-beatcrest-navy hover:bg-beatcrest-teal/10 transition-colors duration-200"
+                className="btn-secondary flex items-center gap-2"
               >
                 <Filter className="w-4 h-4" />
                 <span>More Filters</span>
@@ -470,15 +491,15 @@ export default function Home() {
 
             {/* More Filters Panel */}
             {showMoreFilters && (
-              <div className="mb-6 p-4 bg-beatcrest-teal/5 rounded-lg border border-beatcrest-teal/20">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="mb-8 glass-dark rounded-2xl p-6 animate-slide-up border border-white/20">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-beatcrest-navy mb-2">BPM Range</label>
-                    <input type="range" min="60" max="200" className="w-full" />
+                    <label className="block text-sm font-semibold text-white/90 mb-3">BPM Range</label>
+                    <input type="range" min="60" max="200" className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-teal-500" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-beatcrest-navy mb-2">Sort By</label>
-                    <select className="w-full px-3 py-2 border border-beatcrest-teal/30 rounded-lg text-beatcrest-navy bg-white">
+                    <label className="block text-sm font-semibold text-white/90 mb-3">Sort By</label>
+                    <select className="input-field">
                       <option>Newest First</option>
                       <option>Oldest First</option>
                       <option>Price: Low to High</option>
@@ -487,8 +508,11 @@ export default function Home() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-beatcrest-navy mb-2">Verified Only</label>
-                    <input type="checkbox" className="w-4 h-4 text-beatcrest-blue" />
+                    <label className="block text-sm font-semibold text-white/90 mb-3">Verified Only</label>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" className="w-5 h-5 text-teal-500 border-2 border-white/30 rounded focus:ring-2 focus:ring-teal-500 bg-white/10" />
+                      <span className="text-sm text-white/90">Show verified only</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -496,15 +520,18 @@ export default function Home() {
 
             {/* Loading skeletons */}
             {loadingBeats && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="rounded-2xl border border-beatcrest-teal/20 bg-white overflow-hidden shadow-sm animate-pulse">
-                    <div className="h-1.5 bg-beatcrest-teal/10" />
-                    <div className="h-72 bg-beatcrest-teal/10" />
-                    <div className="p-6 space-y-3">
-                      <div className="h-4 bg-beatcrest-teal/10 rounded" />
-                      <div className="h-3 bg-beatcrest-teal/10 rounded w-2/3" />
-                      <div className="h-3 bg-beatcrest-teal/10 rounded w-1/2" />
+                  <div key={i} className="beat-card animate-pulse">
+                    <div className="h-64 bg-gradient-to-br from-white/10 to-white/5" />
+                    <div className="p-6 space-y-4">
+                      <div className="h-6 bg-white/10 rounded-lg w-3/4" />
+                      <div className="h-4 bg-white/10 rounded w-1/2" />
+                      <div className="h-4 bg-white/10 rounded w-2/3" />
+                      <div className="flex gap-2">
+                        <div className="h-6 w-16 bg-white/10 rounded-full" />
+                        <div className="h-6 w-16 bg-white/10 rounded-full" />
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -512,180 +539,193 @@ export default function Home() {
             )}
 
             {/* Beats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
-              {filteredBeats.map((beat, idx) => (
-                <div 
-                  key={beat.id}
-                  className={`rounded-2xl p-[1px] bg-gradient-to-br from-beatcrest-teal/30 via-beatcrest-blue/20 to-transparent hover:from-beatcrest-blue/40 hover:via-beatcrest-teal/30 transition-all duration-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
-                  style={{ transitionDelay: `${idx * 40}ms` }}
-                >
-                  <div className="bg-white rounded-2xl border border-beatcrest-teal/20 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
-                  {/* Play Progress Bar */}
-                  <div className="h-1.5 bg-beatcrest-teal/20 relative">
-                    <div className="h-full bg-beatcrest-blue w-0"></div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-beatcrest-navy/60">
-                      0:00 / 0:00
-                    </div>
-                  </div>
-
-                  {/* (moved) Engagement & Actions now placed below thumbnail */}
-
-                  {/* Producer Info */}
-                  {(() => {
-                    const producerProfile = getProfileByUsername(beat.producerUsername);
-                    return (
-                      <div className="px-6 pb-4 flex items-center gap-3">
-                        <img 
-                          src={producerProfile?.profile_picture || `https://ui-avatars.com/api/?name=${beat.producerUsername}&background=random`}
-                          alt={producerProfile?.full_name || beat.producerUsername}
-                          className="w-10 h-10 rounded-full object-cover border-2 border-beatcrest-teal/20"
-                          onError={(e) => {
-                            // Fallback to gradient avatar if image fails
-                            e.currentTarget.style.display = 'none';
-                            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                            if (fallback) fallback.style.display = 'flex';
-                          }}
-                        />
-                        <div className="w-10 h-10 rounded-full bg-beatcrest-gradient flex items-center justify-center text-white text-sm font-bold hidden">
-                          {beat.producerUsername.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 flex-wrap">
-                            <span className="text-sm font-medium text-beatcrest-navy">{producerProfile?.full_name || beat.producerUsername}</span>
-                            <span className="text-xs text-beatcrest-navy/60">{beat.date}</span>
-                            {(producerProfile?.is_verified || beat.verified) && (
-                              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Verified</span>
-                            )}
-                          </div>
-                          {producerProfile && (
-                            <div className="text-xs text-beatcrest-navy/60 mt-0.5">
-                              {producerProfile.followers_count.toLocaleString()} followers
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Beat Title */}
-                  <div className="px-6 pb-3">
-                    <h3 className="text-xl font-bold text-beatcrest-navy">{beat.title}</h3>
-                  </div>
-
-                  {/* Description */}
-                  <div className="px-6 pb-4">
-                    <p className="text-base text-beatcrest-navy/70 leading-relaxed">{beat.description}</p>
-                  </div>
-
-                  {/* Tags */}
-                  <div className="px-6 pb-4 flex flex-wrap gap-2">
-                    <span className="text-xs px-2 py-1 bg-beatcrest-teal/10 text-beatcrest-navy rounded">{beat.genre}</span>
-                    <span className="text-xs px-2 py-1 bg-beatcrest-teal/10 text-beatcrest-navy rounded">{beat.bpm} BPM</span>
-                    <span className="text-xs px-2 py-1 bg-beatcrest-teal/10 text-beatcrest-navy rounded">{beat.key}</span>
-                    {beat.tags.map((tag, idx) => (
-                      <span key={idx} className="text-xs px-2 py-1 bg-beatcrest-teal/10 text-beatcrest-navy rounded">{tag}</span>
-                    ))}
-                  </div>
-
-                  {/* Cover Image */}
-                  <div className="relative group cursor-pointer" onClick={() => handlePlay(beat)}>
-                    <img
-                      src={beat.cover}
-                      alt={beat.title}
-                      loading="lazy"
-                      className="w-full h-72 object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3">
-                        <Play className="w-6 h-6 text-beatcrest-blue fill-current" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Engagement Metrics (below thumbnail) */}
-                  <div className="px-6 pt-3 pb-2 flex items-center gap-6 text-sm text-beatcrest-navy/70">
-                    <span>{beat.plays.toLocaleString()} plays</span>
-                    <span>{beat.likes.toLocaleString()} likes</span>
-                    <span>{beat.downloads.toLocaleString()} downloads</span>
-                  </div>
-
-                  {/* Interaction Buttons (below thumbnail) */}
-                  <div className="px-6 pb-4 flex items-center gap-4 flex-wrap">
-                    <button 
-                      onClick={() => handleLike(beat.id)}
-                      className={`flex items-center gap-1 transition-colors ${
-                        beat.isLiked 
-                          ? 'text-red-500 hover:text-red-600' 
-                          : 'text-beatcrest-navy hover:text-beatcrest-blue'
-                      }`}
-                    >
-                      <Heart className={`w-4 h-4 ${beat.isLiked ? 'fill-current' : ''}`} />
-                      <span className="text-sm">{beat.likes}</span>
-                    </button>
-                    <button 
-                      onClick={() => handleComment(beat.id)}
-                      className="flex items-center gap-1 text-beatcrest-navy hover:text-beatcrest-blue transition-colors"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      <span className="text-sm">Comment</span>
-                    </button>
-                    <button 
-                      onClick={() => handleShare(beat)}
-                      className="flex items-center gap-1 text-beatcrest-navy hover:text-beatcrest-blue transition-colors"
-                    >
-                      <Share2 className="w-4 h-4" />
-                      <span className="text-sm">Share</span>
-                    </button>
-                    <div className="ml-auto flex items-center gap-2">
-                      <span className="text-sm font-semibold text-beatcrest-navy">₦{beat.price.toLocaleString()}</span>
-                      <button 
-                        onClick={() => handleBuyNow(beat)}
-                        className="flex items-center gap-1 px-3 py-1 bg-beatcrest-blue text-white rounded-lg text-sm font-medium hover:bg-beatcrest-blue-dark transition-colors"
-                      >
-                        <ShoppingCart className="w-4 h-4" />
-                        <span>Buy</span>
-                      </button>
-                    </div>
-                  </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA Section */}
-            <div className="mt-12 rounded-2xl bg-beatcrest-gradient p-8 text-center text-white shadow">
-              <h3 className="text-2xl md:text-3xl font-bold">Ready to sell your first beat?</h3>
-              <p className="mt-2 text-white/90">Join thousands of producers earning on BeatCrest today.</p>
-              <button
-                onClick={() => navigate('/upload')}
-                className="mt-4 bg-white text-beatcrest-navy hover:text-beatcrest-blue px-5 py-3 rounded-xl font-semibold"
-              >
-                Upload a Beat
-              </button>
-            </div>
-
-            {filteredBeats.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-beatcrest-teal text-lg">No beats found matching your search criteria.</p>
+            {!loadingBeats && filteredBeats.length === 0 && (
+              <div className="text-center py-16">
+                <div className="text-6xl mb-4">🎵</div>
+                <h3 className="text-2xl font-bold text-white mb-2">No beats found</h3>
+                <p className="text-white/90">Try adjusting your filters or search terms</p>
               </div>
             )}
+
+            {!loadingBeats && filteredBeats.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredBeats.map((beat, idx) => (
+                  <div 
+                    key={beat.id}
+                    className="beat-card animate-fade-in"
+                    style={{ animationDelay: `${idx * 50}ms` }}
+                  >
+                    {/* Cover Image */}
+                    <div className="relative group cursor-pointer overflow-hidden" onClick={() => handlePlay(beat)}>
+                      <img
+                        src={beat.cover}
+                        alt={beat.title}
+                        loading="lazy"
+                        className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-full p-4 shadow-2xl transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                          <Play className="w-8 h-8 text-blue-600 fill-blue-600 ml-1" />
+                        </div>
+                      </div>
+                      {/* Progress Bar */}
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                        <div className="h-full bg-gradient-to-r from-blue-500 to-teal-500 w-0 transition-all duration-300"></div>
+                      </div>
+                    </div>
+
+                      {/* Beat Content */}
+                      <div className="p-6 space-y-4">
+                        {/* Producer Info */}
+                        {(() => {
+                          const producerProfile = getProfileByUsername(beat.producerUsername);
+                          return (
+                            <div className="flex items-center gap-3">
+                              {producerProfile?.profile_picture ? (
+                                <img 
+                                  src={producerProfile.profile_picture}
+                                  alt={producerProfile.full_name || beat.producerUsername}
+                                  className="w-10 h-10 rounded-full object-cover border-2 border-teal-500/50"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center text-white text-sm font-bold">
+                                  {beat.producerUsername.charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-sm font-semibold text-white truncate">{producerProfile?.full_name || beat.producerUsername}</span>
+                                  {(producerProfile?.is_verified || beat.verified) && (
+                                    <span className="badge-success text-xs px-2 py-0.5">✓ Verified</span>
+                                  )}
+                                </div>
+                                <div className="text-xs text-white/80 mt-0.5">{beat.date}</div>
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Beat Title */}
+                        <div>
+                          <h3 className="text-xl font-bold text-white mb-2 line-clamp-1">{beat.title}</h3>
+                          {beat.description && (
+                            <p className="text-sm text-white/90 leading-relaxed line-clamp-2">{beat.description}</p>
+                          )}
+                        </div>
+
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-2">
+                          <span className="badge-primary text-xs">{beat.genre}</span>
+                          <span className="badge bg-white/10 text-white/90 text-xs">{beat.bpm} BPM</span>
+                          {beat.key && <span className="badge bg-white/10 text-white/90 text-xs">{beat.key}</span>}
+                          {beat.tags?.slice(0, 2).map((tag, idx) => (
+                            <span key={idx} className="badge bg-white/10 text-white/90 text-xs">{tag}</span>
+                          ))}
+                        </div>
+
+                        {/* Engagement Metrics */}
+                        <div className="flex items-center gap-4 text-xs text-white/80 pt-2 border-t border-white/10">
+                          <span className="flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {beat.plays.toLocaleString()}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Heart className={`w-4 h-4 ${beat.isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+                            {beat.likes.toLocaleString()}
+                          </span>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex items-center justify-between pt-2">
+                          <div className="flex items-center gap-2">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleLike(beat.id);
+                              }}
+                              className={`p-2 rounded-lg transition-colors ${
+                                beat.isLiked 
+                                  ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/40' 
+                                  : 'bg-white/10 text-white/70 hover:bg-white/20 border border-white/20'
+                              }`}
+                            >
+                              <Heart className={`w-4 h-4 ${beat.isLiked ? 'fill-current' : ''}`} />
+                            </button>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleComment(beat.id);
+                              }}
+                              className="p-2 rounded-lg bg-white/10 text-white/70 hover:bg-white/20 border border-white/20 transition-colors"
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-lg font-bold text-white">₦{beat.price.toLocaleString()}</span>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleBuyNow(beat);
+                              }}
+                              className="btn-primary text-sm px-4 py-2 flex items-center gap-2"
+                            >
+                              <ShoppingCart className="w-4 h-4" />
+                              Buy
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+            {/* CTA Section */}
+            <div className="mt-16 rounded-3xl bg-gradient-to-br from-blue-600 via-blue-500 to-teal-500 p-12 text-center text-white shadow-2xl relative overflow-hidden">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMC41IiBvcGFjaXR5PSIwLjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20"></div>
+              <div className="relative z-10">
+                <h3 className="text-3xl md:text-4xl font-bold mb-4">Ready to sell your first beat?</h3>
+                <p className="text-lg text-white/90 mb-8 max-w-2xl mx-auto">Join thousands of producers earning on BeatCrest today.</p>
+                <button
+                  onClick={() => navigate('/upload')}
+                  className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  Upload a Beat Now
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-beatcrest-teal/20 bg-beatcrest-surface py-10 text-sm">
-        <div className="container mx-auto px-4 flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="text-beatcrest-teal">© {new Date().getFullYear()} BeatCrest. All rights reserved.</div>
+      <footer className="border-t border-white/10 glass-dark py-12 mt-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-600 via-teal-500 to-orange-500 flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-sm">BC</span>
+              </div>
+              <span className="text-lg font-bold gradient-text">BeatCrest</span>
+            </div>
+            <div className="text-sm text-white/90">
+              © {new Date().getFullYear()} BeatCrest. All rights reserved.
+            </div>
+          </div>
         </div>
       </footer>
 
       {/* Auth Modal */}
       {showAuthModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl glass-dark p-8 shadow-2xl border border-white/10">
             <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gradient">
+              <h3 className="text-2xl font-bold gradient-text">
                 {authMode === 'signin' ? 'Welcome Back' : 'Join BeatCrest'}
               </h3>
               <button 
@@ -695,16 +735,16 @@ export default function Home() {
                   setAuthFormData({ email: '', password: '', fullName: '', username: '', account_type: 'buyer' });
                   setAuthError('');
                 }} 
-                className="rounded-xl px-3 py-1 text-sm text-beatcrest-teal hover:bg-beatcrest-teal/10 transition-colors duration-200"
+                className="rounded-xl px-3 py-1 text-sm text-white/90 hover:text-white hover:bg-white/10 transition-colors duration-200"
               >
-                Close
+                ✕
               </button>
             </div>
             
             <form onSubmit={handleAuthSubmit} className="space-y-4">
               {authMode === 'signup' && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-beatcrest-navy">Username</label>
+                  <label className="mb-1 block text-sm font-semibold text-white/90">Username</label>
                   <input 
                     type="text" 
                     name="username"
@@ -718,7 +758,7 @@ export default function Home() {
               )}
               
               <div>
-                <label className="mb-1 block text-sm font-medium text-beatcrest-navy">Email</label>
+                <label className="mb-1 block text-sm font-semibold text-white/90">Email</label>
                 <input 
                   type="email" 
                   name="email"
@@ -731,7 +771,7 @@ export default function Home() {
               </div>
               
               <div>
-                <label className="mb-1 block text-sm font-medium text-beatcrest-navy">Password</label>
+                <label className="mb-1 block text-sm font-semibold text-white/90">Password</label>
                 <input 
                   type="password" 
                   name="password"
@@ -743,7 +783,7 @@ export default function Home() {
                   minLength={8}
                 />
                 {authMode === 'signup' && (
-                  <p className="text-xs text-beatcrest-teal mt-1">
+                  <p className="text-xs text-white/80 mt-1">
                     Must be at least 8 characters long
                   </p>
                 )}
@@ -752,7 +792,7 @@ export default function Home() {
               {authMode === 'signup' && (
                 <>
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-beatcrest-navy">I want to</label>
+                    <label className="mb-1 block text-sm font-semibold text-white/90">I want to</label>
                     <select
                       name="account_type"
                       value={authFormData.account_type}
@@ -763,7 +803,7 @@ export default function Home() {
                       <option value="buyer">Buy Beats (Artist/Buyer)</option>
                       <option value="producer">Sell Beats (Producer)</option>
                     </select>
-                    <p className="text-xs text-beatcrest-teal mt-1">
+                    <p className="text-xs text-white/80 mt-1">
                       {authFormData.account_type === 'producer' 
                         ? 'Producers can upload and sell beats' 
                         : 'Buyers can purchase and license beats'}
@@ -773,14 +813,14 @@ export default function Home() {
                   {/* Dashboard Assignment Indicator */}
                   <div className={`mt-4 p-4 rounded-lg border-2 transition-all duration-200 ${
                     authFormData.account_type === 'producer'
-                      ? 'bg-beatcrest-orange/10 border-beatcrest-orange/30'
-                      : 'bg-beatcrest-blue/10 border-beatcrest-blue/30'
+                      ? 'bg-orange-500/20 border-orange-500/40'
+                      : 'bg-blue-500/20 border-blue-500/40'
                   }`}>
                     <div className="flex items-start gap-3">
                       <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
                         authFormData.account_type === 'producer'
-                          ? 'bg-beatcrest-orange/20'
-                          : 'bg-beatcrest-blue/20'
+                          ? 'bg-orange-500/30'
+                          : 'bg-blue-500/30'
                       }`}>
                         {authFormData.account_type === 'producer' ? (
                           <span className="text-xl">🎵</span>
@@ -789,19 +829,19 @@ export default function Home() {
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-beatcrest-navy mb-1">
+                        <p className="text-sm font-medium text-white/90 mb-1">
                           You'll be assigned to:
                         </p>
                         <p className={`text-base font-semibold ${
                           authFormData.account_type === 'producer'
-                            ? 'text-beatcrest-orange'
-                            : 'text-beatcrest-blue'
+                            ? 'text-orange-400'
+                            : 'text-blue-400'
                         }`}>
                           {authFormData.account_type === 'producer' 
                             ? 'Producer Dashboard' 
                             : 'Buyer Dashboard'}
                         </p>
-                        <p className="text-xs text-beatcrest-teal mt-1">
+                        <p className="text-xs text-white/80 mt-1">
                           {authFormData.account_type === 'producer'
                             ? 'Upload beats, manage sales, and track earnings'
                             : 'Browse beats, make purchases, and manage licenses'}
@@ -813,7 +853,7 @@ export default function Home() {
               )}
               
               {authError && (
-                <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+                <div className="text-red-300 text-sm bg-red-500/20 border border-red-500/50 p-3 rounded-lg">
                   {authError}
                 </div>
               )}
@@ -821,10 +861,16 @@ export default function Home() {
               <button 
                 type="submit"
                 disabled={authLoading}
-                className="w-full inline-flex items-center justify-center rounded-2xl bg-beatcrest-blue px-5 py-3 text-white shadow-lg hover:bg-beatcrest-blue-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary w-full py-3"
               >
                 {authLoading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </span>
                 ) : (
                   <span className="font-medium">
                     {authMode === 'signin' ? 'Sign In' : 'Create Account'}
@@ -834,11 +880,11 @@ export default function Home() {
             </form>
             
             <div className="mt-6 text-center">
-              <p className="text-beatcrest-navy/70 text-sm">
+              <p className="text-white/90 text-sm">
                 {authMode === 'signin' ? "Don't have an account?" : "Already have an account?"}
                 <button 
                   onClick={switchAuthMode}
-                  className="ml-1 text-beatcrest-blue hover:text-beatcrest-blue-dark font-medium transition-colors duration-200"
+                  className="ml-1 text-teal-400 hover:text-teal-300 font-semibold transition-colors duration-200"
                 >
                   {authMode === 'signin' ? 'Sign up' : 'Sign in'}
                 </button>

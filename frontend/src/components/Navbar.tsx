@@ -106,48 +106,62 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="bg-beatcrest-surface shadow-sm border-b border-beatcrest-teal/20 backdrop-blur-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+      <nav className="sticky top-0 z-50 glass-dark border-b border-white/20 shadow-sm backdrop-blur-xl">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3">
-              <img 
-                src={logoImage}
-                alt="BeatCrest Logo" 
-                className="h-8 w-8 object-contain"
-                onLoad={() => {
-                  console.log('Navbar logo loaded successfully');
-                }}
-                onError={(e) => {
-                  console.error('Navbar logo failed to load:', (e.currentTarget as HTMLImageElement).src);
-                  // Fallback to gradient div if logo fails to load
-                  (e.currentTarget as HTMLImageElement).style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                }}
-              />
-              <div className="h-8 w-8 rounded-xl bg-beatcrest-gradient hidden"></div>
-              <span className="text-xl font-bold text-gradient">BeatCrest</span>
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="relative">
+                <img 
+                  src={logoImage}
+                  alt="BeatCrest Logo" 
+                  className="h-10 w-10 object-contain transition-transform duration-300 group-hover:scale-110"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = 'none';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 via-teal-500 to-orange-500 hidden items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-lg">BC</span>
+                </div>
+              </div>
+              <span className="text-2xl font-bold gradient-text hidden sm:block">BeatCrest</span>
             </Link>
 
             {/* Navigation Links */}
-            <div className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="text-beatcrest-navy hover:text-beatcrest-blue transition-colors duration-200 font-medium">
+            <div className="hidden lg:flex items-center space-x-1">
+              <Link 
+                to="/" 
+                className="px-4 py-2 rounded-lg text-white/95 hover:text-teal-400 hover:bg-white/10 font-medium transition-all duration-200"
+              >
                 Home
               </Link>
-              <Link to="/marketplace" className="text-beatcrest-navy hover:text-beatcrest-blue transition-colors duration-200 font-medium">
+              <Link 
+                to="/marketplace" 
+                className="px-4 py-2 rounded-lg text-white/95 hover:text-teal-400 hover:bg-white/10 font-medium transition-all duration-200"
+              >
                 Marketplace
               </Link>
               {user && user.account_type === 'admin' && (
-                <Link to="/admin" className="text-beatcrest-navy hover:text-beatcrest-blue transition-colors duration-200 font-medium">
+                <Link 
+                  to="/admin" 
+                  className="px-4 py-2 rounded-lg text-white/95 hover:text-teal-400 hover:bg-white/10 font-medium transition-all duration-200"
+                >
                   Admin
                 </Link>
               )}
               {user && (
                 <>
-                  <Link to="/upload" className="text-beatcrest-navy hover:text-beatcrest-blue transition-colors duration-200 font-medium">
+                  <Link 
+                    to="/upload" 
+                    className="px-4 py-2 rounded-lg text-white/95 hover:text-teal-400 hover:bg-white/10 font-medium transition-all duration-200"
+                  >
                     Upload
                   </Link>
-                  <Link to="/messages" className="text-beatcrest-navy hover:text-beatcrest-blue transition-colors duration-200 font-medium">
+                  <Link 
+                    to="/messages" 
+                    className="px-4 py-2 rounded-lg text-white/95 hover:text-teal-400 hover:bg-white/10 font-medium transition-all duration-200"
+                  >
                     Messages
                   </Link>
                 </>
@@ -155,26 +169,38 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Auth Buttons */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               {user ? (
                 <>
                   <NotificationDropdown />
+                  {user.profile_picture ? (
+                    <Link to={`/profile/${user.username}`} className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors">
+                      <img 
+                        src={user.profile_picture} 
+                        alt={user.username}
+                        className="h-8 w-8 rounded-full object-cover border-2 border-teal-500"
+                      />
+                      <span className="hidden md:block text-sm font-medium text-white">{user.username}</span>
+                    </Link>
+                  ) : (
+                    <Link to={`/profile/${user.username}`} className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center text-white font-semibold text-sm hover:shadow-lg transition-shadow">
+                      {user.username?.charAt(0).toUpperCase()}
+                    </Link>
+                  )}
                   <button 
                     onClick={logout}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
+                    className="px-4 py-2 text-sm font-medium text-white/95 hover:text-red-400 hover:bg-red-500/20 rounded-lg transition-all duration-200 border border-white/20 hover:border-red-500/50"
                   >
                     Sign Out
                   </button>
                 </>
               ) : (
-                <>
-                    <button 
-                        onClick={() => setShowAuthModal(true)}
-                        className="text-beatcrest-navy hover:text-beatcrest-blue transition-colors duration-200 font-medium px-4 py-2 rounded-lg hover:bg-beatcrest-teal/10"
-                      >
-                        Sign In
-                      </button>
-                </>
+                <button 
+                  onClick={() => setShowAuthModal(true)}
+                  className="btn-primary text-sm px-6 py-2.5"
+                >
+                  Sign In
+                </button>
               )}
             </div>
           </div>
@@ -183,27 +209,29 @@ const Navbar: React.FC = () => {
 
       {/* Authentication Modal */}
       {showAuthModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <div 
             ref={modalRef}
-            className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+            className="glass-dark rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4 animate-slide-up border border-white/10"
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gradient">
-                {authMode === 'signin' ? 'Sign In' : 'Create Account'}
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-bold gradient-text">
+                {authMode === 'signin' ? 'Welcome Back' : 'Get Started'}
               </h2>
-                  <button
-                    onClick={() => setShowAuthModal(false)}
-                    className="text-beatcrest-teal hover:text-beatcrest-navy transition-colors duration-200"
-                  >
-                    ✕
-                  </button>
+              <button
+                onClick={() => setShowAuthModal(false)}
+                className="text-white/90 hover:text-white transition-colors duration-200 p-2 hover:bg-white/10 rounded-lg"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
 
-            <form onSubmit={handleAuthSubmit} className="space-y-4">
+            <form onSubmit={handleAuthSubmit} className="space-y-5">
               {authMode === 'signup' && (
                 <div>
-                  <label className="block text-sm font-medium text-beatcrest-navy mb-1">
+                  <label className="block text-sm font-semibold text-white/90 mb-2">
                     Username
                   </label>
                   <input
@@ -213,13 +241,13 @@ const Navbar: React.FC = () => {
                     onChange={handleAuthInputChange}
                     required={authMode === 'signup'}
                     className="input-field"
-                    placeholder="Enter your username"
+                    placeholder="Choose a username"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-beatcrest-navy mb-1">
+                <label className="block text-sm font-semibold text-white/90 mb-2">
                   Email
                 </label>
                 <input
@@ -229,12 +257,12 @@ const Navbar: React.FC = () => {
                   onChange={handleAuthInputChange}
                   required
                   className="input-field"
-                  placeholder="Enter your email"
+                  placeholder="your.email@example.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-beatcrest-navy mb-1">
+                <label className="block text-sm font-semibold text-white/90 mb-2">
                   Password
                 </label>
                 <input
@@ -245,10 +273,10 @@ const Navbar: React.FC = () => {
                   required
                   minLength={8}
                   className="input-field"
-                  placeholder="At least 8 characters"
+                  placeholder="••••••••"
                 />
                 {authMode === 'signup' && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-white/80 mt-2">
                     Must be at least 8 characters long
                   </p>
                 )}
@@ -257,7 +285,7 @@ const Navbar: React.FC = () => {
               {authMode === 'signup' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-beatcrest-navy mb-1">
+                    <label className="block text-sm font-semibold text-white/90 mb-2">
                       I want to
                     </label>
                     <select
@@ -270,45 +298,40 @@ const Navbar: React.FC = () => {
                       <option value="buyer">Buy Beats (Artist/Buyer)</option>
                       <option value="producer">Sell Beats (Producer)</option>
                     </select>
-                    <p className="text-xs text-beatcrest-teal mt-1">
-                      {authFormData.account_type === 'producer' 
-                        ? 'Producers can upload and sell beats' 
-                        : 'Buyers can purchase and license beats'}
-                    </p>
                   </div>
                   
                   {/* Dashboard Assignment Indicator */}
-                  <div className={`mt-4 p-4 rounded-lg border-2 transition-all duration-200 ${
+                  <div className={`p-5 rounded-xl border-2 transition-all duration-300 ${
                     authFormData.account_type === 'producer'
-                      ? 'bg-beatcrest-orange/10 border-beatcrest-orange/30'
-                      : 'bg-beatcrest-blue/10 border-beatcrest-blue/30'
+                      ? 'bg-orange-500/20 border-orange-500/40'
+                      : 'bg-blue-500/20 border-blue-500/40'
                   }`}>
-                    <div className="flex items-start gap-3">
-                      <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
+                    <div className="flex items-start gap-4">
+                      <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
                         authFormData.account_type === 'producer'
-                          ? 'bg-beatcrest-orange/20'
-                          : 'bg-beatcrest-blue/20'
+                          ? 'bg-gradient-to-br from-orange-500 to-orange-600'
+                          : 'bg-gradient-to-br from-blue-500 to-blue-600'
                       }`}>
                         {authFormData.account_type === 'producer' ? (
-                          <span className="text-xl">🎵</span>
+                          <span className="text-2xl">🎵</span>
                         ) : (
-                          <span className="text-xl">🛒</span>
+                          <span className="text-2xl">🛒</span>
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-beatcrest-navy mb-1">
-                          You'll be assigned to:
+                        <p className="text-sm font-medium text-white/90 mb-1">
+                          You'll access:
                         </p>
-                        <p className={`text-base font-semibold ${
+                        <p className={`text-lg font-bold ${
                           authFormData.account_type === 'producer'
-                            ? 'text-beatcrest-orange'
-                            : 'text-beatcrest-blue'
+                            ? 'text-orange-400'
+                            : 'text-blue-400'
                         }`}>
                           {authFormData.account_type === 'producer' 
                             ? 'Producer Dashboard' 
                             : 'Buyer Dashboard'}
                         </p>
-                        <p className="text-xs text-beatcrest-teal mt-1">
+                        <p className="text-xs text-white/80 mt-2">
                           {authFormData.account_type === 'producer'
                             ? 'Upload beats, manage sales, and track earnings'
                             : 'Browse beats, make purchases, and manage licenses'}
@@ -320,29 +343,39 @@ const Navbar: React.FC = () => {
               )}
 
               {authError && (
-                <div className="text-sm text-red-600 bg-red-50 p-3 rounded">
+                <div className="p-4 rounded-xl bg-red-500/20 border-2 border-red-500/50 text-sm text-red-300 font-medium">
                   {authError}
                 </div>
               )}
 
-              <Button
+              <button
                 type="submit"
-                className="w-full bg-beatcrest-blue hover:bg-beatcrest-blue-dark text-white"
+                className="btn-primary w-full text-base font-semibold py-3"
                 disabled={authLoading}
               >
-                {authLoading ? 'Processing...' : authMode === 'signin' ? 'Sign In' : 'Create Account'}
-              </Button>
+                {authLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </span>
+                ) : (
+                  authMode === 'signin' ? 'Sign In' : 'Create Account'
+                )}
+              </button>
             </form>
 
-            <div className="mt-4 text-center">
+            <div className="mt-6 text-center">
               <button
                 onClick={switchAuthMode}
-                className="text-beatcrest-blue hover:text-beatcrest-blue-dark text-sm"
+                className="text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors"
               >
                 {authMode === 'signin' 
-                  ? "Don't have an account? Sign up" 
-                  : "Already have an account? Sign in"
+                  ? "Don't have an account? " : "Already have an account? "
                 }
+                <span className="font-semibold underline">{authMode === 'signin' ? 'Sign up' : 'Sign in'}</span>
               </button>
             </div>
           </div>

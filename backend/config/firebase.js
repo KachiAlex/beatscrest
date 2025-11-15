@@ -69,7 +69,8 @@ const COLLECTIONS = {
   PURCHASES: 'purchases',
   COMMENTS: 'comments',
   MESSAGES: 'messages',
-  NOTIFICATIONS: 'notifications'
+  NOTIFICATIONS: 'notifications',
+  TENANTS: 'tenants'
 };
 
 module.exports = {

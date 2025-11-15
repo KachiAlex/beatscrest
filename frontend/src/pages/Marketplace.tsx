@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, Filter, Play, Heart, ShoppingCart, Music } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -8,6 +8,7 @@ import { Beat } from '../types';
 import apiService from '../services/api';
 
 export default function Marketplace() {
+  const navigate = useNavigate();
   const [beats, setBeats] = useState<Beat[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -65,27 +66,31 @@ export default function Marketplace() {
   const genres = ['Hip Hop', 'R&B', 'Afrobeats', 'Pop', 'Trap', 'Drill', 'Amapiano', 'Gospel', 'Jazz', 'Electronic'];
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen pt-20">
+      <div className="section-container">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Beat Marketplace</h1>
-          <p className="text-lg text-gray-600">Discover and purchase amazing beats from talented producers</p>
+        <div className="mb-12 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            Beat <span className="gradient-text">Marketplace</span>
+          </h1>
+          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            Discover and purchase amazing beats from talented producers worldwide
+          </p>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <div className="card-elevated mb-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             {/* Search */}
             <div className="lg:col-span-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
                 <input
                   type="text"
-                  placeholder="Search beats..."
+                  placeholder="Search beats, producers..."
                   value={filters.search}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="input-field pl-12"
                 />
               </div>
             </div>
@@ -95,7 +100,7 @@ export default function Marketplace() {
               <select
                 value={filters.genre}
                 onChange={(e) => handleFilterChange('genre', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="input-field"
               >
                 <option value="">All Genres</option>
                 {genres.map(genre => (
@@ -111,7 +116,7 @@ export default function Marketplace() {
                 placeholder="Min Price"
                 value={filters.minPrice}
                 onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="input-field"
               />
             </div>
 
@@ -122,7 +127,7 @@ export default function Marketplace() {
                 placeholder="Max Price"
                 value={filters.maxPrice}
                 onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="input-field"
               />
             </div>
 
@@ -133,7 +138,7 @@ export default function Marketplace() {
                 placeholder="BPM"
                 value={filters.bpm}
                 onChange={(e) => handleFilterChange('bpm', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="input-field"
               />
             </div>
           </div>
@@ -142,108 +147,105 @@ export default function Marketplace() {
         {/* Beats Grid */}
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : beats.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">🎵</div>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">No beats found</h3>
+            <p className="text-slate-600">Try adjusting your filters or search terms</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {beats.map((beat) => (
-              <Card key={beat.id} className="beat-card group">
-                <div className="relative">
-                  {/* Beat Thumbnail */}
-                  <div className="aspect-square bg-gradient-to-br from-purple-100 via-teal-100 to-orange-100 relative overflow-hidden">
-                    {beat.thumbnail_url ? (
-                      <img
-                        src={beat.thumbnail_url}
-                        alt={beat.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Music className="h-16 w-16 text-teal-400" />
-                      </div>
-                    )}
-                    
-                    {/* Play Button Overlay */}
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
-                      <Button
-                        size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white text-teal-600 hover:bg-gray-100"
-                      >
-                        <Play className="h-4 w-4" />
-                      </Button>
+            {beats.map((beat, idx) => (
+              <Link key={beat.id} to={`/beat/${beat.id}`} className="beat-card group animate-fade-in" style={{ animationDelay: `${idx * 50}ms` }}>
+                {/* Beat Thumbnail */}
+                <div className="relative aspect-square bg-gradient-to-br from-blue-100 via-teal-100 to-orange-100 overflow-hidden rounded-t-2xl">
+                  {beat.thumbnail_url ? (
+                    <img
+                      src={beat.thumbnail_url}
+                      alt={beat.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Music className="h-20 w-20 text-slate-300" />
                     </div>
-
-                    {/* Price Badge */}
-                    <div className="absolute top-3 right-3">
-                      <Badge className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 text-white">
-                        ₦{beat.price.toLocaleString()}
-                      </Badge>
+                  )}
+                  
+                  {/* Play Button Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="bg-white/95 backdrop-blur-sm rounded-full p-4 shadow-2xl transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                      <Play className="w-6 h-6 text-blue-600 fill-blue-600 ml-1" />
                     </div>
                   </div>
 
-                  <CardContent className="p-4">
-                    {/* Beat Info */}
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-lg truncate">{beat.title}</h3>
-                      <p className="text-sm text-gray-600 truncate">{beat.producer_name}</p>
-                      
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-1">
-                        {beat.genre && (
-                          <Badge variant="outline" className="text-xs">
-                            {beat.genre}
-                          </Badge>
-                        )}
-                        {beat.bpm && (
-                          <Badge variant="outline" className="text-xs">
-                            {beat.bpm} BPM
-                          </Badge>
-                        )}
-                      </div>
-
-                      {/* Stats */}
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <div className="flex items-center space-x-4">
-                          <span>{beat.likes_count} likes</span>
-                          <span>{beat.plays_count} plays</span>
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex items-center justify-between pt-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleLike(beat.id)}
-                          className={`flex items-center space-x-1 ${
-                            beat.is_liked ? 'text-red-500' : 'text-gray-500'
-                          }`}
-                        >
-                          <Heart className={`h-4 w-4 ${beat.is_liked ? 'fill-current' : ''}`} />
-                          <span>Like</span>
-                        </Button>
-
-                        <Link to={`/beat/${beat.id}`}>
-                          <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
-                            <ShoppingCart className="h-4 w-4 mr-1" />
-                            Buy Now
-                          </Button>
-                        </Link>
-                      </div>
+                  {/* Price Badge */}
+                  <div className="absolute top-4 right-4">
+                    <div className="bg-gradient-to-r from-blue-600 to-teal-500 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg">
+                      ₦{beat.price.toLocaleString()}
                     </div>
-                  </CardContent>
+                  </div>
                 </div>
-              </Card>
-            ))}
-          </div>
-        )}
 
-        {/* Empty State */}
-        {!loading && beats.length === 0 && (
-          <div className="text-center py-20">
-            <Music className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No beats found</h3>
-            <p className="text-gray-600">Try adjusting your filters or search terms</p>
+                {/* Beat Info */}
+                <div className="p-6 space-y-3">
+                  <div>
+                    <h3 className="font-bold text-lg text-slate-900 truncate mb-1">{beat.title}</h3>
+                    <p className="text-sm text-slate-600 truncate">{beat.producer_name || 'Unknown Producer'}</p>
+                  </div>
+                  
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-2">
+                    {beat.genre && (
+                      <span className="badge-primary text-xs">{beat.genre}</span>
+                    )}
+                    {beat.bpm && (
+                      <span className="badge bg-slate-100 text-slate-700 text-xs">{beat.bpm} BPM</span>
+                    )}
+                  </div>
+
+                  {/* Stats */}
+                  <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+                    <span className="flex items-center gap-1">
+                      <Heart className={`w-4 h-4 ${beat.is_liked ? 'fill-red-500 text-red-500' : ''}`} />
+                      {beat.likes_count || 0}
+                    </span>
+                    <span>{beat.plays_count || 0} plays</span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center justify-between pt-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleLike(beat.id);
+                      }}
+                      className={`p-2 rounded-lg transition-colors ${
+                        beat.is_liked 
+                          ? 'bg-red-50 text-red-600 hover:bg-red-100' 
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      <Heart className={`h-4 w-4 ${beat.is_liked ? 'fill-current' : ''}`} />
+                    </Button>
+
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate(`/beat/${beat.id}`);
+                      }}
+                      className="btn-primary text-sm px-4 py-2 flex items-center gap-2"
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      Buy Now
+                    </button>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         )}
       </div>

@@ -255,23 +255,28 @@ export default function BeatDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-beatcrest-blue"></div>
+      <div className="min-h-screen pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading beat...</p>
+        </div>
       </div>
     );
   }
 
   if (!beat) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
-        <div className="text-center">
-          <Music className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Beat Not Found</h2>
-          <p className="text-gray-600 mb-4">The beat you're looking for doesn't exist or has been removed.</p>
+      <div className="min-h-screen pt-20 flex items-center justify-center">
+        <div className="text-center animate-fade-in">
+          <div className="p-6 rounded-full bg-slate-100 w-24 h-24 flex items-center justify-center mx-auto mb-6">
+            <Music className="h-12 w-12 text-slate-400" />
+          </div>
+          <h2 className="text-3xl font-bold text-slate-900 mb-3">Beat Not Found</h2>
+          <p className="text-slate-600 mb-6 text-lg">The beat you're looking for doesn't exist or has been removed.</p>
           <Link to="/marketplace">
-            <Button className="bg-beatcrest-blue hover:bg-beatcrest-blue-dark">
+            <button className="btn-primary">
               Browse Beats
-            </Button>
+            </button>
           </Link>
         </div>
       </div>
@@ -279,158 +284,151 @@ export default function BeatDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen pt-20">
+      <div className="section-container">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Beat Header */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex-1">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{beat.title}</h1>
-                    <Link 
-                      to={`/profile/${beat.producer_name}`}
-                      className="text-lg text-purple-600 hover:text-purple-700 font-medium"
-                    >
-                      by {beat.producer_name}
-                    </Link>
-                    {feedbackStats && (
-                      <div className="flex items-center gap-2 mt-2">
-                        <StarRating
-                          rating={Math.round(feedbackStats.average_rating)}
-                          readonly
-                          size="sm"
-                          showValue
-                        />
-                        <span className="text-sm text-gray-500">
-                          ({feedbackStats.total_ratings} {feedbackStats.total_ratings === 1 ? 'review' : 'reviews'})
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-purple-600 mb-2">
-                      ₦{beat.price.toLocaleString()}
+            <div className="card-elevated">
+              <div className="flex flex-col md:flex-row items-start justify-between gap-6 mb-8">
+                <div className="flex-1">
+                  <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-3">{beat.title}</h1>
+                  <Link 
+                    to={`/profile/${beat.producer_name}`}
+                    className="text-lg text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-2 hover:underline transition-colors"
+                  >
+                    <span>by {beat.producer_name}</span>
+                    <span className="text-sm">→</span>
+                  </Link>
+                  {feedbackStats && (
+                    <div className="flex items-center gap-3 mt-4">
+                      <StarRating
+                        rating={Math.round(feedbackStats.average_rating)}
+                        readonly
+                        size="sm"
+                        showValue
+                      />
+                      <span className="text-sm text-slate-600 font-medium">
+                        ({feedbackStats.total_ratings} {feedbackStats.total_ratings === 1 ? 'review' : 'reviews'})
+                      </span>
                     </div>
-                    <Button 
-                      onClick={handlePurchase}
-                      className="w-full bg-purple-600 hover:bg-purple-700"
-                    >
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      {user ? 'Buy Now' : 'Sign in to Purchase'}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Audio Player */}
-                <div className="bg-gray-100 rounded-lg p-4 mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                      <Button
-                        onClick={() => setIsPlaying(!isPlaying)}
-                        className="bg-purple-600 hover:bg-purple-700"
-                      >
-                        {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                      </Button>
-                      <div>
-                        <div className="font-medium">Preview</div>
-                        <div className="text-sm text-gray-500">30 seconds</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <Button
-                        variant="ghost"
-                        onClick={handleLike}
-                        className={`flex items-center space-x-1 ${
-                          beat.is_liked ? 'text-red-500' : 'text-gray-500'
-                        }`}
-                      >
-                        <Heart className={`h-4 w-4 ${beat.is_liked ? 'fill-current' : ''}`} />
-                        <span>{beat.likes_count}</span>
-                      </Button>
-                      <Button variant="ghost" className="text-gray-500">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {/* Progress Bar */}
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-purple-600 h-2 rounded-full" style={{ width: '30%' }}></div>
-                  </div>
-                </div>
-
-                {/* Beat Info */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{beat.bpm || 'N/A'}</div>
-                    <div className="text-sm text-gray-500">BPM</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{beat.key || 'N/A'}</div>
-                    <div className="text-sm text-gray-500">Key</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{beat.likes_count}</div>
-                    <div className="text-sm text-gray-500">Likes</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{beat.plays_count}</div>
-                    <div className="text-sm text-gray-500">Plays</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">
-                      {feedbackStats ? feedbackStats.average_rating.toFixed(1) : 'N/A'}
-                    </div>
-                    <div className="text-sm text-gray-500">Rating</div>
-                  </div>
-                </div>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2">
-                  {beat.genre && (
-                    <Badge className="bg-purple-100 text-purple-800">
-                      {beat.genre}
-                    </Badge>
                   )}
-                  {beat.tags?.map((tag, index) => (
-                    <Badge key={index} variant="outline">
-                      {tag}
-                    </Badge>
-                  ))}
                 </div>
-              </CardContent>
-            </Card>
+                <div className="text-right w-full md:w-auto">
+                  <div className="text-4xl font-bold gradient-text mb-4">
+                    ₦{beat.price.toLocaleString()}
+                  </div>
+                  <button 
+                    onClick={handlePurchase}
+                    className="btn-primary w-full md:w-auto px-8 py-3 flex items-center justify-center gap-2 text-base font-semibold"
+                  >
+                    <ShoppingCart className="h-5 w-5" />
+                    {user ? 'Buy Now' : 'Sign in to Purchase'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Audio Player */}
+              <div className="bg-gradient-to-br from-slate-100 to-blue-50/50 rounded-2xl p-6 mb-6 border-2 border-slate-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => setIsPlaying(!isPlaying)}
+                      className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110"
+                    >
+                      {isPlaying ? <Pause className="h-6 w-6 fill-current" /> : <Play className="h-6 w-6 fill-current ml-1" />}
+                    </button>
+                    <div>
+                      <div className="font-bold text-slate-900">Preview</div>
+                      <div className="text-sm text-slate-600 font-medium">30 seconds</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleLike}
+                      className={`p-3 rounded-xl transition-colors flex items-center gap-2 ${
+                        beat.is_liked 
+                          ? 'bg-red-50 text-red-600 hover:bg-red-100' 
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      <Heart className={`h-5 w-5 ${beat.is_liked ? 'fill-current' : ''}`} />
+                      <span className="font-semibold">{beat.likes_count || 0}</span>
+                    </button>
+                    <button className="p-3 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+                      <Share2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Progress Bar */}
+                <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                  <div className="bg-gradient-to-r from-blue-600 to-teal-500 h-2 rounded-full transition-all duration-300" style={{ width: '30%' }}></div>
+                </div>
+              </div>
+
+              {/* Beat Info */}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6 pt-6 border-t border-slate-200">
+                <div className="text-center p-4 rounded-xl bg-slate-50">
+                  <div className="text-3xl font-bold gradient-text mb-1">{beat.bpm || 'N/A'}</div>
+                  <div className="text-sm text-slate-600 font-medium">BPM</div>
+                </div>
+                <div className="text-center p-4 rounded-xl bg-slate-50">
+                  <div className="text-3xl font-bold gradient-text mb-1">{beat.key || 'N/A'}</div>
+                  <div className="text-sm text-slate-600 font-medium">Key</div>
+                </div>
+                <div className="text-center p-4 rounded-xl bg-slate-50">
+                  <div className="text-3xl font-bold text-slate-900 mb-1">{beat.likes_count || 0}</div>
+                  <div className="text-sm text-slate-600 font-medium">Likes</div>
+                </div>
+                <div className="text-center p-4 rounded-xl bg-slate-50">
+                  <div className="text-3xl font-bold text-slate-900 mb-1">{beat.plays_count || 0}</div>
+                  <div className="text-sm text-slate-600 font-medium">Plays</div>
+                </div>
+                <div className="text-center p-4 rounded-xl bg-slate-50">
+                  <div className="text-3xl font-bold gradient-text mb-1">
+                    {feedbackStats ? feedbackStats.average_rating.toFixed(1) : 'N/A'}
+                  </div>
+                  <div className="text-sm text-slate-600 font-medium">Rating</div>
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-200">
+                {beat.genre && (
+                  <span className="badge-primary text-sm">{beat.genre}</span>
+                )}
+                {beat.tags?.map((tag, index) => (
+                  <span key={index} className="badge bg-slate-100 text-slate-700 text-sm">{tag}</span>
+                ))}
+              </div>
+            </div>
 
             {/* Description */}
             {beat.description && (
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-4">Description</h3>
-                  <p className="text-gray-700 leading-relaxed">{beat.description}</p>
-                </CardContent>
-              </Card>
+              <div className="card-elevated">
+                <h3 className="text-2xl font-bold text-slate-900 mb-4">Description</h3>
+                <p className="text-slate-700 leading-relaxed text-lg">{beat.description}</p>
+              </div>
             )}
 
             {/* Comments */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">Comments</h3>
-                
-                {/* Add Comment */}
-                {user && (
-                  <form onSubmit={handleComment} className="mb-6">
-                    <div className="flex space-x-2">
-                      <input
-                        type="text"
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        placeholder="Add a comment..."
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        disabled={submittingComment}
-                      />
+            <div className="card-elevated">
+              <h3 className="text-2xl font-bold text-slate-900 mb-6">Comments</h3>
+              
+              {/* Add Comment */}
+              {user && (
+                <form onSubmit={handleComment} className="mb-8">
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      placeholder="Add a comment..."
+                      className="flex-1 input-field"
+                      disabled={submittingComment}
+                    />
                       <Button 
                         type="submit" 
                         disabled={!comment.trim() || submittingComment}
@@ -461,119 +459,118 @@ export default function BeatDetail() {
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+            </div>
 
             {/* Feedback Section */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold">Reviews & Ratings</h3>
-                  {user && !showFeedbackForm && (
-                    <Button
-                      onClick={() => setShowFeedbackForm(true)}
-                      className="bg-purple-600 hover:bg-purple-700"
-                    >
-                      <Star className="h-4 w-4 mr-2" />
-                      Write a Review
-                    </Button>
-                  )}
+            <div className="card-elevated">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-slate-900">Reviews & Ratings</h3>
+                {user && !showFeedbackForm && (
+                  <button
+                    onClick={() => setShowFeedbackForm(true)}
+                    className="btn-primary flex items-center gap-2"
+                  >
+                    <Star className="h-5 w-5" />
+                    Write a Review
+                  </button>
+                )}
+              </div>
+
+              {/* Feedback Stats */}
+              {feedbackStats && (
+                <div className="mb-6">
+                  <FeedbackStatsComponent stats={feedbackStats} />
                 </div>
+              )}
 
-                {/* Feedback Stats */}
-                {feedbackStats && (
-                  <div className="mb-6">
-                    <FeedbackStatsComponent stats={feedbackStats} />
-                  </div>
-                )}
+              {/* Feedback Form */}
+              {showFeedbackForm && user && (
+                <div className="mb-6">
+                  <FeedbackForm
+                    onSubmit={handleSubmitFeedback}
+                    onCancel={handleCancelFeedback}
+                    initialRating={editingFeedback?.rating || 0}
+                    initialComment={editingFeedback?.comment || ''}
+                    isEditing={!!editingFeedback}
+                    loading={submittingFeedback}
+                  />
+                </div>
+              )}
 
-                {/* Feedback Form */}
-                {showFeedbackForm && user && (
-                  <div className="mb-6">
-                    <FeedbackForm
-                      onSubmit={handleSubmitFeedback}
-                      onCancel={handleCancelFeedback}
-                      initialRating={editingFeedback?.rating || 0}
-                      initialComment={editingFeedback?.comment || ''}
-                      isEditing={!!editingFeedback}
-                      loading={submittingFeedback}
-                    />
-                  </div>
-                )}
-
-                {/* Feedback List */}
-                <FeedbackList
-                  feedback={feedback}
-                  currentUserId={user?.id}
-                  onEdit={handleEditFeedback}
-                  onDelete={handleDeleteFeedback}
-                  loading={feedbackLoading}
-                />
-              </CardContent>
-            </Card>
+              {/* Feedback List */}
+              <FeedbackList
+                feedback={feedback}
+                currentUserId={user?.id}
+                onEdit={handleEditFeedback}
+                onDelete={handleDeleteFeedback}
+                loading={feedbackLoading}
+              />
+            </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Producer Info */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Producer</h3>
-                <div className="flex items-center space-x-3 mb-4">
+            <div className="card-elevated">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Producer</h3>
+              <div className="flex items-center gap-3 mb-4">
+                {beat.producer_picture ? (
                   <img
-                    src={beat.producer_picture || 'https://via.placeholder.com/60'}
+                    src={beat.producer_picture}
                     alt={beat.producer_name}
-                    className="w-15 h-15 rounded-full"
+                    className="w-16 h-16 rounded-full object-cover border-2 border-slate-200"
                   />
-                  <div>
-                    <Link 
-                      to={`/profile/${beat.producer_name}`}
-                      className="font-medium text-purple-600 hover:text-purple-700"
-                    >
-                      {beat.producer_name}
-                    </Link>
-                    <div className="text-sm text-gray-500">Producer</div>
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center border-2 border-slate-200">
+                    <span className="text-white font-bold text-lg">{beat.producer_name?.charAt(0).toUpperCase()}</span>
                   </div>
+                )}
+                <div>
+                  <Link 
+                    to={`/profile/${beat.producer_name}`}
+                    className="font-bold text-blue-600 hover:text-blue-700 text-lg"
+                  >
+                    {beat.producer_name}
+                  </Link>
+                  <div className="text-sm text-slate-600">Producer</div>
                 </div>
-                <Link to={`/profile/${beat.producer_name}`}>
-                  <Button variant="outline" className="w-full">
-                    View Profile
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+              </div>
+              <Link to={`/profile/${beat.producer_name}`}>
+                <button className="btn-secondary w-full">
+                  View Profile
+                </button>
+              </Link>
+            </div>
 
             {/* Purchase Info */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Purchase Details</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Beat Price</span>
-                    <span className="font-medium">₦{beat.price.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Platform Fee (5%)</span>
-                    <span className="font-medium">₦{(beat.price * 0.05).toLocaleString()}</span>
-                  </div>
-                  <hr />
-                  <div className="flex justify-between font-semibold">
-                    <span>Total</span>
-                    <span>₦{beat.price.toLocaleString()}</span>
-                  </div>
+            <div className="card-elevated">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Purchase Details</h3>
+              <div className="space-y-3 mb-4">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Beat Price</span>
+                  <span className="font-bold text-slate-900">₦{beat.price.toLocaleString()}</span>
                 </div>
-                <div className="mt-4 text-sm text-gray-500">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Clock className="h-4 w-4" />
-                    <span>Instant download after purchase</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Music className="h-4 w-4" />
-                    <span>Full quality WAV/MP3 files</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Platform Fee (5%)</span>
+                  <span className="font-bold text-slate-900">₦{(beat.price * 0.05).toLocaleString()}</span>
                 </div>
-              </CardContent>
-            </Card>
+                <hr className="border-slate-200" />
+                <div className="flex justify-between font-bold text-lg">
+                  <span className="text-slate-900">Total</span>
+                  <span className="gradient-text">₦{beat.price.toLocaleString()}</span>
+                </div>
+              </div>
+              <div className="text-sm text-slate-600 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                  <span>Instant download after purchase</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Music className="h-4 w-4 text-blue-600" />
+                  <span>Full quality WAV/MP3 files</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

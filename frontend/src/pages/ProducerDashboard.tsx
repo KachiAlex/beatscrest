@@ -178,10 +178,10 @@ export default function ProducerDashboard() {
   // Show loading while checking auth
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen pt-20 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
         </div>
       </div>
     );
@@ -190,9 +190,9 @@ export default function ProducerDashboard() {
   // Show message if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen pt-20 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">Please sign in to access the dashboard.</p>
+          <p className="text-slate-600">Please sign in to access the dashboard.</p>
         </div>
       </div>
     );
@@ -317,20 +317,26 @@ export default function ProducerDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen pt-20">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4">
+      <header className="glass border-b border-slate-200/50 sticky top-20 z-40">
+        <div className="section-container py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <SimpleLogo size={40} />
-              <h1 className="text-2xl font-bold text-gray-900">Producer Dashboard</h1>
+            <div className="flex items-center gap-4">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-teal-500">
+                <span className="text-white text-xl">🎵</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">Producer Dashboard</h1>
+                <p className="text-sm text-slate-600">Manage your beats and earnings</p>
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => navigate('/upload')}
-                className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg"
+                className="btn-primary flex items-center gap-2"
               >
+                <span>➕</span>
                 Upload New Beat
               </button>
               
@@ -338,15 +344,21 @@ export default function ProducerDashboard() {
               <div className="relative profile-dropdown">
                 <button 
                   onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                  className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-2 p-2 rounded-xl hover:bg-slate-100 transition-colors border border-slate-200"
                 >
-                  <img
-                    src={user?.profile_picture || profileImagePreview || 'https://via.placeholder.com/40'}
-                    alt="Profile"
-                    className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
-                  />
+                  {user?.profile_picture || profileImagePreview ? (
+                    <img
+                      src={user?.profile_picture || profileImagePreview || ''}
+                      alt="Profile"
+                      className="w-10 h-10 rounded-full object-cover border-2 border-blue-200"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center border-2 border-blue-200">
+                      <span className="text-white font-bold text-sm">{user?.username?.charAt(0).toUpperCase()}</span>
+                    </div>
+                  )}
                   <svg 
-                    className={`w-4 h-4 text-gray-600 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 text-slate-600 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`}
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
@@ -357,10 +369,10 @@ export default function ProducerDashboard() {
                 
                 {/* Dropdown Menu */}
                 {showProfileDropdown && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="font-medium text-gray-900">{user?.full_name || user?.username}</p>
-                      <p className="text-sm text-gray-600">{user?.email}</p>
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200/60 py-2 z-50 animate-slide-up">
+                    <div className="px-4 py-3 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-teal-50">
+                      <p className="font-bold text-slate-900">{user?.full_name || user?.username}</p>
+                      <p className="text-sm text-slate-600">{user?.email}</p>
                     </div>
                     
                     <div className="py-1">
@@ -369,9 +381,9 @@ export default function ProducerDashboard() {
                           setActiveTab('profile');
                           setShowProfileDropdown(false);
                         }}
-                        className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                        className="w-full px-4 py-2.5 text-left text-slate-700 hover:bg-blue-50 flex items-center gap-3 transition-colors font-medium"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         Edit Profile
@@ -382,9 +394,9 @@ export default function ProducerDashboard() {
                           logout();
                           setShowProfileDropdown(false);
                         }}
-                        className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 flex items-center gap-3"
+                        className="w-full px-4 py-2.5 text-left text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors font-medium"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                         Sign Out
@@ -398,52 +410,52 @@ export default function ProducerDashboard() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="section-container">
         {/* Analytics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <div className="card-elevated group hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Total Beats</p>
-                <p className="text-2xl font-bold text-gray-900">{analytics.totalBeats}</p>
+                <p className="text-slate-600 text-sm font-medium mb-1">Total Beats</p>
+                <p className="text-3xl font-bold text-slate-900">{analytics.totalBeats}</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-teal-100 to-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                 <span className="text-2xl">🎵</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm">
+          <div className="card-elevated group hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Total Sales</p>
-                <p className="text-2xl font-bold text-gray-900">{analytics.totalSales}</p>
+                <p className="text-slate-600 text-sm font-medium mb-1">Total Sales</p>
+                <p className="text-3xl font-bold text-slate-900">{analytics.totalSales}</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-teal-100 rounded-lg flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                 <span className="text-2xl">📦</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm">
+          <div className="card-elevated group hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Total Earnings</p>
-                <p className="text-2xl font-bold text-gray-900">₦{analytics.totalEarnings.toLocaleString()}</p>
+                <p className="text-slate-600 text-sm font-medium mb-1">Total Earnings</p>
+                <p className="text-2xl font-bold gradient-text">₦{analytics.totalEarnings.toLocaleString()}</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-100 via-teal-100 to-orange-100 rounded-lg flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 via-teal-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                 <span className="text-2xl">💰</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm">
+          <div className="card-elevated group hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Pending Orders</p>
-                <p className="text-2xl font-bold text-gray-900">{analytics.pendingOrders}</p>
+                <p className="text-slate-600 text-sm font-medium mb-1">Pending Orders</p>
+                <p className="text-3xl font-bold text-slate-900">{analytics.pendingOrders}</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-lg flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                 <span className="text-2xl">⏳</span>
               </div>
             </div>
@@ -451,17 +463,17 @@ export default function ProducerDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-xl shadow-sm mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
+        <div className="card-elevated mb-8">
+          <div className="border-b border-slate-200">
+            <nav className="flex space-x-2 px-2 overflow-x-auto scrollbar-hide">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
+                  className={`py-3 px-4 rounded-xl font-semibold text-sm flex items-center gap-2 whitespace-nowrap transition-all duration-300 ${
                     activeTab === tab.id
-                      ? 'border-teal-500 text-teal-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg scale-105'
+                      : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50'
                   }`}
                 >
                   <span>{tab.icon}</span>
@@ -471,26 +483,29 @@ export default function ProducerDashboard() {
             </nav>
           </div>
 
-          <div className="p-6">
+          <div className="p-8">
             {/* Overview Tab */}
             {activeTab === 'overview' && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-gray-50 rounded-xl p-6">
-                    <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-                    <div className="space-y-3">
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="card group hover:shadow-xl transition-shadow">
+                    <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                      <span className="text-2xl">📋</span>
+                      Recent Activity
+                    </h3>
+                    <div className="space-y-4">
                       {orders.slice(0, 3).map((order) => (
-                        <div key={order.id} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                        <div key={order.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors border border-slate-200">
                           <div>
-                            <p className="font-medium">{order.beatTitle}</p>
-                            <p className="text-sm text-gray-600">Sold to {order.buyerName}</p>
+                            <p className="font-bold text-slate-900">{order.beatTitle}</p>
+                            <p className="text-sm text-slate-600 mt-0.5">Sold to {order.buyerName}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium">₦{order.amount.toLocaleString()}</p>
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                              order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-red-100 text-red-800'
+                            <p className="font-bold text-slate-900">₦{order.amount.toLocaleString()}</p>
+                            <span className={`text-xs px-3 py-1 rounded-full font-semibold mt-1 inline-block ${
+                              order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                              order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'
                             }`}>
                               {order.status}
                             </span>

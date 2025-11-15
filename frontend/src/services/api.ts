@@ -490,6 +490,67 @@ const getTopProducers = async (limit?: number) => {
   }
 };
 
+// Tenant API methods
+const getAdminTenants = async (params?: { page?: number; limit?: number; search?: string; isActive?: boolean }) => {
+  try {
+    const { data } = await api.get('/admin/tenants', { params });
+    return data;
+  } catch (err) {
+    console.error('Get admin tenants error:', err);
+    throw err;
+  }
+};
+
+const createTenant = async (tenantData: { name: string; domain?: string; description?: string; adminIds?: string[]; isActive?: boolean }) => {
+  try {
+    const { data } = await api.post('/admin/tenants', tenantData);
+    return data;
+  } catch (err) {
+    console.error('Create tenant error:', err);
+    throw err;
+  }
+};
+
+const updateTenant = async (tenantId: string, updates: { name?: string; domain?: string; description?: string; isActive?: boolean }) => {
+  try {
+    const { data } = await api.put(`/admin/tenants/${tenantId}`, updates);
+    return data;
+  } catch (err) {
+    console.error('Update tenant error:', err);
+    throw err;
+  }
+};
+
+const addTenantAdmin = async (tenantId: string, userId: string) => {
+  try {
+    const { data } = await api.post(`/admin/tenants/${tenantId}/admins`, { userId });
+    return data;
+  } catch (err) {
+    console.error('Add tenant admin error:', err);
+    throw err;
+  }
+};
+
+const removeTenantAdmin = async (tenantId: string, userId: string) => {
+  try {
+    const { data } = await api.delete(`/admin/tenants/${tenantId}/admins/${userId}`);
+    return data;
+  } catch (err) {
+    console.error('Remove tenant admin error:', err);
+    throw err;
+  }
+};
+
+const deleteTenant = async (tenantId: string) => {
+  try {
+    const { data } = await api.delete(`/admin/tenants/${tenantId}`);
+    return data;
+  } catch (err) {
+    console.error('Delete tenant error:', err);
+    throw err;
+  }
+};
+
 // Notifications API methods
 const getNotifications = async (params?: { unread_only?: boolean; limit?: number }) => {
   try {
@@ -601,6 +662,13 @@ const apiService = {
   getAdminPurchases,
   getAdminRevenue,
   getTopProducers,
+  // Tenant methods
+  getAdminTenants,
+  createTenant,
+  updateTenant,
+  addTenantAdmin,
+  removeTenantAdmin,
+  deleteTenant,
   // Messages methods
   getConversations,
   getConversation,

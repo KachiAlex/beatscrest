@@ -63,75 +63,89 @@ const BuyerDashboard: React.FC = () => {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+			<div className="min-h-screen pt-20 flex items-center justify-center">
+				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-50 pt-20">
-			<div className="container mx-auto px-4 py-8 max-w-6xl">
+		<div className="min-h-screen pt-20">
+			<div className="section-container">
 				{/* Header */}
-				<div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 p-1">
-					<div className="rounded-2xl bg-white p-6">
-						<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+				<div className="card-elevated mb-10 bg-gradient-to-br from-blue-50 to-teal-50 border-2 border-blue-200">
+					<div className="p-8">
+						<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
 							<div className="flex items-center gap-4">
-								<img
-									src={user?.profile_picture || 'https://via.placeholder.com/80'}
-									alt={user?.username || 'User'}
-									className="w-16 h-16 rounded-full object-cover border"
-								/>
+								{user?.profile_picture ? (
+									<img
+										src={user.profile_picture}
+										alt={user?.username || 'User'}
+										className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
+									/>
+								) : (
+									<div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center border-4 border-white shadow-lg">
+										<span className="text-white font-bold text-2xl">{user?.username?.charAt(0).toUpperCase()}</span>
+									</div>
+								)}
 								<div>
-									<h1 className="text-2xl md:text-3xl font-bold text-gray-900">Buyer Dashboard</h1>
-									<p className="text-gray-600">Welcome{user ? `, ${user.username}` : ''}.</p>
+									<h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-1">Buyer Dashboard</h1>
+									<p className="text-slate-600 text-lg">Welcome{user ? `, ${user.username}` : ''}!</p>
 								</div>
 							</div>
 							<div className="flex items-center gap-3">
-								<Button variant="outline" className="border-gray-300">Settings</Button>
-								<Button className="bg-purple-600 hover:bg-purple-700">Deposit</Button>
+								<button className="btn-secondary">Settings</button>
+								<button className="btn-primary">Deposit</button>
 							</div>
 						</div>
 					</div>
 				</div>
 
 				{/* Quick Stats */}
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-					<Card>
-						<CardContent className="p-5 flex items-center gap-4">
-							<div className="p-3 rounded-lg bg-purple-50 text-purple-700"><ShoppingBag size={20} /></div>
-							<div>
-								<div className="text-sm text-gray-500">Orders</div>
-								<div className="text-2xl font-bold">{orders.length}</div>
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+					<div className="card-elevated group hover:scale-105 transition-transform duration-300">
+						<div className="p-6 flex items-center gap-4">
+							<div className="p-4 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg group-hover:scale-110 transition-transform">
+								<ShoppingBag size={24} />
 							</div>
-						</CardContent>
-					</Card>
-					<Card>
-						<CardContent className="p-5 flex items-center gap-4">
-							<div className="p-3 rounded-lg bg-teal-50 text-teal-700"><Wallet size={20} /></div>
 							<div>
-								<div className="text-sm text-gray-500">Total Spend</div>
-								<div className="text-2xl font-bold">₦{transactions.filter(t => t.type === 'purchase').reduce((s, t) => s + t.amount, 0).toLocaleString()}</div>
+								<div className="text-sm text-slate-600 font-medium mb-1">Orders</div>
+								<div className="text-3xl font-bold text-slate-900">{orders.length}</div>
 							</div>
-						</CardContent>
-					</Card>
-					<Card>
-						<CardContent className="p-5 flex items-center gap-4">
-							<div className="p-3 rounded-lg bg-orange-50 text-orange-700"><Receipt size={20} /></div>
+						</div>
+					</div>
+					<div className="card-elevated group hover:scale-105 transition-transform duration-300">
+						<div className="p-6 flex items-center gap-4">
+							<div className="p-4 rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 text-white shadow-lg group-hover:scale-110 transition-transform">
+								<Wallet size={24} />
+							</div>
 							<div>
-								<div className="text-sm text-gray-500">Transactions</div>
-								<div className="text-2xl font-bold">{transactions.length}</div>
+								<div className="text-sm text-slate-600 font-medium mb-1">Total Spend</div>
+								<div className="text-2xl font-bold gradient-text">₦{transactions.filter(t => t.type === 'purchase').reduce((s, t) => s + t.amount, 0).toLocaleString()}</div>
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
+					<div className="card-elevated group hover:scale-105 transition-transform duration-300">
+						<div className="p-6 flex items-center gap-4">
+							<div className="p-4 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg group-hover:scale-110 transition-transform">
+								<Receipt size={24} />
+							</div>
+							<div>
+								<div className="text-sm text-slate-600 font-medium mb-1">Transactions</div>
+								<div className="text-3xl font-bold text-slate-900">{transactions.length}</div>
+							</div>
+						</div>
+					</div>
 				</div>
 
 				{/* Tabs */}
-				<div className="mt-8">
-					<div className="flex items-center gap-2 border-b">
-						<button onClick={() => setActiveTab('overview')} className={`px-4 py-2 -mb-px border-b-2 ${activeTab === 'overview' ? 'border-purple-600 text-purple-700' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>Overview</button>
-						<button onClick={() => setActiveTab('orders')} className={`px-4 py-2 -mb-px border-b-2 ${activeTab === 'orders' ? 'border-purple-600 text-purple-700' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>Orders</button>
-						<button onClick={() => setActiveTab('transactions')} className={`px-4 py-2 -mb-px border-b-2 ${activeTab === 'transactions' ? 'border-purple-600 text-purple-700' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>Transactions</button>
+				<div className="card-elevated mb-8">
+					<div className="border-b border-slate-200">
+						<div className="flex items-center gap-2 px-2 overflow-x-auto scrollbar-hide">
+							<button onClick={() => setActiveTab('overview')} className={`py-3 px-6 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-300 ${activeTab === 'overview' ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg scale-105' : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50'}`}>Overview</button>
+							<button onClick={() => setActiveTab('orders')} className={`py-3 px-6 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-300 ${activeTab === 'orders' ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg scale-105' : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50'}`}>Orders</button>
+							<button onClick={() => setActiveTab('transactions')} className={`py-3 px-6 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-300 ${activeTab === 'transactions' ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg scale-105' : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50'}`}>Transactions</button>
+						</div>
 					</div>
 
 					{/* Overview */}

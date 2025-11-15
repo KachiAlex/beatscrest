@@ -7,32 +7,33 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Logo-based color palette
+        // Modern color palette
         primary: {
-          // Muted Teal/Blue-Green (background)
-          50: '#e6f5f5',
-          100: '#b3e0e0',
-          200: '#80cccc',
-          300: '#4db8b8',
-          400: '#1aa3a3',
-          500: '#008f8f', // Primary teal
-          600: '#007373',
-          700: '#005757',
-          800: '#003b3b',
-          900: '#001f1f',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
+          950: '#172554',
         },
-        'beatcrest-teal': '#4A9B9D', // Muted teal background
-        'beatcrest-teal-light': '#5F9EA0',
-        'beatcrest-teal-dark': '#3A7A7C',
-        'beatcrest-blue': '#3B82F6', // Bright blue from hexagon
-        'beatcrest-blue-light': '#60A5FA',
-        'beatcrest-blue-dark': '#2563EB',
-        'beatcrest-orange': '#F97316', // Orange from hexagon
-        'beatcrest-orange-light': '#FB923C',
-        'beatcrest-orange-dark': '#EA580C',
-        'beatcrest-navy': '#1E3A8A', // Dark navy blue from hexagon
-        'beatcrest-navy-light': '#1E40AF',
-        'beatcrest-navy-dark': '#1E293B',
+        // Legacy support (for gradual migration)
+        'beatcrest-teal': '#14b8a6',
+        'beatcrest-teal-light': '#5eead4',
+        'beatcrest-teal-dark': '#0d9488',
+        'beatcrest-blue': '#3b82f6',
+        'beatcrest-blue-light': '#60a5fa',
+        'beatcrest-blue-dark': '#2563eb',
+        'beatcrest-orange': '#f97316',
+        'beatcrest-orange-light': '#fb923c',
+        'beatcrest-orange-dark': '#ea580c',
+        'beatcrest-navy': '#1e3a8a',
+        'beatcrest-navy-light': '#1e40af',
+        'beatcrest-navy-dark': '#1e293b',
         teal: {
           50: '#f0fdfa',
           100: '#ccfbf1',
@@ -95,6 +96,9 @@ export default {
       backgroundColor: {
         'beatcrest-bg': 'rgba(74, 155, 157, 0.05)', // Subtle teal background
         'beatcrest-surface': 'rgba(255, 255, 255, 0.95)', // Slightly transparent white
+        'beatcrest-dark': '#1A202C', // Dark navy background like HMS VOYAGER
+        'beatcrest-dark-surface': 'rgba(30, 41, 59, 0.4)', // Dark surface with translucency
+        'beatcrest-dark-card': 'rgba(26, 32, 44, 0.7)', // Dark glass card with blur
       },
     },
   },

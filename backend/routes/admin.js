@@ -1,6 +1,6 @@
 const express = require('express');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
-const { User, Beat, Purchase } = require('../models');
+const { User, Beat, Purchase, Tenant } = require('../models');
 const { getFirestore, COLLECTIONS } = require('../config/firebase');
 
 const router = express.Router();
@@ -458,6 +458,237 @@ router.get('/revenue', async (req, res) => {
   } catch (error) {
     console.error('Get revenue error:', error);
     res.status(500).json({ error: 'Failed to get revenue data', details: error.message });
+  }
+});
+
+// Tenant Management Routes
+
+// Get all tenants
+router.get('/tenants', async (req, res) => {
+  try {
+    const { page = 1, limit = 20, search, isActive } = req.query;
+    
+    const filters = {};
+    if (isActive !== undefined) {
+      filters.isActive = isActive === 'true';
+    }
+    
+    const allTenants = await Tenant.findAll(filters);
+    
+    // Apply search filter if provided
+    let filteredTenants = allTenants;
+    if (search) {
+      const searchTerm = search.toLowerCase();
+      filteredTenants = allTenants.filter(tenant => 
+        tenant.name?.toLowerCase().includes(searchTerm) ||
+        tenant.domain?.toLowerCase().includes(searchTerm) ||
+        tenant.description?.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Pagination
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const paginatedTenants = filteredTenants.slice(offset, offset + parseInt(limit));
+    
+    // Populate admin info
+    const tenantsWithAdmins = await Promise.all(paginatedTenants.map(async (tenant) => {
+      const adminUsers = await Promise.all(
+        (tenant.adminIds || []).map(async (adminId) => {
+          const admin = await User.findById(adminId);
+          return admin ? {
+            id: admin.id,
+            username: admin.username,
+            email: admin.email
+          } : null;
+        })
+      );
+      
+      return {
+        id: tenant.id,
+        name: tenant.name,
+        domain: tenant.domain,
+        description: tenant.description,
+        isActive: tenant.isActive,
+        adminIds: tenant.adminIds || [],
+        admins: adminUsers.filter(a => a !== null),
+        created_at: tenant.createdAt,
+        updated_at: tenant.updatedAt
+      };
+    }));
+    
+    res.json({
+      tenants: tenantsWithAdmins,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: filteredTenants.length,
+        pages: Math.ceil(filteredTenants.length / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Get tenants error:', error);
+    res.status(500).json({ error: 'Failed to get tenants', details: error.message });
+  }
+});
+
+// Create a new tenant
+router.post('/tenants', async (req, res) => {
+  try {
+    const { name, domain, description, adminIds, isActive } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ error: 'Tenant name is required' });
+    }
+    
+    // Check if tenant with same name or domain already exists
+    const existingByName = await Tenant.findByName(name);
+    if (existingByName) {
+      return res.status(400).json({ error: 'Tenant with this name already exists' });
+    }
+    
+    const tenantData = {
+      name,
+      domain: domain || null,
+      description: description || null,
+      adminIds: adminIds || [],
+      isActive: isActive !== undefined ? isActive : true
+    };
+    
+    const newTenant = await Tenant.create(tenantData);
+    
+    res.status(201).json({
+      message: 'Tenant created successfully',
+      tenant: {
+        id: newTenant.id,
+        name: newTenant.name,
+        domain: newTenant.domain,
+        description: newTenant.description,
+        isActive: newTenant.isActive,
+        adminIds: newTenant.adminIds || [],
+        created_at: newTenant.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('Create tenant error:', error);
+    res.status(500).json({ error: 'Failed to create tenant', details: error.message });
+  }
+});
+
+// Update tenant details
+router.put('/tenants/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, domain, description, isActive } = req.body;
+    
+    const tenant = await Tenant.findById(id);
+    if (!tenant) {
+      return res.status(404).json({ error: 'Tenant not found' });
+    }
+    
+    const updates = {};
+    if (name !== undefined) updates.name = name;
+    if (domain !== undefined) updates.domain = domain;
+    if (description !== undefined) updates.description = description;
+    if (isActive !== undefined) updates.isActive = isActive;
+    
+    const updatedTenant = await Tenant.update(id, updates);
+    
+    res.json({
+      message: 'Tenant updated successfully',
+      tenant: {
+        id: updatedTenant.id,
+        name: updatedTenant.name,
+        domain: updatedTenant.domain,
+        description: updatedTenant.description,
+        isActive: updatedTenant.isActive,
+        adminIds: updatedTenant.adminIds || [],
+        updated_at: updatedTenant.updatedAt
+      }
+    });
+  } catch (error) {
+    console.error('Update tenant error:', error);
+    res.status(500).json({ error: 'Failed to update tenant', details: error.message });
+  }
+});
+
+// Add tenant admin
+router.post('/tenants/:id/admins', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+    
+    const tenant = await Tenant.findById(id);
+    if (!tenant) {
+      return res.status(404).json({ error: 'Tenant not found' });
+    }
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const updatedTenant = await Tenant.addAdmin(id, userId);
+    
+    res.json({
+      message: 'Tenant admin added successfully',
+      tenant: {
+        id: updatedTenant.id,
+        adminIds: updatedTenant.adminIds || []
+      }
+    });
+  } catch (error) {
+    console.error('Add tenant admin error:', error);
+    res.status(500).json({ error: 'Failed to add tenant admin', details: error.message });
+  }
+});
+
+// Remove tenant admin
+router.delete('/tenants/:id/admins/:userId', async (req, res) => {
+  try {
+    const { id, userId } = req.params;
+    
+    const tenant = await Tenant.findById(id);
+    if (!tenant) {
+      return res.status(404).json({ error: 'Tenant not found' });
+    }
+    
+    const updatedTenant = await Tenant.removeAdmin(id, userId);
+    
+    res.json({
+      message: 'Tenant admin removed successfully',
+      tenant: {
+        id: updatedTenant.id,
+        adminIds: updatedTenant.adminIds || []
+      }
+    });
+  } catch (error) {
+    console.error('Remove tenant admin error:', error);
+    res.status(500).json({ error: 'Failed to remove tenant admin', details: error.message });
+  }
+});
+
+// Delete (deactivate) tenant
+router.delete('/tenants/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const tenant = await Tenant.findById(id);
+    if (!tenant) {
+      return res.status(404).json({ error: 'Tenant not found' });
+    }
+    
+    await Tenant.delete(id);
+    
+    res.json({
+      message: 'Tenant deactivated successfully'
+    });
+  } catch (error) {
+    console.error('Delete tenant error:', error);
+    res.status(500).json({ error: 'Failed to delete tenant', details: error.message });
   }
 });
 

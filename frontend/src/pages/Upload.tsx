@@ -44,10 +44,10 @@ export default function Upload() {
   // Show loading while checking auth
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+      <div className="min-h-screen pt-20 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
         </div>
       </div>
     );
@@ -56,9 +56,9 @@ export default function Upload() {
   // Show message if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+      <div className="min-h-screen pt-20 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">Please sign in to upload beats.</p>
+          <p className="text-slate-600">Please sign in to upload beats.</p>
         </div>
       </div>
     );
@@ -214,93 +214,103 @@ export default function Upload() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen pt-20">
+      <div className="section-container">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Upload Your Beat</h1>
-            <p className="text-lg text-gray-600">Share your music with the world and start earning</p>
+          <div className="mb-10 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+              Upload Your <span className="gradient-text">Beat</span>
+            </h1>
+            <p className="text-xl text-slate-600">Share your music with the world and start earning</p>
           </div>
 
           {/* Success Message */}
           {successMessage && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex items-center">
-                <span className="text-green-600 mr-2">✅</span>
-                <p className="text-green-800 font-medium">{successMessage}</p>
+            <div className="mb-6 p-5 bg-green-50 border-2 border-green-200 rounded-xl animate-slide-up">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <span className="text-green-600 text-xl">✅</span>
+                </div>
+                <p className="text-green-800 font-semibold text-lg">{successMessage}</p>
               </div>
             </div>
           )}
 
-                      {/* Error Message */}
-            {errors.submit && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-center">
-                  <span className="text-red-600 mr-2">❌</span>
-                  <p className="text-red-800 font-medium">{errors.submit}</p>
+          {/* Error Message */}
+          {errors.submit && (
+            <div className="mb-6 p-5 bg-red-50 border-2 border-red-200 rounded-xl animate-slide-up">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                  <span className="text-red-600 text-xl">❌</span>
                 </div>
+                <p className="text-red-800 font-semibold">{errors.submit}</p>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Upload Progress */}
-            {loading && (
-              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-blue-800 font-medium">Uploading your beat...</span>
-                  <span className="text-blue-600">{uploadProgress}%</span>
+          {/* Upload Progress */}
+          {loading && (
+            <div className="mb-8 card-elevated animate-slide-up">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                  <span className="text-slate-800 font-semibold">Uploading your beat...</span>
                 </div>
-                <div className="w-full bg-blue-200 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
-                </div>
+                <span className="text-blue-600 font-bold text-lg">{uploadProgress}%</span>
               </div>
-            )}
+              <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                <div 
+                  className="bg-gradient-to-r from-blue-600 via-teal-500 to-orange-500 h-full rounded-full transition-all duration-300 shadow-lg"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
 
 
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Basic Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
+            <div className="card-elevated">
+              <div className="mb-6 pb-4 border-b border-slate-200">
+                <h2 className="text-2xl font-bold text-slate-900">Basic Information</h2>
+                <p className="text-slate-600 mt-1">Tell us about your beat</p>
+              </div>
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Beat Title *</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Beat Title *</label>
                   <input
                     type="text"
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className={`input-field ${errors.title ? 'input-field-error' : ''}`}
                     placeholder="Enter your beat title"
                   />
-                  {errors.title && <p className="text-red-600 text-sm mt-1">{errors.title}</p>}
+                  {errors.title && <p className="text-red-600 text-sm mt-2 font-medium">{errors.title}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Description</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Description</label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="input-field resize-none"
                     placeholder="Describe your beat, inspiration, or any additional information"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Genre</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">Genre</label>
                     <select
                       name="genre"
                       value={formData.genre}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="input-field"
                     >
                       <option value="">Select Genre</option>
                       {genres.map(genre => (
@@ -310,24 +320,24 @@ export default function Upload() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">BPM</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">BPM</label>
                     <input
                       type="number"
                       name="bpm"
                       value={formData.bpm}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="input-field"
                       placeholder="e.g., 140"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">Key</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">Key</label>
                     <select
                       name="key"
                       value={formData.key}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="input-field"
                     >
                       <option value="">Select Key</option>
                       {keys.map(key => (
@@ -338,37 +348,39 @@ export default function Upload() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Tags</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Tags</label>
                   <input
                     type="text"
                     name="tags"
                     value={formData.tags}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    className="input-field"
                     placeholder="Enter tags separated by commas (e.g., trap, dark, aggressive)"
                   />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Google Drive Links */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Google Drive Links</CardTitle>
-                <p className="text-sm text-gray-600 mt-2">
+            <div className="card-elevated">
+              <div className="mb-6 pb-4 border-b border-slate-200">
+                <h2 className="text-2xl font-bold text-slate-900">Google Drive Links</h2>
+                <p className="text-slate-600 mt-1">
                   Share your Google Drive links instead of uploading files directly. This is faster and more reliable!
                 </p>
-              </CardHeader>
-              <CardContent className="space-y-6">
+              </div>
+              <div className="space-y-6">
                 {/* Preview File */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Preview File Google Drive Link *</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                    <div className="flex items-center space-x-3 mb-4">
-                      <FileAudio className="h-8 w-8 text-teal-600" />
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">Preview File Google Drive Link *</label>
+                  <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 hover:border-blue-400 transition-colors bg-slate-50/50">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                        <FileAudio className="h-6 w-6 text-blue-600" />
+                      </div>
                       <div>
-                        <p className="font-medium">30-second Preview (MP3/WAV)</p>
-                        <p className="text-sm text-gray-500">Share your Google Drive link for the preview file</p>
+                        <p className="font-semibold text-slate-900">30-second Preview (MP3/WAV)</p>
+                        <p className="text-sm text-slate-600">Share your Google Drive link for the preview file</p>
                       </div>
                     </div>
                     <input
@@ -376,27 +388,27 @@ export default function Upload() {
                       placeholder="https://drive.google.com/file/d/..."
                       value={driveLinks.preview}
                       onChange={(e) => handleDriveLinkChange('preview', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                        errors.preview ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`input-field ${errors.preview ? 'input-field-error' : ''}`}
                     />
-                    {errors.preview && <p className="text-red-600 text-sm mt-1">{errors.preview}</p>}
-                    <p className="text-xs text-gray-500 mt-2">
-                      💡 Make sure your Google Drive file is set to "Anyone with the link can view"
+                    {errors.preview && <p className="text-red-600 text-sm mt-2 font-medium">{errors.preview}</p>}
+                    <p className="text-xs text-slate-500 mt-3 flex items-center gap-1">
+                      <span>💡</span>
+                      <span>Make sure your Google Drive file is set to "Anyone with the link can view"</span>
                     </p>
                   </div>
-                  {errors.preview && <p className="text-red-600 text-sm mt-1">{errors.preview}</p>}
                 </div>
 
                 {/* Full Beat File */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Full Beat File Google Drive Link *</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                    <div className="flex items-center space-x-3 mb-4">
-                      <Music className="h-8 w-8 text-teal-600" />
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">Full Beat File Google Drive Link *</label>
+                  <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 hover:border-blue-400 transition-colors bg-slate-50/50">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center">
+                        <Music className="h-6 w-6 text-teal-600" />
+                      </div>
                       <div>
-                        <p className="font-medium">Full Beat (WAV/MP3)</p>
-                        <p className="text-sm text-gray-500">Share your Google Drive link for the full beat file</p>
+                        <p className="font-semibold text-slate-900">Full Beat (WAV/MP3)</p>
+                        <p className="text-sm text-slate-600">Share your Google Drive link for the full beat file</p>
                       </div>
                     </div>
                     <input
@@ -404,26 +416,27 @@ export default function Upload() {
                       placeholder="https://drive.google.com/file/d/..."
                       value={driveLinks.fullBeat}
                       onChange={(e) => handleDriveLinkChange('fullBeat', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
-                        errors.fullBeat ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`input-field ${errors.fullBeat ? 'input-field-error' : ''}`}
                     />
-                    <p className="text-xs text-gray-500 mt-2">
-                      💡 Make sure your Google Drive file is set to "Anyone with the link can view"
+                    {errors.fullBeat && <p className="text-red-600 text-sm mt-2 font-medium">{errors.fullBeat}</p>}
+                    <p className="text-xs text-slate-500 mt-3 flex items-center gap-1">
+                      <span>💡</span>
+                      <span>Make sure your Google Drive file is set to "Anyone with the link can view"</span>
                     </p>
                   </div>
-                  {errors.fullBeat && <p className="text-red-600 text-sm mt-1">{errors.fullBeat}</p>}
                 </div>
 
                 {/* Thumbnail */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Thumbnail Google Drive Link (Optional)</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                    <div className="flex items-center space-x-3 mb-4">
-                      <Image className="h-8 w-8 text-teal-600" />
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">Thumbnail Google Drive Link (Optional)</label>
+                  <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 hover:border-blue-400 transition-colors bg-slate-50/50">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+                        <Image className="h-6 w-6 text-orange-600" />
+                      </div>
                       <div>
-                        <p className="font-medium">Thumbnail Image (JPG/PNG)</p>
-                        <p className="text-sm text-gray-500">Share your Google Drive link for the thumbnail image</p>
+                        <p className="font-semibold text-slate-900">Thumbnail Image (JPG/PNG)</p>
+                        <p className="text-sm text-slate-600">Share your Google Drive link for the thumbnail image</p>
                       </div>
                     </div>
                     <input
@@ -431,89 +444,78 @@ export default function Upload() {
                       placeholder="https://drive.google.com/file/d/... (optional)"
                       value={driveLinks.thumbnail}
                       onChange={(e) => handleDriveLinkChange('thumbnail', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="input-field"
                     />
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-xs text-slate-500 mt-3">
                       💡 Optional: Add a thumbnail image for your beat
                     </p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Pricing */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Pricing</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Price (₦) *</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₦</span>
-                    <input
-                      type="number"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleInputChange}
-                      className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      placeholder="0.00"
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                  {errors.price && <p className="text-red-600 text-sm mt-1">{errors.price}</p>}
-                  <p className="text-sm text-gray-500 mt-2">
-                    Platform fee: 5% • You'll receive ₦{(parseFloat(formData.price) || 0) * 0.95} per sale
+            <div className="card-elevated">
+              <div className="mb-6 pb-4 border-b border-slate-200">
+                <h2 className="text-2xl font-bold text-slate-900">Pricing</h2>
+                <p className="text-slate-600 mt-1">Set your beat price</p>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Price (₦) *</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500 font-semibold">₦</span>
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    className={`input-field pl-10 ${errors.price ? 'input-field-error' : ''}`}
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                {errors.price && <p className="text-red-600 text-sm mt-2 font-medium">{errors.price}</p>}
+                <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <p className="text-sm text-slate-700">
+                    <span className="font-semibold">Platform fee: 5%</span>
+                    <span className="mx-2">•</span>
+                    You'll receive <span className="font-bold text-blue-600">₦{((parseFloat(formData.price) || 0) * 0.95).toLocaleString()}</span> per sale
                   </p>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Upload Progress */}
-            {loading && (
-              <Card>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">Uploading...</span>
-                      <span className="text-sm text-gray-500">{uploadProgress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${uploadProgress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Error Message */}
-            {errors.submit && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-600">{errors.submit}</p>
               </div>
-            )}
+            </div>
 
             {/* Submit Button */}
-            <div className="flex justify-end space-x-4">
-              <Button
+            <div className="flex flex-col sm:flex-row justify-end gap-4 pt-4">
+              <button
                 type="button"
-                variant="outline"
                 onClick={() => navigate('/marketplace')}
                 disabled={loading}
+                className="btn-secondary w-full sm:w-auto"
               >
                 Cancel
-              </Button>
-              <Button
+              </button>
+              <button
                 type="submit"
-                className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white transition-all duration-300 shadow-lg"
                 disabled={loading}
+                className="btn-primary w-full sm:w-auto text-base px-8"
               >
-                {loading ? 'Uploading...' : 'Upload Beat'}
-              </Button>
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Uploading...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <UploadIcon className="w-5 h-5" />
+                    Upload Beat
+                  </span>
+                )}
+              </button>
             </div>
           </form>
         </div>

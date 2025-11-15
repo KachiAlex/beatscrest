@@ -553,6 +553,85 @@ const Notification = {
   }
 };
 
+// Tenant Model
+const Tenant = {
+  collection: db.collection(COLLECTIONS.TENANTS),
+
+  async create(tenantData) {
+    const tenantRef = this.collection.doc();
+    const db = getFirestore();
+    const newTenant = {
+      ...tenantData,
+      adminIds: tenantData.adminIds || [], // Array of user IDs who are tenant admins
+      isActive: tenantData.isActive !== undefined ? tenantData.isActive : true,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+    await tenantRef.set(newTenant);
+    const created = await tenantRef.get();
+    return docToObject(created);
+  },
+
+  async findById(tenantId) {
+    const doc = await this.collection.doc(tenantId).get();
+    return docToObject(doc);
+  },
+
+  async findByName(name) {
+    const snapshot = await this.collection.where('name', '==', name).limit(1).get();
+    if (snapshot.empty) return null;
+    return docToObject(snapshot.docs[0]);
+  },
+
+  async findAll(filters = {}) {
+    let query = this.collection;
+    
+    if (filters.isActive !== undefined) {
+      query = query.where('isActive', '==', filters.isActive);
+    }
+    
+    const snapshot = await query.orderBy('createdAt', 'desc').get();
+    return snapshot.docs.map(doc => docToObject(doc));
+  },
+
+  async update(tenantId, updates) {
+    const tenantRef = this.collection.doc(tenantId);
+    await tenantRef.update({
+      ...updates,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    return this.findById(tenantId);
+  },
+
+  async addAdmin(tenantId, userId) {
+    const tenantRef = this.collection.doc(tenantId);
+    await tenantRef.update({
+      adminIds: admin.firestore.FieldValue.arrayUnion(userId),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    return this.findById(tenantId);
+  },
+
+  async removeAdmin(tenantId, userId) {
+    const tenant = await this.findById(tenantId);
+    if (!tenant) throw new Error('Tenant not found');
+    
+    const adminIds = tenant.adminIds || [];
+    const updatedAdminIds = adminIds.filter(id => id !== userId);
+    
+    const tenantRef = this.collection.doc(tenantId);
+    await tenantRef.update({
+      adminIds: updatedAdminIds,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    return this.findById(tenantId);
+  },
+
+  async delete(tenantId) {
+    return this.update(tenantId, { isActive: false });
+  }
+};
+
 module.exports = {
   User,
   Beat,
@@ -560,6 +639,7 @@ module.exports = {
   Comment,
   Message,
   Notification,
+  Tenant,
   docToObject
 };
 
