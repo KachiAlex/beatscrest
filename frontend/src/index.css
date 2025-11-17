@@ -11,17 +11,59 @@
   }
   
   body {
-    @apply bg-beatcrest-dark text-white antialiased;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(20, 184, 166, 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(249, 115, 22, 0.05) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, rgba(59, 130, 246, 0.05) 0px, transparent 50%);
+    @apply text-white antialiased;
+    background: linear-gradient(to bottom right, rgb(15 23 42), rgb(30 58 138), rgb(88 28 135));
     min-height: 100vh;
+    position: relative;
+  }
+  
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15), transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1), transparent 50%),
+      radial-gradient(circle at 20% 80%, rgba(20, 184, 166, 0.1), transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 8rem;
+    opacity: 0.2;
+    pointer-events: none;
+    z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 120' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 60 Q150 20, 300 60 T600 60 T900 60 T1200 60' stroke='url(%23wave-gradient)' stroke-width='2' fill='none'/%3E%3Cpath d='M0 70 Q150 30, 300 70 T600 70 T900 70 T1200 70' stroke='url(%23wave-gradient2)' stroke-width='2' fill='none'/%3E%3Cdefs%3E%3ClinearGradient id='wave-gradient' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%233b82f6'/%3E%3Cstop offset='50%25' stop-color='%2314b8a6'/%3E%3Cstop offset='100%25' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3ClinearGradient id='wave-gradient2' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%2314b8a6'/%3E%3Cstop offset='50%25' stop-color='%23a855f7'/%3E%3Cstop offset='100%25' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 0.2;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+  
+  #root {
+    position: relative;
+    z-index: 1;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
+    @apply font-semibold tracking-tight text-white;
   }
   
   h1 {
@@ -34,6 +76,20 @@
   
   h3 {
     @apply text-2xl md:text-3xl;
+  }
+  
+  /* Ensure good text contrast for common text elements */
+  p {
+    @apply text-white/95;
+  }
+  
+  label {
+    @apply text-white/95;
+  }
+  
+  /* Override for specific cases where we want less opacity */
+  .text-muted {
+    color: rgba(255, 255, 255, 0.85);
   }
 }
 
@@ -52,7 +108,7 @@
   }
   
   .btn-ghost {
-    @apply bg-transparent hover:bg-white/10 text-white/70 hover:text-white font-medium py-2 px-4 rounded-lg transition-all duration-200;
+    @apply bg-transparent hover:bg-white/10 text-white/90 hover:text-white font-medium py-2 px-4 rounded-lg transition-all duration-200;
   }
   
   /* Card Styles - Dark Mode */
@@ -70,7 +126,7 @@
   
   /* Input Styles - Dark Mode */
   .input-field {
-    @apply w-full px-4 py-3 bg-white/10 border-2 border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all duration-200 text-white placeholder:text-white/70 backdrop-blur-sm;
+    @apply w-full px-4 py-3 bg-white/10 border-2 border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all duration-200 text-white placeholder:text-white/80 backdrop-blur-sm;
   }
   
   .input-field-error {

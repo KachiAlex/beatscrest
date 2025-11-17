@@ -27,7 +27,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (user) {
+    // Only connect to Socket.IO in development where the local backend is running
+    if (user && import.meta.env.DEV) {
       const newSocket = io('http://localhost:5000', {
         auth: {
           token: localStorage.getItem('token'),

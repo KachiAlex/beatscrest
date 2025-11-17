@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { User, Beat, Purchase, Comment, Message, Conversation, Notification, RegisterData, LoginData, ApiResponse, PaginatedResponse } from '../types';
-import { mockBeats as localMockBeats } from '../data/mockBeats';
 
 // Simple API configuration - Use Firebase Functions in production
 // Firebase Function URL: https://us-central1-beatcrest.cloudfunctions.net/api
@@ -106,18 +105,16 @@ api.interceptors.response.use(
   }
 );
 
-// Prefer real backend, fallback to local mock where needed
+// Get user profile from backend
 const getProfile = async () => {
   try {
     const res = await api.get('/auth/me');
     return { user: res.data.user as User };
   } catch (err) {
-    // In development, allow mock fallback so UI works without backend
-    if (import.meta.env.DEV) {
-      const storedUser = localStorage.getItem('mockUser');
-      if (storedUser) {
-        return { user: JSON.parse(storedUser) as User };
-      }
+    // Check localStorage for cached user data (from previous login)
+    const storedUser = localStorage.getItem('mockUser');
+    if (storedUser) {
+      return { user: JSON.parse(storedUser) as User };
     }
     throw err;
   }
@@ -166,27 +163,6 @@ const login = async (credentials: { email: string; password: string }) => {
       console.error('   - Backend authentication logic issue');
     }
     
-    if (import.meta.env.DEV) {
-      // Dev fallback: minimal local mock so UI remains usable
-      console.warn('⚠️ Using mock login fallback (DEV mode only)');
-      const userData = {
-        id: 1,
-        username: credentials.email.split('@')[0],
-        email: credentials.email,
-        full_name: credentials.email.split('@')[0].replace(/[0-9]/g, '').replace(/[^a-zA-Z]/g, ' ') || 'User',
-        profile_picture: null,
-        bio: '',
-        headline: '',
-        rating: 0,
-        total_ratings: 0,
-        account_type: 'producer' as const,
-        is_verified: false,
-        followers_count: 0,
-        following_count: 0,
-        created_at: new Date().toISOString()
-      } as unknown as User;
-      return { user: userData, token: 'mock_jwt_token_' + Date.now() };
-    }
     throw err;
   }
 };
@@ -196,26 +172,6 @@ const register = async (userData: any) => {
     const { data } = await api.post('/auth/register', userData);
     return { user: data.user as User, token: data.token as string };
   } catch (err) {
-    if (import.meta.env.DEV) {
-      // Dev fallback similar to previous implementation
-      const newUser = {
-        id: 1,
-        username: userData.username || 'new_user',
-        email: userData.email,
-        full_name: userData.full_name || userData.username || 'New User',
-        profile_picture: null,
-        bio: '',
-        headline: '',
-        rating: 0,
-        total_ratings: 0,
-        account_type: userData.account_type || 'producer',
-        is_verified: false,
-        followers_count: 0,
-        following_count: 0,
-        created_at: new Date().toISOString()
-      } as unknown as User;
-      return { user: newUser, token: 'mock_jwt_token_' + Date.now() };
-    }
     throw err;
   }
 };
@@ -276,31 +232,6 @@ const getBeat = async (beatId: number) => {
     const { data } = await api.get(`/beats/${beatId}`);
     return { beat: data.beat as any };
   } catch (err) {
-    // Fallback: derive from local mock if exists
-    const local = localMockBeats.find(b => b.id === beatId);
-    if (local) {
-      return {
-        beat: {
-          id: local.id,
-          title: local.title,
-          description: local.description,
-          genre: local.genre,
-          bpm: local.bpm,
-          key: local.key,
-          price: local.price,
-          preview_url: local.cover,
-          full_beat_url: local.cover,
-          thumbnail_url: local.cover,
-          likes_count: local.likes,
-          plays_count: local.plays,
-          is_active: true,
-          created_at: new Date().toISOString(),
-          producer_name: local.producerUsername,
-          producer_picture: undefined,
-          is_liked: local.isLiked,
-        }
-      } as any;
-    }
     throw err;
   }
 };
@@ -311,12 +242,7 @@ const getBeats = async (params?: { page?: number; limit?: number; genre?: string
     const { data } = await api.get('/beats', { params });
     return data;
   } catch (err: any) {
-    // Silently fallback to local mock list if backend is unavailable
-    // This allows the app to work even if the backend isn't deployed
-    if (import.meta.env.DEV) {
-      console.warn('⚠️ Backend unavailable, using mock data');
-    }
-    return { beats: localMockBeats, pagination: { page: 1, limit: localMockBeats.length, total: localMockBeats.length, pages: 1 } };
+    throw err;
   }
 };
 
@@ -580,26 +506,6 @@ const getUserBeats = async (
       console.error('⚠️ Server response:', err?.response?.data);
     }
     
-    if (import.meta.env.DEV) {
-      // Dev-only fallback: filter local mock beats by producer username
-      try {
-        const beats = localMockBeats.filter(
-          (b) => b.producerUsername?.toLowerCase() === username.toLowerCase()
-        );
-        console.warn('⚠️ Using mock data fallback for user beats');
-        return {
-          beats,
-          pagination: {
-            page: 1,
-            limit: beats.length,
-            total: beats.length,
-            pages: 1,
-          },
-        };
-      } catch (fallbackErr) {
-        console.error('Fallback also failed:', fallbackErr);
-      }
-    }
     throw err;
   }
 };

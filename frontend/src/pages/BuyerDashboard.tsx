@@ -34,15 +34,16 @@ const BuyerDashboard: React.FC = () => {
 	const [txStatusFilter, setTxStatusFilter] = useState<'all' | 'pending' | 'completed' | 'failed'>('all');
 
 	useEffect(() => {
-		// Mock: Load buyer data (replace with real API later)
-		setOrders([
-			{ id: 'ORD1001', beatTitle: 'Midnight Groove', producerName: 'DJ ProBeat', amount: 45000, status: 'completed', orderDate: '2024-01-25' },
-			{ id: 'ORD1002', beatTitle: 'Afro Vibes', producerName: 'Afrobeats King', amount: 35000, status: 'pending', orderDate: '2024-01-28' }
-		]);
-		setTransactions([
-			{ id: 'TX1001', type: 'purchase', amount: 45000, description: 'Purchase: Midnight Groove', date: '2024-01-25', status: 'completed' },
-			{ id: 'TX1002', type: 'purchase', amount: 35000, description: 'Purchase: Afro Vibes', date: '2024-01-28', status: 'pending' }
-		]);
+		// TODO: Load buyer data from API
+		// const loadBuyerData = async () => {
+		//   try {
+		//     const purchases = await apiService.getPurchases();
+		//     // Transform purchases to orders and transactions
+		//   } catch (error) {
+		//     console.error('Failed to load buyer data:', error);
+		//   }
+		// };
+		// loadBuyerData();
 	}, []);
 
 	const totalSpend = transactions

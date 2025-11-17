@@ -4,9 +4,7 @@ import SignupModal from "../components/SignupModal";
 import PaymentModal from "../components/PaymentModal";
 import { useAuth } from "../contexts/AuthContext";
 import { Search, Filter, Play, Heart, MessageCircle, ShoppingCart, Music, TrendingUp, Users, Zap, Shield, Star, ArrowRight } from 'lucide-react';
-import { mockBeats } from "../data/mockBeats";
 import apiService from "../services/api";
-import { getProfileByUsername } from "../data/mockProfiles";
 
 export default function Home() {
   const { login, register, user } = useAuth();
@@ -32,11 +30,11 @@ export default function Home() {
   const [authError, setAuthError] = useState('');
   const navigate = useNavigate();
 
-  const [beats, setBeats] = useState(mockBeats);
+  const [beats, setBeats] = useState<any[]>([]);
   const [loadingBeats, setLoadingBeats] = useState(false);
 
 
-  // Fetch beats from backend (fallback to local mock)
+  // Fetch beats from backend
   useEffect(() => {
     const fetchBeats = async () => {
       try {
@@ -66,8 +64,7 @@ export default function Home() {
           setBeats(normalized);
         }
       } catch (e) {
-        // silently keep local mock
-        console.warn('Using local mock beats due to API error');
+        console.error('Failed to load beats:', e);
       } finally {
         setLoadingBeats(false);
       }
@@ -479,33 +476,20 @@ export default function Home() {
                     {/* Beat Content */}
                     <div className="p-6 space-y-4">
                         {/* Producer Info */}
-                        {(() => {
-                          const producerProfile = getProfileByUsername(beat.producerUsername);
-                          return (
-                            <div className="flex items-center gap-3">
-                              {producerProfile?.profile_picture ? (
-                                <img 
-                                  src={producerProfile.profile_picture}
-                                  alt={producerProfile.full_name || beat.producerUsername}
-                                  className="w-10 h-10 rounded-full object-cover border-2 border-teal-500/50"
-                                />
-                              ) : (
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center text-white text-sm font-bold">
-                                  {beat.producerUsername.charAt(0).toUpperCase()}
-                                </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center text-white text-sm font-bold">
+                            {beat.producerUsername.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-semibold text-white truncate">{beat.producerUsername}</span>
+                              {beat.verified && (
+                                <span className="badge-success text-xs px-2 py-0.5">✓ Verified</span>
                               )}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-sm font-semibold text-white truncate">{producerProfile?.full_name || beat.producerUsername}</span>
-                                  {(producerProfile?.is_verified || beat.verified) && (
-                                    <span className="badge-success text-xs px-2 py-0.5">✓ Verified</span>
-                                  )}
-                                </div>
-                                <div className="text-xs text-white/90 mt-0.5">{beat.date}</div>
-                              </div>
                             </div>
-                          );
-                        })()}
+                            <div className="text-xs text-white/90 mt-0.5">{beat.date}</div>
+                          </div>
+                        </div>
 
                         {/* Beat Title */}
                         <div>
@@ -520,7 +504,7 @@ export default function Home() {
                           <span className="badge-primary text-xs">{beat.genre}</span>
                           <span className="badge bg-white/10 text-white/90 text-xs">{beat.bpm} BPM</span>
                           {beat.key && <span className="badge bg-white/10 text-white/90 text-xs">{beat.key}</span>}
-                          {beat.tags?.slice(0, 2).map((tag, idx) => (
+                          {beat.tags?.slice(0, 2).map((tag: string, idx: number) => (
                             <span key={idx} className="badge bg-white/10 text-white/90 text-xs">{tag}</span>
                           ))}
                         </div>

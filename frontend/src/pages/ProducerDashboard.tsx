@@ -198,104 +198,25 @@ export default function ProducerDashboard() {
     );
   }
 
-  // Mock data
-  const beats: Beat[] = [
-    {
-      id: '1',
-      title: 'Midnight Groove',
-      description: 'Smooth hip-hop beat with heavy bass and melodic samples',
-      genre: 'Hip Hop',
-      bpm: 140,
-      price: 45000,
-      status: 'published',
-      uploadDate: '2024-01-15',
-      previewUrl: '/previews/midnight-groove.mp4',
-      sales: 12,
-      earnings: 540000
-    },
-    {
-      id: '2',
-      title: 'Afro Vibes',
-      description: 'Upbeat afrobeats instrumental with traditional African rhythms',
-      genre: 'Afrobeats',
-      bpm: 120,
-      price: 35000,
-      status: 'published',
-      uploadDate: '2024-01-10',
-      previewUrl: '/previews/afro-vibes.mp4',
-      sales: 8,
-      earnings: 280000
-    },
-    {
-      id: '3',
-      title: 'R&B Soul',
-      description: 'Emotional R&B beat with soulful melodies and smooth chords',
-      genre: 'R&B',
-      bpm: 90,
-      price: 55000,
-      status: 'draft',
-      uploadDate: '2024-01-20',
-      previewUrl: '/previews/rnb-soul.mp4',
-      sales: 0,
-      earnings: 0
-    }
-  ];
-
-  const orders: Order[] = [
-    {
-      id: 'ORD001',
-      beatTitle: 'Midnight Groove',
-      buyerName: 'John Doe',
-      amount: 45000,
-      status: 'delivered',
-      orderDate: '2024-01-25',
-      deliveryDate: '2024-01-25'
-    },
-    {
-      id: 'ORD002',
-      beatTitle: 'Afro Vibes',
-      buyerName: 'Jane Smith',
-      amount: 35000,
-      status: 'pending',
-      orderDate: '2024-01-26'
-    },
-    {
-      id: 'ORD003',
-      beatTitle: 'Midnight Groove',
-      buyerName: 'Mike Johnson',
-      amount: 45000,
-      status: 'delivered',
-      orderDate: '2024-01-24',
-      deliveryDate: '2024-01-24'
-    }
-  ];
-
-  const transactions: Transaction[] = [
-    {
-      id: 'TXN001',
-      type: 'sale',
-      amount: 45000,
-      description: 'Sale: Midnight Groove',
-      date: '2024-01-25',
-      status: 'completed'
-    },
-    {
-      id: 'TXN002',
-      type: 'sale',
-      amount: 35000,
-      description: 'Sale: Afro Vibes',
-      date: '2024-01-24',
-      status: 'completed'
-    },
-    {
-      id: 'TXN003',
-      type: 'withdrawal',
-      amount: -100000,
-      description: 'Withdrawal to bank account',
-      date: '2024-01-20',
-      status: 'completed'
-    }
-  ];
+  // TODO: Load data from API
+  const [beats, setBeats] = useState<Beat[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  
+  // Load producer data
+  useEffect(() => {
+    // TODO: Load beats, orders, and transactions from API
+    // const loadProducerData = async () => {
+    //   try {
+    //     const beatsData = await apiService.getBeats({});
+    //     const salesData = await apiService.getSales();
+    //     // Transform and set data
+    //   } catch (error) {
+    //     console.error('Failed to load producer data:', error);
+    //   }
+    // };
+    // loadProducerData();
+  }, []);
 
   const analytics = {
     totalBeats: beats.length,
@@ -303,7 +224,7 @@ export default function ProducerDashboard() {
     totalEarnings: beats.reduce((sum, beat) => sum + beat.earnings, 0),
     pendingOrders: orders.filter(o => o.status === 'pending').length,
     monthlyGrowth: 15.5,
-    topPerformingBeat: beats.reduce((top, beat) => beat.sales > top.sales ? beat : top, beats[0])
+    topPerformingBeat: beats.length > 0 ? beats.reduce((top, beat) => beat.sales > top.sales ? beat : top, beats[0]) : { title: 'N/A', description: 'No beats yet', sales: 0, earnings: 0 }
   };
 
   const tabs = [
