@@ -19,32 +19,49 @@ export default function Profile() {
   const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
-    if (username) {
-      loadUserProfile();
-      loadUserBeats();
-    }
-  }, [username]);
-
-  const loadUserProfile = async () => {
-    try {
-      const response = await apiService.getUserProfile(username!);
-      setUser(response.user);
-      setIsFollowing(response.user.is_following || false);
-    } catch (error) {
-      console.error('Error loading user profile:', error);
-    }
-  };
-
-  const loadUserBeats = async () => {
-    try {
-      const response = await apiService.getUserBeats(username!);
-      setBeats(response.beats);
-    } catch (error) {
-      console.error('Error loading user beats:', error);
-    } finally {
+    if (!username) {
       setLoading(false);
+      return;
     }
-  };
+    
+    const loadUserProfile = async () => {
+      try {
+        const response = await apiService.getUserProfile(username);
+        setUser(response.user);
+        setIsFollowing(response.user.is_following || false);
+      } catch (error) {
+        console.error('Get user profile error:', error);
+        setUser(null);
+      }
+    };
+
+    const loadUserBeats = async () => {
+      try {
+        const response = await apiService.getUserBeats(username);
+        setBeats(response.beats || []);
+      } catch (error: any) {
+        // Enhanced error logging with full details
+        const errorInfo = {
+          message: error?.message || 'Unknown error',
+          status: error?.response?.status,
+          statusText: error?.response?.statusText,
+          data: error?.response?.data,
+          url: error?.config?.url,
+          code: error?.code,
+        };
+        console.error('❌ Get user beats error (Profile):', errorInfo);
+        console.error('❌ Full error object:', error);
+        console.error('❌ Error JSON:', JSON.stringify(errorInfo, null, 2));
+        setBeats([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    setLoading(true);
+    loadUserProfile();
+    loadUserBeats();
+  }, [username]);
 
   const handleFollow = async () => {
     if (!username) return;

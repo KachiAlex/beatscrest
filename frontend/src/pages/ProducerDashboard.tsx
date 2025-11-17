@@ -181,7 +181,7 @@ export default function ProducerDashboard() {
       <div className="min-h-screen pt-20 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading...</p>
+          <p className="text-slate-300">Loading...</p>
         </div>
       </div>
     );
@@ -192,7 +192,7 @@ export default function ProducerDashboard() {
     return (
       <div className="min-h-screen pt-20 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-slate-600">Please sign in to access the dashboard.</p>
+          <p className="text-slate-300">Please sign in to access the dashboard.</p>
         </div>
       </div>
     );
@@ -327,8 +327,8 @@ export default function ProducerDashboard() {
                 <span className="text-white text-xl">🎵</span>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Producer Dashboard</h1>
-                <p className="text-sm text-slate-600">Manage your beats and earnings</p>
+                <h1 className="text-2xl font-bold text-white">Producer Dashboard</h1>
+                <p className="text-sm text-slate-300">Manage your beats and earnings</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -344,7 +344,7 @@ export default function ProducerDashboard() {
               <div className="relative profile-dropdown">
                 <button 
                   onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                  className="flex items-center gap-2 p-2 rounded-xl hover:bg-slate-100 transition-colors border border-slate-200"
+                  className="flex items-center gap-2 p-2 rounded-xl hover:bg-white/10 transition-colors border border-white/20"
                 >
                   {user?.profile_picture || profileImagePreview ? (
                     <img
@@ -358,7 +358,7 @@ export default function ProducerDashboard() {
                     </div>
                   )}
                   <svg 
-                    className={`w-4 h-4 text-slate-600 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 text-white transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`}
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
@@ -416,8 +416,8 @@ export default function ProducerDashboard() {
           <div className="card-elevated group hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-sm font-medium mb-1">Total Beats</p>
-                <p className="text-3xl font-bold text-slate-900">{analytics.totalBeats}</p>
+                <p className="text-slate-300 text-sm font-medium mb-1">Total Beats</p>
+                <p className="text-3xl font-bold text-white">{analytics.totalBeats}</p>
               </div>
               <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                 <span className="text-2xl">🎵</span>
@@ -428,8 +428,8 @@ export default function ProducerDashboard() {
           <div className="card-elevated group hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-sm font-medium mb-1">Total Sales</p>
-                <p className="text-3xl font-bold text-slate-900">{analytics.totalSales}</p>
+                <p className="text-slate-300 text-sm font-medium mb-1">Total Sales</p>
+                <p className="text-3xl font-bold text-white">{analytics.totalSales}</p>
               </div>
               <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                 <span className="text-2xl">📦</span>
@@ -440,7 +440,7 @@ export default function ProducerDashboard() {
           <div className="card-elevated group hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-sm font-medium mb-1">Total Earnings</p>
+                <p className="text-slate-300 text-sm font-medium mb-1">Total Earnings</p>
                 <p className="text-2xl font-bold gradient-text">₦{analytics.totalEarnings.toLocaleString()}</p>
               </div>
               <div className="w-14 h-14 bg-gradient-to-br from-purple-500 via-teal-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
@@ -452,8 +452,8 @@ export default function ProducerDashboard() {
           <div className="card-elevated group hover:scale-105 transition-transform duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-600 text-sm font-medium mb-1">Pending Orders</p>
-                <p className="text-3xl font-bold text-slate-900">{analytics.pendingOrders}</p>
+                <p className="text-slate-300 text-sm font-medium mb-1">Pending Orders</p>
+                <p className="text-3xl font-bold text-white">{analytics.pendingOrders}</p>
               </div>
               <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                 <span className="text-2xl">⏳</span>
@@ -473,7 +473,7 @@ export default function ProducerDashboard() {
                   className={`py-3 px-4 rounded-xl font-semibold text-sm flex items-center gap-2 whitespace-nowrap transition-all duration-300 ${
                     activeTab === tab.id
                       ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg scale-105'
-                      : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50'
+                      : 'text-slate-300 hover:text-blue-300 hover:bg-blue-900/30'
                   }`}
                 >
                   <span>{tab.icon}</span>
@@ -489,23 +489,23 @@ export default function ProducerDashboard() {
               <div className="space-y-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div className="card group hover:shadow-xl transition-shadow">
-                    <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                       <span className="text-2xl">📋</span>
                       Recent Activity
                     </h3>
                     <div className="space-y-4">
                       {orders.slice(0, 3).map((order) => (
-                        <div key={order.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors border border-slate-200">
+                        <div key={order.id} className="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl hover:bg-slate-700/50 transition-colors border border-slate-700">
                           <div>
-                            <p className="font-bold text-slate-900">{order.beatTitle}</p>
-                            <p className="text-sm text-slate-600 mt-0.5">Sold to {order.buyerName}</p>
+                            <p className="font-bold text-white">{order.beatTitle}</p>
+                            <p className="text-sm text-slate-300 mt-0.5">Sold to {order.buyerName}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-slate-900">₦{order.amount.toLocaleString()}</p>
-                            <span className={`text-xs px-3 py-1 rounded-full font-semibold mt-1 inline-block ${
-                              order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                              order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-red-100 text-red-700'
+                            <p className="font-bold text-white">₦{order.amount.toLocaleString()}</p>
+                            <span className={`text-xs px-3 py-1 rounded-full font-semibold mt-1 inline-block border ${
+                              order.status === 'delivered' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
+                              order.status === 'pending' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
+                              'bg-red-500/20 text-red-300 border-red-500/30'
                             }`}>
                               {order.status}
                             </span>
@@ -515,19 +515,19 @@ export default function ProducerDashboard() {
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 rounded-xl p-6">
-                    <h3 className="text-lg font-semibold mb-4">Top Performing Beat</h3>
-                    <div className="bg-white rounded-lg p-4">
-                      <h4 className="font-semibold">{analytics.topPerformingBeat.title}</h4>
-                      <p className="text-gray-600 text-sm mb-3">{analytics.topPerformingBeat.description}</p>
+                  <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+                    <h3 className="text-lg font-semibold mb-4 text-white">Top Performing Beat</h3>
+                    <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+                      <h4 className="font-semibold text-white">{analytics.topPerformingBeat.title}</h4>
+                      <p className="text-slate-300 text-sm mb-3">{analytics.topPerformingBeat.description}</p>
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <p className="text-gray-600">Sales</p>
-                          <p className="font-semibold">{analytics.topPerformingBeat.sales}</p>
+                          <p className="text-slate-300">Sales</p>
+                          <p className="font-semibold text-white">{analytics.topPerformingBeat.sales}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Earnings</p>
-                          <p className="font-semibold">₦{analytics.topPerformingBeat.earnings.toLocaleString()}</p>
+                          <p className="text-slate-300">Earnings</p>
+                          <p className="font-semibold text-white">₦{analytics.topPerformingBeat.earnings.toLocaleString()}</p>
                         </div>
                       </div>
                     </div>
@@ -540,7 +540,7 @@ export default function ProducerDashboard() {
             {activeTab === 'beats' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">My Beats</h3>
+                  <h3 className="text-lg font-semibold text-white">My Beats</h3>
                   <button 
                     onClick={() => navigate('/upload')}
                     className="bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white px-4 py-2 rounded-lg transition-all duration-300 shadow-lg"
@@ -551,36 +551,36 @@ export default function ProducerDashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                   {beats.map((beat) => (
-                    <div key={beat.id} className="bg-gray-50 rounded-xl p-6">
+                    <div key={beat.id} className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
                       <div className="flex justify-between items-start mb-4">
-                        <h4 className="font-semibold text-lg">{beat.title}</h4>
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          beat.status === 'published' ? 'bg-green-100 text-green-800' :
-                          beat.status === 'draft' ? 'bg-gray-100 text-gray-800' :
-                          'bg-red-100 text-red-800'
+                        <h4 className="font-semibold text-lg text-white">{beat.title}</h4>
+                        <span className={`text-xs px-2 py-1 rounded-full border ${
+                          beat.status === 'published' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
+                          beat.status === 'draft' ? 'bg-slate-600 text-slate-200 border-slate-500' :
+                          'bg-red-500/20 text-red-300 border-red-500/30'
                         }`}>
                           {beat.status}
                         </span>
                       </div>
                       
-                      <p className="text-gray-600 text-sm mb-4">{beat.description}</p>
+                      <p className="text-slate-300 text-sm mb-4">{beat.description}</p>
                       
                       <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                         <div>
-                          <p className="text-gray-600">Genre</p>
-                          <p className="font-medium">{beat.genre}</p>
+                          <p className="text-slate-300">Genre</p>
+                          <p className="font-medium text-white">{beat.genre}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">BPM</p>
-                          <p className="font-medium">{beat.bpm}</p>
+                          <p className="text-slate-300">BPM</p>
+                          <p className="font-medium text-white">{beat.bpm}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Price</p>
-                          <p className="font-medium">₦{beat.price.toLocaleString()}</p>
+                          <p className="text-slate-300">Price</p>
+                          <p className="font-medium text-white">₦{beat.price.toLocaleString()}</p>
                         </div>
                         <div>
-                          <p className="text-gray-600">Sales</p>
-                          <p className="font-medium">{beat.sales}</p>
+                          <p className="text-slate-300">Sales</p>
+                          <p className="font-medium text-white">{beat.sales}</p>
                         </div>
                       </div>
 
@@ -588,7 +588,7 @@ export default function ProducerDashboard() {
                         <button className="w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 text-white py-2 rounded-lg text-sm transition-all duration-300">
                           ▶ Preview
                         </button>
-                        <button className="w-full border border-gray-300 hover:bg-gray-50 py-2 rounded-lg text-sm">
+                        <button className="w-full border border-slate-600 bg-slate-800 text-white hover:bg-slate-700 py-2 rounded-lg text-sm">
                           Edit Beat
                         </button>
                       </div>
@@ -601,41 +601,41 @@ export default function ProducerDashboard() {
             {/* Orders Tab */}
             {activeTab === 'orders' && (
               <div className="space-y-6">
-                <h3 className="text-lg font-semibold">Orders</h3>
+                <h3 className="text-lg font-semibold text-white">Orders</h3>
                 
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4">Order ID</th>
-                        <th className="text-left py-3 px-4">Beat</th>
-                        <th className="text-left py-3 px-4">Buyer</th>
-                        <th className="text-left py-3 px-4">Amount</th>
-                        <th className="text-left py-3 px-4">Status</th>
-                        <th className="text-left py-3 px-4">Date</th>
-                        <th className="text-left py-3 px-4">Actions</th>
+                      <tr className="border-b border-slate-700">
+                        <th className="text-left py-3 px-4 text-white">Order ID</th>
+                        <th className="text-left py-3 px-4 text-white">Beat</th>
+                        <th className="text-left py-3 px-4 text-white">Buyer</th>
+                        <th className="text-left py-3 px-4 text-white">Amount</th>
+                        <th className="text-left py-3 px-4 text-white">Status</th>
+                        <th className="text-left py-3 px-4 text-white">Date</th>
+                        <th className="text-left py-3 px-4 text-white">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {orders.map((order) => (
-                        <tr key={order.id} className="border-b border-gray-100">
-                          <td className="py-3 px-4 font-medium">{order.id}</td>
-                          <td className="py-3 px-4">{order.beatTitle}</td>
-                          <td className="py-3 px-4">{order.buyerName}</td>
-                          <td className="py-3 px-4">₦{order.amount.toLocaleString()}</td>
+                        <tr key={order.id} className="border-b border-slate-700/50">
+                          <td className="py-3 px-4 font-medium text-white">{order.id}</td>
+                          <td className="py-3 px-4 text-white">{order.beatTitle}</td>
+                          <td className="py-3 px-4 text-white">{order.buyerName}</td>
+                          <td className="py-3 px-4 text-white">₦{order.amount.toLocaleString()}</td>
                           <td className="py-3 px-4">
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                              order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-red-100 text-red-800'
+                            <span className={`text-xs px-2 py-1 rounded-full border ${
+                              order.status === 'delivered' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
+                              order.status === 'pending' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
+                              'bg-red-500/20 text-red-300 border-red-500/30'
                             }`}>
                               {order.status}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-sm">{order.orderDate}</td>
+                          <td className="py-3 px-4 text-sm text-slate-300">{order.orderDate}</td>
                           <td className="py-3 px-4">
                             {order.status === 'pending' && (
-                                                          <button className="text-teal-600 hover:text-teal-700 text-sm font-medium">
+                                                          <button className="text-teal-400 hover:text-teal-300 text-sm font-medium">
                               Deliver
                             </button>
                             )}
@@ -651,26 +651,26 @@ export default function ProducerDashboard() {
             {/* Transactions Tab */}
             {activeTab === 'transactions' && (
               <div className="space-y-6">
-                <h3 className="text-lg font-semibold">Transaction History</h3>
+                <h3 className="text-lg font-semibold text-white">Transaction History</h3>
                 
                 <div className="space-y-4">
                   {transactions.map((transaction) => (
-                    <div key={transaction.id} className="bg-gray-50 rounded-xl p-4">
+                    <div key={transaction.id} className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium">{transaction.description}</p>
-                          <p className="text-sm text-gray-600">{transaction.date}</p>
+                          <p className="font-medium text-white">{transaction.description}</p>
+                          <p className="text-sm text-slate-300">{transaction.date}</p>
                         </div>
                         <div className="text-right">
                           <p className={`font-semibold ${
-                            transaction.type === 'withdrawal' ? 'text-red-600' : 'text-green-600'
+                            transaction.type === 'withdrawal' ? 'text-red-400' : 'text-green-400'
                           }`}>
                             {transaction.type === 'withdrawal' ? '-' : '+'}₦{Math.abs(transaction.amount).toLocaleString()}
                           </p>
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            transaction.status === 'completed' ? 'bg-green-100 text-green-800' :
-                            transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
+                          <span className={`text-xs px-2 py-1 rounded-full border ${
+                            transaction.status === 'completed' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
+                            transaction.status === 'pending' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
+                            'bg-red-500/20 text-red-300 border-red-500/30'
                           }`}>
                             {transaction.status}
                           </span>
@@ -686,7 +686,7 @@ export default function ProducerDashboard() {
             {activeTab === 'profile' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">Profile Settings</h3>
+                  <h3 className="text-lg font-semibold text-white">Profile Settings</h3>
                   <div className="flex gap-3">
                     {isEditingProfile && (
                       <button 
@@ -764,87 +764,87 @@ export default function ProducerDashboard() {
                             </span>
                           ))}
                         </div>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-slate-300">
                           {user?.rating || 0} out of 5 ({user?.total_ratings || 0} ratings)
                         </p>
                       </div>
 
                       <div className="space-y-2 text-sm">
-                        <p className="font-medium">{user?.username}</p>
-                        <p className="text-gray-600">{user?.account_type}</p>
-                        <p className="text-gray-600">Member since {new Date(user?.created_at || '').toLocaleDateString()}</p>
+                        <p className="font-medium text-white">{user?.username}</p>
+                        <p className="text-slate-300">{user?.account_type}</p>
+                        <p className="text-slate-300">Member since {new Date(user?.created_at || '').toLocaleDateString()}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Profile Form */}
                   <div className="lg:col-span-2">
-                    <div className="bg-gray-50 rounded-xl p-6">
+                    <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
                       <form onSubmit={(e) => { e.preventDefault(); handleProfileSave(); }} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-sm font-medium mb-2">Username</label>
+                            <label className="block text-sm font-medium mb-2 text-white">Username</label>
                             <input
                               type="text"
                               value={profileData.username}
                               onChange={(e) => setProfileData(prev => ({ ...prev, username: e.target.value }))}
                               disabled={!isEditingProfile}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100"
+                              className="w-full px-3 py-2 border border-slate-600 bg-slate-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-slate-800 disabled:text-slate-400"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium mb-2">Email</label>
+                            <label className="block text-sm font-medium mb-2 text-white">Email</label>
                             <input
                               type="email"
                               value={profileData.email}
                               onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
                               disabled={!isEditingProfile}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100"
+                              className="w-full px-3 py-2 border border-slate-600 bg-slate-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-slate-800 disabled:text-slate-400"
                             />
                           </div>
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-2">Full Name</label>
+                          <label className="block text-sm font-medium mb-2 text-white">Full Name</label>
                           <input
                             type="text"
                             value={profileData.fullName}
                             onChange={(e) => setProfileData(prev => ({ ...prev, fullName: e.target.value }))}
                             disabled={!isEditingProfile}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100"
+                            className="w-full px-3 py-2 border border-slate-600 bg-slate-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-slate-800 disabled:text-slate-400"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-2">Headline</label>
+                          <label className="block text-sm font-medium mb-2 text-white">Headline</label>
                           <input
                             type="text"
                             value={profileData.headline}
                             onChange={(e) => setProfileData(prev => ({ ...prev, headline: e.target.value }))}
                             disabled={!isEditingProfile}
                             placeholder="e.g., Professional Music Producer & Sound Engineer"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100"
+                            className="w-full px-3 py-2 border border-slate-600 bg-slate-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-slate-800 disabled:text-slate-400 placeholder:text-slate-400"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium mb-2">Bio</label>
+                          <label className="block text-sm font-medium mb-2 text-white">Bio</label>
                           <textarea
                             value={profileData.bio}
                             onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
                             disabled={!isEditingProfile}
                             rows={4}
                             placeholder="Tell your story, your musical journey, and what makes your beats unique..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100 resize-none"
+                            className="w-full px-3 py-2 border border-slate-600 bg-slate-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-slate-800 disabled:text-slate-400 resize-none placeholder:text-slate-400"
                           />
                         </div>
 
                         {/* Social Links */}
                         <div>
-                          <label className="block text-sm font-medium mb-3">Social Links</label>
+                          <label className="block text-sm font-medium mb-3 text-white">Social Links</label>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-xs text-gray-600 mb-1">Instagram</label>
+                              <label className="block text-xs text-slate-300 mb-1">Instagram</label>
                               <input
                                 type="url"
                                 value={profileData.socialLinks.instagram}
@@ -854,11 +854,11 @@ export default function ProducerDashboard() {
                                 }))}
                                 disabled={!isEditingProfile}
                                 placeholder="https://instagram.com/yourusername"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100 text-sm"
+                                className="w-full px-3 py-2 border border-slate-600 bg-slate-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-slate-800 disabled:text-slate-400 text-sm"
                               />
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-600 mb-1">Twitter</label>
+                              <label className="block text-xs text-slate-300 mb-1">Twitter</label>
                               <input
                                 type="url"
                                 value={profileData.socialLinks.twitter}
@@ -868,11 +868,11 @@ export default function ProducerDashboard() {
                                 }))}
                                 disabled={!isEditingProfile}
                                 placeholder="https://twitter.com/yourusername"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100 text-sm"
+                                className="w-full px-3 py-2 border border-slate-600 bg-slate-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-slate-800 disabled:text-slate-400 text-sm"
                               />
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-600 mb-1">YouTube</label>
+                              <label className="block text-xs text-slate-300 mb-1">YouTube</label>
                               <input
                                 type="url"
                                 value={profileData.socialLinks.youtube}
@@ -882,11 +882,11 @@ export default function ProducerDashboard() {
                                 }))}
                                 disabled={!isEditingProfile}
                                 placeholder="https://youtube.com/@yourchannel"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100 text-sm"
+                                className="w-full px-3 py-2 border border-slate-600 bg-slate-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-slate-800 disabled:text-slate-400 text-sm"
                               />
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-600 mb-1">SoundCloud</label>
+                              <label className="block text-xs text-slate-300 mb-1">SoundCloud</label>
                               <input
                                 type="url"
                                 value={profileData.socialLinks.soundcloud}
@@ -896,7 +896,7 @@ export default function ProducerDashboard() {
                                 }))}
                                 disabled={!isEditingProfile}
                                 placeholder="https://soundcloud.com/yourusername"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-gray-100 text-sm"
+                                className="w-full px-3 py-2 border border-slate-600 bg-slate-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-slate-800 disabled:text-slate-400 text-sm"
                               />
                             </div>
                           </div>
@@ -913,31 +913,31 @@ export default function ProducerDashboard() {
             {/* Certificates Tab */}
             {activeTab === 'certificates' && (
               <div className="space-y-6">
-                <h3 className="text-lg font-semibold">Beat Certificates</h3>
+                <h3 className="text-lg font-semibold text-white">Beat Certificates</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {beats.map((beat) => (
-                    <div key={beat.id} className="bg-gray-50 rounded-xl p-6">
+                    <div key={beat.id} className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
                       <div className="text-center mb-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-purple-100 via-teal-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <div className="w-16 h-16 bg-gradient-to-br from-purple-500 via-teal-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
                           <span className="text-2xl">🏆</span>
                         </div>
-                        <h4 className="font-semibold">{beat.title}</h4>
-                        <p className="text-sm text-gray-600">{beat.genre}</p>
+                        <h4 className="font-semibold text-white">{beat.title}</h4>
+                        <p className="text-sm text-slate-300">{beat.genre}</p>
                       </div>
                       
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-2 text-sm text-white">
                         <div className="flex justify-between">
-                          <span>Certificate ID:</span>
-                          <span className="font-medium">CERT-{beat.id.padStart(4, '0')}</span>
+                          <span className="text-slate-300">Certificate ID:</span>
+                          <span className="font-medium text-white">CERT-{beat.id.padStart(4, '0')}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Issue Date:</span>
-                          <span>{beat.uploadDate}</span>
+                          <span className="text-slate-300">Issue Date:</span>
+                          <span className="text-white">{beat.uploadDate}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Status:</span>
-                          <span className="text-green-600">Verified</span>
+                          <span className="text-slate-300">Status:</span>
+                          <span className="text-green-400">Verified</span>
                         </div>
                       </div>
                       
@@ -945,7 +945,7 @@ export default function ProducerDashboard() {
                         <button className="w-full bg-gradient-to-r from-purple-600 via-teal-500 to-orange-500 hover:from-purple-700 hover:via-teal-600 hover:to-orange-600 text-white py-2 rounded-lg text-sm transition-all duration-300">
                           View Certificate
                         </button>
-                        <button className="w-full border border-gray-300 hover:bg-gray-50 py-2 rounded-lg text-sm">
+                        <button className="w-full border border-slate-600 bg-slate-800 text-white hover:bg-slate-700 py-2 rounded-lg text-sm">
                           Download PDF
                         </button>
                       </div>
@@ -958,19 +958,19 @@ export default function ProducerDashboard() {
             {/* Analytics Tab */}
             {activeTab === 'analytics' && (
               <div className="space-y-6">
-                <h3 className="text-lg font-semibold">Detailed Analytics</h3>
+                <h3 className="text-lg font-semibold text-white">Detailed Analytics</h3>
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-gray-50 rounded-xl p-6">
-                    <h4 className="font-semibold mb-4">Sales Performance</h4>
+                  <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+                    <h4 className="font-semibold mb-4 text-white">Sales Performance</h4>
                     <div className="space-y-3">
                       {beats.map((beat) => (
-                        <div key={beat.id} className="bg-white rounded-lg p-3">
+                        <div key={beat.id} className="bg-slate-700/50 rounded-lg p-3 border border-slate-600">
                           <div className="flex justify-between items-center mb-2">
-                            <span className="font-medium">{beat.title}</span>
-                            <span className="text-sm text-gray-600">{beat.sales} sales</span>
+                            <span className="font-medium text-white">{beat.title}</span>
+                            <span className="text-sm text-slate-300">{beat.sales} sales</span>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="w-full bg-slate-600 rounded-full h-2">
                             <div 
                               className="bg-gradient-to-r from-teal-500 to-purple-600 h-2 rounded-full" 
                               style={{ width: `${(beat.sales / Math.max(...beats.map(b => b.sales))) * 100}%` }}
@@ -981,20 +981,20 @@ export default function ProducerDashboard() {
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 rounded-xl p-6">
-                    <h4 className="font-semibold mb-4">Earnings Overview</h4>
+                  <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+                    <h4 className="font-semibold mb-4 text-white">Earnings Overview</h4>
                     <div className="space-y-4">
-                      <div className="bg-white rounded-lg p-4">
-                        <p className="text-sm text-gray-600">This Month</p>
-                        <p className="text-2xl font-bold text-green-600">₦{(analytics.totalEarnings * 0.3).toLocaleString()}</p>
+                      <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+                        <p className="text-sm text-slate-300">This Month</p>
+                        <p className="text-2xl font-bold text-green-400">₦{(analytics.totalEarnings * 0.3).toLocaleString()}</p>
                       </div>
-                      <div className="bg-white rounded-lg p-4">
-                        <p className="text-sm text-gray-600">Last Month</p>
-                        <p className="text-2xl font-bold text-gray-900">₦{(analytics.totalEarnings * 0.7).toLocaleString()}</p>
+                      <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+                        <p className="text-sm text-slate-300">Last Month</p>
+                        <p className="text-2xl font-bold text-white">₦{(analytics.totalEarnings * 0.7).toLocaleString()}</p>
                       </div>
-                      <div className="bg-white rounded-lg p-4">
-                        <p className="text-sm text-gray-600">Growth</p>
-                        <p className="text-lg font-semibold text-green-600">+{analytics.monthlyGrowth}%</p>
+                      <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+                        <p className="text-sm text-slate-300">Growth</p>
+                        <p className="text-lg font-semibold text-green-400">+{analytics.monthlyGrowth}%</p>
                       </div>
                     </div>
                   </div>

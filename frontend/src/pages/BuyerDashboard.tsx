@@ -3,7 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { Wallet, ShoppingBag, Receipt, Filter, ChevronRight } from 'lucide-react';
+import { Wallet, ShoppingBag, Receipt, Filter, ChevronRight, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface BuyerOrder {
 	id: string;
@@ -25,6 +26,7 @@ interface BuyerTransaction {
 
 const BuyerDashboard: React.FC = () => {
 	const { user, loading } = useAuth();
+	const navigate = useNavigate();
 	const [orders, setOrders] = useState<BuyerOrder[]>([]);
 	const [transactions, setTransactions] = useState<BuyerTransaction[]>([]);
 	const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'transactions'>('overview');
@@ -108,10 +110,10 @@ const BuyerDashboard: React.FC = () => {
 							<div className="p-4 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg group-hover:scale-110 transition-transform">
 								<ShoppingBag size={24} />
 							</div>
-							<div>
-								<div className="text-sm text-slate-600 font-medium mb-1">Orders</div>
-								<div className="text-3xl font-bold text-slate-900">{orders.length}</div>
-							</div>
+								<div>
+									<div className="text-sm text-slate-300 font-medium mb-1">Orders</div>
+									<div className="text-3xl font-bold text-white">{orders.length}</div>
+								</div>
 						</div>
 					</div>
 					<div className="card-elevated group hover:scale-105 transition-transform duration-300">
@@ -119,10 +121,10 @@ const BuyerDashboard: React.FC = () => {
 							<div className="p-4 rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 text-white shadow-lg group-hover:scale-110 transition-transform">
 								<Wallet size={24} />
 							</div>
-							<div>
-								<div className="text-sm text-slate-600 font-medium mb-1">Total Spend</div>
-								<div className="text-2xl font-bold gradient-text">₦{transactions.filter(t => t.type === 'purchase').reduce((s, t) => s + t.amount, 0).toLocaleString()}</div>
-							</div>
+								<div>
+									<div className="text-sm text-slate-300 font-medium mb-1">Total Spend</div>
+									<div className="text-2xl font-bold gradient-text">₦{transactions.filter(t => t.type === 'purchase').reduce((s, t) => s + t.amount, 0).toLocaleString()}</div>
+								</div>
 						</div>
 					</div>
 					<div className="card-elevated group hover:scale-105 transition-transform duration-300">
@@ -130,10 +132,10 @@ const BuyerDashboard: React.FC = () => {
 							<div className="p-4 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg group-hover:scale-110 transition-transform">
 								<Receipt size={24} />
 							</div>
-							<div>
-								<div className="text-sm text-slate-600 font-medium mb-1">Transactions</div>
-								<div className="text-3xl font-bold text-slate-900">{transactions.length}</div>
-							</div>
+								<div>
+									<div className="text-sm text-slate-300 font-medium mb-1">Transactions</div>
+									<div className="text-3xl font-bold text-white">{transactions.length}</div>
+								</div>
 						</div>
 					</div>
 				</div>
@@ -158,25 +160,25 @@ const BuyerDashboard: React.FC = () => {
 										<img
 											src={user?.profile_picture || 'https://via.placeholder.com/80'}
 											alt={user?.username || 'User'}
-											className="w-20 h-20 rounded-full object-cover border"
+											className="w-20 h-20 rounded-full object-cover border border-slate-700"
 										/>
 										<div>
-											<div className="text-lg font-semibold">{user?.username || 'Guest'}</div>
-											<div className="text-sm text-gray-600">{user?.email || 'Not signed in'}</div>
+											<div className="text-lg font-semibold text-white">{user?.username || 'Guest'}</div>
+											<div className="text-sm text-slate-300">{user?.email || 'Not signed in'}</div>
 										</div>
 									</div>
 									<div className="mt-4 grid grid-cols-3 gap-4 text-center">
 										<div>
-											<div className="text-xl font-bold">{orders.length}</div>
-											<div className="text-xs text-gray-500">Orders</div>
+											<div className="text-xl font-bold text-white">{orders.length}</div>
+											<div className="text-xs text-slate-400">Orders</div>
 										</div>
 										<div>
-											<div className="text-xl font-bold">₦{transactions.filter(t => t.type === 'purchase').reduce((s, t) => s + t.amount, 0).toLocaleString()}</div>
-											<div className="text-xs text-gray-500">Total Spend</div>
+											<div className="text-xl font-bold text-white">₦{transactions.filter(t => t.type === 'purchase').reduce((s, t) => s + t.amount, 0).toLocaleString()}</div>
+											<div className="text-xs text-slate-400">Total Spend</div>
 										</div>
 										<div>
-											<div className="text-xl font-bold">{transactions.length}</div>
-											<div className="text-xs text-gray-500">Transactions</div>
+											<div className="text-xl font-bold text-white">{transactions.length}</div>
+											<div className="text-xs text-slate-400">Transactions</div>
 										</div>
 									</div>
 								</CardContent>
@@ -186,13 +188,13 @@ const BuyerDashboard: React.FC = () => {
 							<Card className="lg:col-span-2">
 								<CardContent className="p-6">
 									<div className="flex items-center justify-between mb-4">
-										<h2 className="text-lg font-semibold">Current Orders</h2>
+										<h2 className="text-lg font-semibold text-white">Current Orders</h2>
 										<div className="flex items-center gap-2">
-											<Filter size={16} className="text-gray-500" />
+											<Filter size={16} className="text-slate-400" />
 											<select
 												value={orderStatusFilter}
 												onChange={(e) => setOrderStatusFilter(e.target.value as any)}
-												className="text-sm border rounded-md px-2 py-1"
+												className="text-sm border border-slate-600 bg-slate-800 text-white rounded-md px-2 py-1"
 											>
 												<option value="all">All</option>
 												<option value="pending">Pending</option>
@@ -203,22 +205,33 @@ const BuyerDashboard: React.FC = () => {
 									</div>
 									<div className="space-y-3">
 										{filteredOrders.map(order => (
-											<div key={order.id} className="flex items-center justify-between bg-white rounded-lg border p-3">
+											<div key={order.id} className="flex items-center justify-between bg-slate-800/50 rounded-lg border border-slate-700 p-3">
 												<div className="flex items-center gap-3">
-													<div className="h-10 w-10 rounded-md bg-gray-100 flex items-center justify-center text-gray-500">🎵</div>
+													<div className="h-10 w-10 rounded-md bg-slate-700 flex items-center justify-center text-white">🎵</div>
 													<div>
-														<div className="font-medium flex items-center gap-2">{order.beatTitle} <ChevronRight size={16} className="text-gray-400" /></div>
-														<div className="text-sm text-gray-600">by {order.producerName}</div>
+														<div className="font-medium text-white flex items-center gap-2">{order.beatTitle} <ChevronRight size={16} className="text-slate-400" /></div>
+														<div className="text-sm text-slate-300">by {order.producerName}</div>
 													</div>
 												</div>
-												<div className="text-right space-y-1">
-													<div className="font-semibold">₦{order.amount.toLocaleString()}</div>
-													<div className="flex justify-end">{statusBadge(order.status)}</div>
+												<div className="text-right space-y-2">
+													<div className="font-semibold text-white">₦{order.amount.toLocaleString()}</div>
+													<div className="flex justify-end gap-2 items-center">
+														{statusBadge(order.status)}
+														{order.status === 'completed' && (
+															<button
+																onClick={() => navigate(`/license/${order.id}`)}
+																className="ml-2 px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center gap-1 transition-colors"
+															>
+																<FileText size={12} />
+																License
+															</button>
+														)}
+													</div>
 												</div>
 											</div>
 										))}
 										{filteredOrders.length === 0 && (
-											<div className="text-center text-gray-500 py-8">No orders found for this filter.</div>
+											<div className="text-center text-slate-400 py-8">No orders found for this filter.</div>
 										)}
 									</div>
 								</CardContent>
@@ -231,13 +244,13 @@ const BuyerDashboard: React.FC = () => {
 						<Card className="mt-6">
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between mb-4">
-									<h2 className="text-lg font-semibold">All Orders</h2>
+									<h2 className="text-lg font-semibold text-white">All Orders</h2>
 									<div className="flex items-center gap-2">
-										<Filter size={16} className="text-gray-500" />
+										<Filter size={16} className="text-slate-400" />
 										<select
 											value={orderStatusFilter}
 											onChange={(e) => setOrderStatusFilter(e.target.value as any)}
-											className="text-sm border rounded-md px-2 py-1"
+											className="text-sm border border-slate-600 bg-slate-800 text-white rounded-md px-2 py-1"
 										>
 											<option value="all">All</option>
 											<option value="pending">Pending</option>
@@ -248,19 +261,30 @@ const BuyerDashboard: React.FC = () => {
 								</div>
 								<div className="space-y-3">
 									{filteredOrders.map(order => (
-										<div key={order.id} className="flex items-center justify-between bg-white rounded-lg border p-3">
+										<div key={order.id} className="flex items-center justify-between bg-slate-800/50 rounded-lg border border-slate-700 p-3">
 											<div>
-												<div className="font-medium">{order.beatTitle}</div>
-												<div className="text-sm text-gray-600">by {order.producerName}</div>
+												<div className="font-medium text-white">{order.beatTitle}</div>
+												<div className="text-sm text-slate-300">by {order.producerName}</div>
 											</div>
-											<div className="text-right">
-												<div className="font-semibold">₦{order.amount.toLocaleString()}</div>
-												<div>{statusBadge(order.status)}</div>
+											<div className="text-right space-y-2">
+												<div className="font-semibold text-white">₦{order.amount.toLocaleString()}</div>
+												<div className="flex justify-end gap-2 items-center">
+													{statusBadge(order.status)}
+													{order.status === 'completed' && (
+														<button
+															onClick={() => navigate(`/license/${order.id}`)}
+															className="ml-2 px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center gap-1 transition-colors"
+														>
+															<FileText size={12} />
+															License
+														</button>
+													)}
+												</div>
 											</div>
 										</div>
 									))}
 									{filteredOrders.length === 0 && (
-										<div className="text-center text-gray-500 py-8">No orders found for this filter.</div>
+										<div className="text-center text-slate-400 py-8">No orders found for this filter.</div>
 									)}
 								</div>
 							</CardContent>
@@ -272,13 +296,13 @@ const BuyerDashboard: React.FC = () => {
 						<Card className="mt-6">
 							<CardContent className="p-6">
 								<div className="flex items-center justify-between mb-4">
-									<h2 className="text-lg font-semibold">Transaction History</h2>
+									<h2 className="text-lg font-semibold text-white">Transaction History</h2>
 									<div className="flex items-center gap-2">
-										<Filter size={16} className="text-gray-500" />
+										<Filter size={16} className="text-slate-400" />
 										<select
 											value={txStatusFilter}
 											onChange={(e) => setTxStatusFilter(e.target.value as any)}
-											className="text-sm border rounded-md px-2 py-1"
+											className="text-sm border border-slate-600 bg-slate-800 text-white rounded-md px-2 py-1"
 										>
 											<option value="all">All</option>
 											<option value="pending">Pending</option>
@@ -289,19 +313,19 @@ const BuyerDashboard: React.FC = () => {
 								</div>
 								<div className="space-y-3">
 									{filteredTransactions.map(tx => (
-										<div key={tx.id} className="flex items-center justify-between bg-white rounded-lg border p-3">
+										<div key={tx.id} className="flex items-center justify-between bg-slate-800/50 rounded-lg border border-slate-700 p-3">
 											<div>
-												<div className="font-medium">{tx.description}</div>
-												<div className="text-xs text-gray-500">{tx.date}</div>
+												<div className="font-medium text-white">{tx.description}</div>
+												<div className="text-xs text-slate-400">{tx.date}</div>
 											</div>
 											<div className="text-right">
-												<div className={`font-semibold ${tx.amount < 0 ? 'text-red-600' : 'text-gray-900'}`}>₦{tx.amount.toLocaleString()}</div>
+												<div className={`font-semibold ${tx.amount < 0 ? 'text-red-400' : 'text-white'}`}>₦{tx.amount.toLocaleString()}</div>
 												<div>{statusBadge(tx.status)}</div>
 											</div>
 										</div>
 									))}
 									{filteredTransactions.length === 0 && (
-										<div className="text-center text-gray-500 py-8">No transactions found for this filter.</div>
+										<div className="text-center text-slate-400 py-8">No transactions found for this filter.</div>
 									)}
 								</div>
 							</CardContent>

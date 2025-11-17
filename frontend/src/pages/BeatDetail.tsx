@@ -294,13 +294,15 @@ export default function BeatDetail() {
               <div className="flex flex-col md:flex-row items-start justify-between gap-6 mb-8">
                 <div className="flex-1">
                   <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-3">{beat.title}</h1>
-                  <Link 
-                    to={`/profile/${beat.producer_name}`}
-                    className="text-lg text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-2 hover:underline transition-colors"
-                  >
-                    <span>by {beat.producer_name}</span>
-                    <span className="text-sm">→</span>
-                  </Link>
+                  {beat.producer_name && (
+                    <Link 
+                      to={`/profile/${beat.producer_name}`}
+                      className="text-lg text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-2 hover:underline transition-colors"
+                    >
+                      <span>by {beat.producer_name}</span>
+                      <span className="text-sm">→</span>
+                    </Link>
+                  )}
                   {feedbackStats && (
                     <div className="flex items-center gap-3 mt-4">
                       <StarRating
@@ -511,36 +513,38 @@ export default function BeatDetail() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Producer Info */}
-            <div className="card-elevated">
-              <h3 className="text-xl font-bold text-slate-900 mb-4">Producer</h3>
-              <div className="flex items-center gap-3 mb-4">
-                {beat.producer_picture ? (
-                  <img
-                    src={beat.producer_picture}
-                    alt={beat.producer_name}
-                    className="w-16 h-16 rounded-full object-cover border-2 border-slate-200"
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center border-2 border-slate-200">
-                    <span className="text-white font-bold text-lg">{beat.producer_name?.charAt(0).toUpperCase()}</span>
+            {beat.producer_name && (
+              <div className="card-elevated">
+                <h3 className="text-xl font-bold text-slate-900 mb-4">Producer</h3>
+                <div className="flex items-center gap-3 mb-4">
+                  {beat.producer_picture ? (
+                    <img
+                      src={beat.producer_picture}
+                      alt={beat.producer_name}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-slate-200"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center border-2 border-slate-200">
+                      <span className="text-white font-bold text-lg">{beat.producer_name.charAt(0).toUpperCase()}</span>
+                    </div>
+                  )}
+                  <div>
+                    <Link 
+                      to={`/profile/${beat.producer_name}`}
+                      className="font-bold text-blue-600 hover:text-blue-700 text-lg"
+                    >
+                      {beat.producer_name}
+                    </Link>
+                    <div className="text-sm text-slate-600">Producer</div>
                   </div>
-                )}
-                <div>
-                  <Link 
-                    to={`/profile/${beat.producer_name}`}
-                    className="font-bold text-blue-600 hover:text-blue-700 text-lg"
-                  >
-                    {beat.producer_name}
-                  </Link>
-                  <div className="text-sm text-slate-600">Producer</div>
                 </div>
+                <Link to={`/profile/${beat.producer_name}`}>
+                  <button className="btn-secondary w-full">
+                    View Profile
+                  </button>
+                </Link>
               </div>
-              <Link to={`/profile/${beat.producer_name}`}>
-                <button className="btn-secondary w-full">
-                  View Profile
-                </button>
-              </Link>
-            </div>
+            )}
 
             {/* Purchase Info */}
             <div className="card-elevated">

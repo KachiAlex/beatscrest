@@ -11,6 +11,7 @@ import BuyerDashboard from './pages/BuyerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Messages from './pages/Messages';
 import Payment from './pages/Payment';
+import BeatLicense from './pages/BeatLicense';
 import SplashScreen from './components/SplashScreen';
 
 const App: React.FC = () => {
@@ -30,7 +31,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <Routes>
         {/* Home page with banner slides, about, and beats commerce */}
         <Route path="/" element={
@@ -102,6 +103,14 @@ const App: React.FC = () => {
             <Navbar />
             <main>
               <Messages />
+            </main>
+          </>
+        } />
+        <Route path="/license/:purchaseId" element={
+          <>
+            <Navbar />
+            <main>
+              <BeatLicense />
             </main>
           </>
         } />

@@ -34,10 +34,15 @@ export default function Upload() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated or not a producer
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/');
+    if (!authLoading) {
+      if (!user) {
+        navigate('/');
+      } else if (user.account_type !== 'producer') {
+        // Redirect buyers/artists to their dashboard
+        navigate('/buyer');
+      }
     }
   }, [user, authLoading, navigate]);
 
@@ -53,12 +58,22 @@ export default function Upload() {
     );
   }
 
-  // Show message if not authenticated
+  // Show message if not authenticated or not a producer
   if (!user) {
     return (
       <div className="min-h-screen pt-20 flex items-center justify-center">
         <div className="text-center">
           <p className="text-slate-600">Please sign in to upload beats.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user.account_type !== 'producer') {
+    return (
+      <div className="min-h-screen pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-slate-600">Only producers can upload beats. Please sign up as a producer to access this feature.</p>
         </div>
       </div>
     );

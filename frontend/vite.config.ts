@@ -4,7 +4,21 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // Plugin to handle favicon.ico requests
+    {
+      name: 'favicon-handler',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url === '/favicon.ico') {
+            req.url = '/images/beat-crest-logo.png'
+          }
+          next()
+        })
+      },
+    },
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

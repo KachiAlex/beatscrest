@@ -2,8 +2,12 @@ import axios from 'axios';
 import { User, Beat, Purchase, Comment, Message, Conversation, Notification, RegisterData, LoginData, ApiResponse, PaginatedResponse } from '../types';
 import { mockBeats as localMockBeats } from '../data/mockBeats';
 
-// Simple API configuration
-const baseURL = (import.meta as any).env?.VITE_API_URL ?? (import.meta.env.DEV ? '/api' : 'https://beatscrest.onrender.com/api');
+// Simple API configuration - Use Firebase Functions in production
+// Firebase Function URL: https://us-central1-beatcrest.cloudfunctions.net/api
+// Firebase Hosting rewrite will handle /api/** to the function at beatcrest.web.app
+// Always use /api - Firebase Hosting rewrite routes to Firebase Functions
+// This ensures same-origin requests and proper routing
+const baseURL = import.meta.env.DEV ? '/api' : '/api';
 const api = axios.create({
   baseURL,
   timeout: 10000,
@@ -15,17 +19,38 @@ const api = axios.create({
 // Request interceptor for debugging
 api.interceptors.request.use(
   (config) => {
-    console.log('🚀 API Request:', config.method?.toUpperCase(), config.url);
+    if (import.meta.env.DEV) {
+      console.log('🚀 API Request:', config.method?.toUpperCase(), config.url);
+      
+      // Log request data for login/register (without password)
+      if (config.url?.includes('/auth/login') || config.url?.includes('/auth/register')) {
+        try {
+          const data = typeof config.data === 'string' ? JSON.parse(config.data) : config.data;
+          const safeData = { ...data };
+          if (safeData.password) {
+            safeData.password = '***hidden***';
+          }
+          console.log('🚀 Request payload:', safeData);
+        } catch (e) {
+          // Ignore parsing errors
+        }
+      }
+    }
     // Attach auth token if present
     const token = localStorage.getItem('token');
     if (token) {
       config.headers = config.headers || {};
       (config.headers as any)['Authorization'] = `Bearer ${token}`;
+      if (import.meta.env.DEV) {
+        console.log('🔑 Auth token attached:', token.substring(0, 20) + '...');
+      }
     }
     return config;
   },
   (error) => {
-    console.error('❌ API Request Error:', error);
+    if (import.meta.env.DEV) {
+      console.error('❌ API Request Error:', error);
+    }
     return Promise.reject(error);
   }
 );
@@ -33,11 +58,50 @@ api.interceptors.request.use(
 // Response interceptor for debugging
 api.interceptors.response.use(
   (response) => {
+    if (import.meta.env.DEV) {
     console.log('✅ API Response:', response.status, response.config.url);
+    }
     return response;
   },
   (error) => {
-    console.error('❌ API Response Error:', error.response?.status, error.message);
+    // Enhanced error logging with full details
+    if (import.meta.env.DEV || error.response?.status !== 404) {
+      const errorDetails = {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        url: error.config?.url,
+        method: error.config?.method?.toUpperCase(),
+        message: error.message,
+        code: error.code,
+        responseData: error.response?.data,
+        requestData: error.config?.data,
+      };
+      
+      // Log error details in multiple ways to ensure visibility
+      console.error('❌ API Response Error:', errorDetails);
+      console.error('❌ Full Error Object:', error);
+      console.error('❌ Error Details (JSON):', JSON.stringify(errorDetails, null, 2));
+      
+      // Check for common issues
+      if (error.code === 'ECONNREFUSED' || error.message?.includes('Network Error')) {
+        console.error('⚠️ Backend server appears to be down. Make sure the backend is running on port 5000.');
+        console.error('⚠️ Check: Is the backend server running? Try: cd backend && npm start');
+      } else if (error.response?.status === 401) {
+        console.error('⚠️ Authentication failed. Token may be expired or invalid.');
+        console.error('⚠️ Response data:', error.response?.data);
+        const token = localStorage.getItem('token');
+        console.error('⚠️ Current token exists:', !!token);
+        if (token) {
+          console.error('⚠️ Token preview:', token.substring(0, 20) + '...');
+        }
+      } else if (error.response?.status === 500) {
+        console.error('⚠️ Server error (500). Check backend logs for details.');
+        console.error('⚠️ URL that failed:', error.config?.url);
+        if (error.response?.data) {
+          console.error('⚠️ Server error response:', JSON.stringify(error.response.data, null, 2));
+        }
+      }
+    }
     return Promise.reject(error);
   }
 );
@@ -48,10 +112,12 @@ const getProfile = async () => {
     const res = await api.get('/auth/me');
     return { user: res.data.user as User };
   } catch (err) {
-    // Fallback to locally persisted mock
-    const storedUser = localStorage.getItem('mockUser');
-    if (storedUser) {
-      return { user: JSON.parse(storedUser) as User };
+    // In development, allow mock fallback so UI works without backend
+    if (import.meta.env.DEV) {
+      const storedUser = localStorage.getItem('mockUser');
+      if (storedUser) {
+        return { user: JSON.parse(storedUser) as User };
+      }
     }
     throw err;
   }
@@ -59,27 +125,69 @@ const getProfile = async () => {
 
 const login = async (credentials: { email: string; password: string }) => {
   try {
+    // Log login attempt (without password)
+    console.log('🔐 Attempting login for:', credentials.email);
+    console.log('🔐 Login request URL:', '/auth/login');
+    
     const { data } = await api.post('/auth/login', credentials);
+    
+    console.log('✅ Login successful');
+    console.log('✅ Received user:', data.user?.email || data.user?.username);
+    console.log('✅ Token received:', !!data.token);
+    
     return { user: data.user as User, token: data.token as string };
-  } catch (err) {
-    // Dev fallback: minimal local mock so UI remains usable
-    const userData = {
-      id: 1,
-      username: credentials.email.split('@')[0],
-      email: credentials.email,
-      full_name: credentials.email.split('@')[0].replace(/[0-9]/g, '').replace(/[^a-zA-Z]/g, ' ') || 'User',
-      profile_picture: null,
-      bio: '',
-      headline: '',
-      rating: 0,
-      total_ratings: 0,
-      account_type: 'producer' as const,
-      is_verified: false,
-      followers_count: 0,
-      following_count: 0,
-      created_at: new Date().toISOString()
-    } as unknown as User;
-    return { user: userData, token: 'mock_jwt_token_' + Date.now() };
+  } catch (err: any) {
+    // Enhanced error logging for login
+    const errorInfo = {
+      message: err?.message || 'Unknown error',
+      status: err?.response?.status,
+      statusText: err?.response?.statusText,
+      data: err?.response?.data,
+      url: err?.config?.url,
+      email: credentials.email, // Safe to log email
+    };
+    
+    console.error('❌ Login failed:', errorInfo);
+    console.error('❌ Full error object:', err);
+    console.error('❌ Error JSON:', JSON.stringify(errorInfo, null, 2));
+    
+    // Log server response details
+    if (err?.response?.data) {
+      console.error('❌ Server response:', JSON.stringify(err.response.data, null, 2));
+      console.error('❌ Server error message:', err.response.data?.error || err.response.data?.message);
+    }
+    
+    // Check specific error cases
+    if (err?.response?.status === 401) {
+      console.error('⚠️ Login authentication failed. Possible reasons:');
+      console.error('   - Email or password is incorrect');
+      console.error('   - User does not exist');
+      console.error('   - Account is disabled');
+      console.error('   - Backend authentication logic issue');
+    }
+    
+    if (import.meta.env.DEV) {
+      // Dev fallback: minimal local mock so UI remains usable
+      console.warn('⚠️ Using mock login fallback (DEV mode only)');
+      const userData = {
+        id: 1,
+        username: credentials.email.split('@')[0],
+        email: credentials.email,
+        full_name: credentials.email.split('@')[0].replace(/[0-9]/g, '').replace(/[^a-zA-Z]/g, ' ') || 'User',
+        profile_picture: null,
+        bio: '',
+        headline: '',
+        rating: 0,
+        total_ratings: 0,
+        account_type: 'producer' as const,
+        is_verified: false,
+        followers_count: 0,
+        following_count: 0,
+        created_at: new Date().toISOString()
+      } as unknown as User;
+      return { user: userData, token: 'mock_jwt_token_' + Date.now() };
+    }
+    throw err;
   }
 };
 
@@ -88,24 +196,27 @@ const register = async (userData: any) => {
     const { data } = await api.post('/auth/register', userData);
     return { user: data.user as User, token: data.token as string };
   } catch (err) {
-    // Dev fallback similar to previous implementation
-    const newUser = {
-      id: 1,
-      username: userData.username || 'new_user',
-      email: userData.email,
-      full_name: userData.full_name || userData.username || 'New User',
-      profile_picture: null,
-      bio: '',
-      headline: '',
-      rating: 0,
-      total_ratings: 0,
-      account_type: userData.account_type || 'producer',
-      is_verified: false,
-      followers_count: 0,
-      following_count: 0,
-      created_at: new Date().toISOString()
-    } as unknown as User;
-    return { user: newUser, token: 'mock_jwt_token_' + Date.now() };
+    if (import.meta.env.DEV) {
+      // Dev fallback similar to previous implementation
+      const newUser = {
+        id: 1,
+        username: userData.username || 'new_user',
+        email: userData.email,
+        full_name: userData.full_name || userData.username || 'New User',
+        profile_picture: null,
+        bio: '',
+        headline: '',
+        rating: 0,
+        total_ratings: 0,
+        account_type: userData.account_type || 'producer',
+        is_verified: false,
+        followers_count: 0,
+        following_count: 0,
+        created_at: new Date().toISOString()
+      } as unknown as User;
+      return { user: newUser, token: 'mock_jwt_token_' + Date.now() };
+    }
+    throw err;
   }
 };
 
@@ -199,8 +310,12 @@ const getBeats = async (params?: { page?: number; limit?: number; genre?: string
   try {
     const { data } = await api.get('/beats', { params });
     return data;
-  } catch (err) {
-    // Fallback to local mock list
+  } catch (err: any) {
+    // Silently fallback to local mock list if backend is unavailable
+    // This allows the app to work even if the backend isn't deployed
+    if (import.meta.env.DEV) {
+      console.warn('⚠️ Backend unavailable, using mock data');
+    }
     return { beats: localMockBeats, pagination: { page: 1, limit: localMockBeats.length, total: localMockBeats.length, pages: 1 } };
   }
 };
@@ -407,6 +522,86 @@ const deleteFeedback = async (feedbackId: number) => {
   await new Promise(resolve => setTimeout(resolve, 300));
   
   return { success: true };
+};
+
+// User profile API methods
+const getUserProfile = async (username: string) => {
+  try {
+    const { data } = await api.get(`/users/profile/${username}`);
+    return data;
+  } catch (err) {
+    // Dev-only fallback: build a minimal profile from local mock user if available
+    if (import.meta.env.DEV) {
+      const storedUser = localStorage.getItem('mockUser');
+      if (storedUser) {
+        const mock = JSON.parse(storedUser) as User;
+        return {
+          user: {
+            ...mock,
+            username: username || mock.username,
+            profile_picture: mock.profile_picture ?? null,
+            followers_count: mock.followers_count ?? 0,
+            following_count: mock.following_count ?? 0,
+            bio: mock.bio ?? '',
+          },
+        };
+      }
+    }
+    console.error('Get user profile error:', err);
+    throw err;
+  }
+};
+
+const getUserBeats = async (
+  username: string,
+  params?: { page?: number; limit?: number }
+) => {
+  try {
+    const { data } = await api.get(`/users/${username}/beats`, { params });
+    return data;
+  } catch (err: any) {
+    // Enhanced error logging with full details
+    const errorInfo = {
+      message: err?.message || 'Unknown error',
+      status: err?.response?.status,
+      statusText: err?.response?.statusText,
+      data: err?.response?.data,
+      url: err?.config?.url,
+      code: err?.code,
+    };
+    
+    console.error('❌ Get user beats error:', errorInfo);
+    console.error('❌ Full error object:', err);
+    console.error('❌ Error JSON:', JSON.stringify(errorInfo, null, 2));
+    
+    if (err?.response?.status === 500) {
+      console.error('⚠️ Server returned 500 error for getUserBeats');
+      console.error('⚠️ Username requested:', username);
+      console.error('⚠️ Server response:', err?.response?.data);
+    }
+    
+    if (import.meta.env.DEV) {
+      // Dev-only fallback: filter local mock beats by producer username
+      try {
+        const beats = localMockBeats.filter(
+          (b) => b.producerUsername?.toLowerCase() === username.toLowerCase()
+        );
+        console.warn('⚠️ Using mock data fallback for user beats');
+        return {
+          beats,
+          pagination: {
+            page: 1,
+            limit: beats.length,
+            total: beats.length,
+            pages: 1,
+          },
+        };
+      } catch (fallbackErr) {
+        console.error('Fallback also failed:', fallbackErr);
+      }
+    }
+    throw err;
+  }
 };
 
 // Admin API methods
@@ -633,12 +828,25 @@ const sendMessage = async (recipientId: string, content: string) => {
   }
 };
 
+// License API methods
+const getLicense = async (purchaseId: string) => {
+  try {
+    const { data } = await api.get(`/payments/license/${purchaseId}`);
+    return data;
+  } catch (err) {
+    console.error('Get license error:', err);
+    throw err;
+  }
+};
+
 // Add all methods to the api object
 const apiService = {
   ...api,
   getProfile,
   login,
   register,
+  getUserProfile,
+  getUserBeats,
   getBeats,
   uploadBeat,
   updateProfile,
@@ -678,7 +886,9 @@ const apiService = {
   getUnreadNotificationCount,
   markNotificationAsRead,
   markAllNotificationsAsRead,
-  deleteNotification
+  deleteNotification,
+  // License methods
+  getLicense
 };
 
 export default apiService; 

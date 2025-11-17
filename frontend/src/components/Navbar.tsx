@@ -1,14 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Button } from './ui/button';
 import NotificationDropdown from './NotificationDropdown';
+import { User, LayoutDashboard, LogOut } from 'lucide-react';
 import logoImage from '../assets/beat-crest-logo.png';
 
 const Navbar: React.FC = () => {
   const { user, logout, login, register } = useAuth();
+  
+  // Memoize account type checks to prevent unnecessary re-renders
+  const isAdmin = useMemo(() => {
+    return user?.account_type?.toLowerCase() === 'admin';
+  }, [user?.account_type]);
+  
+  const isProducer = useMemo(() => {
+    return user?.account_type?.toLowerCase() === 'producer';
+  }, [user?.account_type]);
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [authFormData, setAuthFormData] = useState({
     email: '',
@@ -19,6 +29,7 @@ const Navbar: React.FC = () => {
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState('');
   const modalRef = useRef<HTMLDivElement>(null);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
 
   // Handle click outside to close modal
   useEffect(() => {
@@ -26,16 +37,33 @@ const Navbar: React.FC = () => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
         setShowAuthModal(false);
       }
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setShowProfileDropdown(false);
+      }
     };
 
-    if (showAuthModal) {
+    if (showAuthModal || showProfileDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showAuthModal]);
+  }, [showAuthModal, showProfileDropdown]);
+  
+  // Get dashboard route based on account type
+  const getDashboardRoute = () => {
+    if (isAdmin) return '/admin';
+    if (isProducer) return '/dashboard';
+    return '/buyer';
+  };
+  
+  // Get dashboard label based on account type
+  const getDashboardLabel = () => {
+    if (isAdmin) return 'Admin Dashboard';
+    if (isProducer) return 'Producer Dashboard';
+    return 'Buyer Dashboard';
+  };
 
   // Handle auth form input changes
   const handleAuthInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -84,12 +112,15 @@ const Navbar: React.FC = () => {
       setAuthFormData({ email: '', password: '', username: '', account_type: 'buyer' });
       setAuthMode('signin');
       
-      // Navigate based on account type
-      if (authMode === 'signup' && authFormData.account_type === 'producer') {
-        navigate('/producer');
-      } else {
-        navigate('/buyer');
+      // Navigate based on account type after signup
+      if (authMode === 'signup') {
+        if (authFormData.account_type === 'producer') {
+          navigate('/dashboard');
+        } else {
+          navigate('/buyer');
+        }
       }
+      // For login, routing will be handled by AuthContext effect
     } catch (error: any) {
       setAuthError(error.message || 'Authentication failed');
     } finally {
@@ -132,39 +163,39 @@ const Navbar: React.FC = () => {
             <div className="hidden lg:flex items-center space-x-1">
               <Link 
                 to="/" 
-                className="px-4 py-2 rounded-lg text-white/95 hover:text-teal-400 hover:bg-white/10 font-medium transition-all duration-200"
+                className="px-4 py-2 rounded-lg text-white hover:text-teal-300 hover:bg-white/10 font-medium transition-all duration-200"
               >
                 Home
               </Link>
               <Link 
                 to="/marketplace" 
-                className="px-4 py-2 rounded-lg text-white/95 hover:text-teal-400 hover:bg-white/10 font-medium transition-all duration-200"
+                className="px-4 py-2 rounded-lg text-white hover:text-teal-300 hover:bg-white/10 font-medium transition-all duration-200"
               >
                 Marketplace
               </Link>
-              {user && user.account_type === 'admin' && (
+              {isAdmin && (
                 <Link 
                   to="/admin" 
-                  className="px-4 py-2 rounded-lg text-white/95 hover:text-teal-400 hover:bg-white/10 font-medium transition-all duration-200"
+                  className="px-4 py-2 rounded-lg text-white hover:text-teal-300 hover:bg-white/10 font-medium transition-all duration-200"
                 >
                   Admin
                 </Link>
               )}
+              {isProducer && (
+                <Link 
+                  to="/upload" 
+                  className="px-4 py-2 rounded-lg text-white hover:text-teal-300 hover:bg-white/10 font-medium transition-all duration-200"
+                >
+                  Upload
+                </Link>
+              )}
               {user && (
-                <>
-                  <Link 
-                    to="/upload" 
-                    className="px-4 py-2 rounded-lg text-white/95 hover:text-teal-400 hover:bg-white/10 font-medium transition-all duration-200"
-                  >
-                    Upload
-                  </Link>
-                  <Link 
-                    to="/messages" 
-                    className="px-4 py-2 rounded-lg text-white/95 hover:text-teal-400 hover:bg-white/10 font-medium transition-all duration-200"
-                  >
-                    Messages
-                  </Link>
-                </>
+                <Link 
+                  to="/messages" 
+                  className="px-4 py-2 rounded-lg text-white hover:text-teal-300 hover:bg-white/10 font-medium transition-all duration-200"
+                >
+                  Messages
+                </Link>
               )}
             </div>
 
@@ -173,26 +204,96 @@ const Navbar: React.FC = () => {
               {user ? (
                 <>
                   <NotificationDropdown />
-                  {user.profile_picture ? (
-                    <Link to={`/profile/${user.username}`} className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors">
-                      <img 
-                        src={user.profile_picture} 
-                        alt={user.username}
-                        className="h-8 w-8 rounded-full object-cover border-2 border-teal-500"
-                      />
-                      <span className="hidden md:block text-sm font-medium text-white">{user.username}</span>
-                    </Link>
-                  ) : (
-                    <Link to={`/profile/${user.username}`} className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center text-white font-semibold text-sm hover:shadow-lg transition-shadow">
-                      {user.username?.charAt(0).toUpperCase()}
-                    </Link>
-                  )}
-                  <button 
-                    onClick={logout}
-                    className="px-4 py-2 text-sm font-medium text-white/95 hover:text-red-400 hover:bg-red-500/20 rounded-lg transition-all duration-200 border border-white/20 hover:border-red-500/50"
-                  >
-                    Sign Out
-                  </button>
+                  {/* Profile Dropdown */}
+                  <div className="relative" ref={profileDropdownRef}>
+                    <button
+                      onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                      className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"
+                    >
+                      {user.username ? (
+                        user.profile_picture ? (
+                          <>
+                            <img 
+                              src={user.profile_picture} 
+                              alt={user.username}
+                              className="h-8 w-8 rounded-full object-cover border-2 border-teal-500"
+                            />
+                            <span className="hidden md:block text-sm font-medium text-white">{user.username}</span>
+                          </>
+                        ) : (
+                          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center text-white font-semibold text-sm hover:shadow-lg transition-shadow">
+                            {user.username.charAt(0).toUpperCase()}
+                          </div>
+                        )
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center text-white font-semibold text-sm">
+                          {user.email?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {showProfileDropdown && (
+                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-slate-200/60 z-50 animate-slide-up overflow-hidden">
+                        {/* User Info */}
+                        <div className="p-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-teal-50">
+                          <div className="flex items-center gap-3">
+                            {user.profile_picture ? (
+                              <img 
+                                src={user.profile_picture} 
+                                alt={user.username || 'User'}
+                                className="h-10 w-10 rounded-full object-cover border-2 border-teal-500"
+                              />
+                            ) : (
+                              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center text-white font-semibold">
+                                {(user.username || user.email || 'U').charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-slate-900 truncate">
+                                {user.username || user.email || 'User'}
+                              </p>
+                              <p className="text-xs text-slate-600 capitalize">
+                                {user.account_type || 'User'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Menu Items */}
+                        <div className="py-2">
+                          {user.username && (
+                            <Link
+                              to={`/profile/${user.username}`}
+                              onClick={() => setShowProfileDropdown(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                            >
+                              <User className="h-4 w-4" />
+                              <span>View Profile</span>
+                            </Link>
+                          )}
+                          <Link
+                            to={getDashboardRoute()}
+                            onClick={() => setShowProfileDropdown(false)}
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                          >
+                            <LayoutDashboard className="h-4 w-4" />
+                            <span>{getDashboardLabel()}</span>
+                          </Link>
+                          <button
+                            onClick={() => {
+                              setShowProfileDropdown(false);
+                              logout();
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          >
+                            <LogOut className="h-4 w-4" />
+                            <span>Sign Out</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </>
               ) : (
                 <button 
@@ -220,7 +321,7 @@ const Navbar: React.FC = () => {
               </h2>
               <button
                 onClick={() => setShowAuthModal(false)}
-                className="text-white/90 hover:text-white transition-colors duration-200 p-2 hover:bg-white/10 rounded-lg"
+                className="text-white hover:text-teal-300 transition-colors duration-200 p-2 hover:bg-white/10 rounded-lg"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -231,7 +332,7 @@ const Navbar: React.FC = () => {
             <form onSubmit={handleAuthSubmit} className="space-y-5">
               {authMode === 'signup' && (
                 <div>
-                  <label className="block text-sm font-semibold text-white/90 mb-2">
+                  <label className="block text-sm font-semibold text-white mb-2">
                     Username
                   </label>
                   <input
@@ -276,7 +377,7 @@ const Navbar: React.FC = () => {
                   placeholder="••••••••"
                 />
                 {authMode === 'signup' && (
-                  <p className="text-xs text-white/80 mt-2">
+                  <p className="text-xs text-white/95 mt-2">
                     Must be at least 8 characters long
                   </p>
                 )}
@@ -285,7 +386,7 @@ const Navbar: React.FC = () => {
               {authMode === 'signup' && (
                 <>
                   <div>
-                    <label className="block text-sm font-semibold text-white/90 mb-2">
+                    <label className="block text-sm font-semibold text-white mb-2">
                       I want to
                     </label>
                     <select
@@ -319,7 +420,7 @@ const Navbar: React.FC = () => {
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-white/90 mb-1">
+                        <p className="text-sm font-medium text-white mb-1">
                           You'll access:
                         </p>
                         <p className={`text-lg font-bold ${
@@ -331,7 +432,7 @@ const Navbar: React.FC = () => {
                             ? 'Producer Dashboard' 
                             : 'Buyer Dashboard'}
                         </p>
-                        <p className="text-xs text-white/80 mt-2">
+                        <p className="text-xs text-white/90 mt-2">
                           {authFormData.account_type === 'producer'
                             ? 'Upload beats, manage sales, and track earnings'
                             : 'Browse beats, make purchases, and manage licenses'}

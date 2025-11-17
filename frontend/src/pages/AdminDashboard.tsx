@@ -102,7 +102,7 @@ interface AdminTenant {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout, refreshUser } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -110,6 +110,7 @@ export default function AdminDashboard() {
   const [purchases, setPurchases] = useState<AdminPurchase[]>([]);
   const [tenants, setTenants] = useState<AdminTenant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [checkingAccess, setCheckingAccess] = useState(true);
   const [usersLoading, setUsersLoading] = useState(false);
   const [beatsLoading, setBeatsLoading] = useState(false);
   const [purchasesLoading, setPurchasesLoading] = useState(false);
@@ -144,12 +145,62 @@ export default function AdminDashboard() {
   const [adminSearchTerm, setAdminSearchTerm] = useState('');
   const [availableUsers, setAvailableUsers] = useState<AdminUser[]>([]);
 
-  // Redirect if not admin
+  // Refresh user data on mount and check admin access
   useEffect(() => {
-    if (!authLoading && (!user || user.account_type !== 'admin')) {
+    const checkAccess = async () => {
+      if (authLoading) return;
+      
+      setCheckingAccess(true);
+      
+      // Refresh user data to get latest account_type (in case user was promoted)
+      try {
+        await refreshUser();
+        // Give React time to update state
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } catch (err) {
+        console.error('Error refreshing user:', err);
+      }
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.log('❌ No token found, redirecting to home');
+        navigate('/');
+        setCheckingAccess(false);
+        return;
+      }
+      
+      setCheckingAccess(false);
+    };
+    
+    checkAccess();
+  }, [authLoading, refreshUser, navigate]);
+
+  // Redirect if not admin (check after user data is loaded/refreshed)
+  useEffect(() => {
+    if (authLoading || checkingAccess) return; // Wait for checks to complete
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
       navigate('/');
+      return;
     }
-  }, [user, authLoading, navigate]);
+    
+    if (!user) {
+      // Still waiting for user data
+      return;
+    }
+    
+    // Check if user is admin (account_type is returned in lowercase from backend)
+    const accountType = user.account_type?.toLowerCase();
+    if (accountType !== 'admin') {
+      console.log('❌ Access denied: User is not admin. Account type:', accountType);
+      console.log('User object:', user);
+      navigate('/');
+      return;
+    }
+    
+    console.log('✅ Admin access granted');
+  }, [user, authLoading, checkingAccess, navigate]);
 
   // Load stats
   useEffect(() => {
@@ -389,18 +440,22 @@ export default function AdminDashboard() {
     });
   };
 
-  if (authLoading || loading) {
+  if (authLoading || checkingAccess || loading) {
     return (
       <div className="min-h-screen pt-20 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-slate-600">Loading...</p>
+          <p className="mt-4 text-slate-600">
+            {authLoading || checkingAccess ? 'Checking access...' : 'Loading...'}
+          </p>
         </div>
       </div>
     );
   }
 
-  if (!user || user.account_type !== 'admin') {
+  // Access check is now handled in useEffect above
+  // This return null is a fallback if somehow we get here without admin access
+  if (!user || user.account_type?.toLowerCase() !== 'admin') {
     return null;
   }
 
@@ -415,12 +470,12 @@ export default function AdminDashboard() {
                 <Shield className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
-                <p className="text-sm text-slate-600 mt-0.5">Manage your platform</p>
+                <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
+                <p className="text-sm text-slate-300 mt-0.5">Manage your platform</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-slate-700 px-3 py-1.5 bg-slate-100 rounded-lg">{user.username}</span>
+              <span className="text-sm font-medium text-white px-3 py-1.5 bg-slate-700 rounded-lg">{user.username}</span>
               <button
                 onClick={() => navigate('/')}
                 className="btn-secondary text-sm"
@@ -457,7 +512,7 @@ export default function AdminDashboard() {
                     flex items-center gap-2 py-3 px-6 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-300
                     ${activeTab === id
                       ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg scale-105'
-                      : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50'
+                      : 'text-slate-300 hover:text-blue-300 hover:bg-blue-900/30'
                     }
                   `}
                 >
@@ -478,8 +533,8 @@ export default function AdminDashboard() {
                   <div className="card-elevated group hover:scale-105 transition-transform duration-300">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-slate-600 font-medium mb-1">Total Users</p>
-                        <p className="text-3xl font-bold text-slate-900">{stats.userStats.total_users}</p>
+                        <p className="text-sm text-slate-300 font-medium mb-1">Total Users</p>
+                        <p className="text-3xl font-bold text-white">{stats.userStats.total_users}</p>
                         <div className="mt-3 flex items-center text-sm">
                           <span className="text-green-600 font-semibold">+{stats.userStats.new_users_month} this month</span>
                         </div>
@@ -493,8 +548,8 @@ export default function AdminDashboard() {
                   <div className="card-elevated group hover:scale-105 transition-transform duration-300">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-slate-600 font-medium mb-1">Total Beats</p>
-                        <p className="text-3xl font-bold text-slate-900">{stats.beatStats.total_beats}</p>
+                        <p className="text-sm text-slate-300 font-medium mb-1">Total Beats</p>
+                        <p className="text-3xl font-bold text-white">{stats.beatStats.total_beats}</p>
                         <div className="mt-3 flex items-center text-sm">
                           <span className="text-green-600 font-semibold">+{stats.beatStats.new_beats_month} this month</span>
                         </div>
@@ -508,10 +563,10 @@ export default function AdminDashboard() {
                   <div className="card-elevated group hover:scale-105 transition-transform duration-300">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-slate-600 font-medium mb-1">Total Revenue</p>
+                        <p className="text-sm text-slate-300 font-medium mb-1">Total Revenue</p>
                         <p className="text-2xl font-bold gradient-text">{formatCurrency(stats.salesStats.total_revenue)}</p>
                         <div className="mt-3 flex items-center text-sm">
-                          <span className="text-slate-600 font-semibold">{formatCurrency(stats.salesStats.total_platform_fees)} fees</span>
+                          <span className="text-slate-300 font-semibold">{formatCurrency(stats.salesStats.total_platform_fees)} fees</span>
                         </div>
                       </div>
                       <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
@@ -523,8 +578,8 @@ export default function AdminDashboard() {
                   <div className="card-elevated group hover:scale-105 transition-transform duration-300">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-slate-600 font-medium mb-1">Total Sales</p>
-                        <p className="text-3xl font-bold text-slate-900">{stats.salesStats.total_sales}</p>
+                        <p className="text-sm text-slate-300 font-medium mb-1">Total Sales</p>
+                        <p className="text-3xl font-bold text-white">{stats.salesStats.total_sales}</p>
                         <div className="mt-3 flex items-center text-sm">
                           <span className="text-green-600 font-semibold">+{stats.salesStats.sales_month} this month</span>
                         </div>
@@ -537,43 +592,43 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* User Breakdown */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">User Breakdown</h2>
+              <div className="bg-slate-800/50 rounded-lg shadow-lg border border-slate-700 p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">User Breakdown</h2>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold text-gray-900">{stats.userStats.producers}</p>
-                    <p className="text-sm text-gray-600 mt-1">Producers</p>
+                    <p className="text-3xl font-bold text-white">{stats.userStats.producers}</p>
+                    <p className="text-sm text-slate-300 mt-1">Producers</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold text-gray-900">{stats.userStats.artists}</p>
-                    <p className="text-sm text-gray-600 mt-1">Artists</p>
+                    <p className="text-3xl font-bold text-white">{stats.userStats.artists}</p>
+                    <p className="text-sm text-slate-300 mt-1">Artists</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold text-gray-900">{stats.userStats.total_users - stats.userStats.producers - stats.userStats.artists}</p>
-                    <p className="text-sm text-gray-600 mt-1">Fans</p>
+                    <p className="text-3xl font-bold text-white">{stats.userStats.total_users - stats.userStats.producers - stats.userStats.artists}</p>
+                    <p className="text-sm text-slate-300 mt-1">Fans</p>
                   </div>
                 </div>
               </div>
 
               {/* Beat Stats */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Beat Statistics</h2>
+              <div className="bg-slate-800/50 rounded-lg shadow-lg border border-slate-700 p-6">
+                <h2 className="text-lg font-semibold text-white mb-4">Beat Statistics</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Average Price</p>
-                    <p className="text-xl font-bold text-gray-900 mt-1">{formatCurrency(stats.beatStats.avg_price)}</p>
+                    <p className="text-sm text-slate-300">Average Price</p>
+                    <p className="text-xl font-bold text-white mt-1">{formatCurrency(stats.beatStats.avg_price)}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Total Likes</p>
-                    <p className="text-xl font-bold text-gray-900 mt-1">{stats.beatStats.total_likes.toLocaleString()}</p>
+                    <p className="text-sm text-slate-300">Total Likes</p>
+                    <p className="text-xl font-bold text-white mt-1">{stats.beatStats.total_likes.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Total Plays</p>
-                    <p className="text-xl font-bold text-gray-900 mt-1">{stats.beatStats.total_plays.toLocaleString()}</p>
+                    <p className="text-sm text-slate-300">Total Plays</p>
+                    <p className="text-xl font-bold text-white mt-1">{stats.beatStats.total_plays.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Avg Sale Amount</p>
-                    <p className="text-xl font-bold text-gray-900 mt-1">{formatCurrency(stats.salesStats.avg_sale_amount)}</p>
+                    <p className="text-sm text-slate-300">Avg Sale Amount</p>
+                    <p className="text-xl font-bold text-white mt-1">{formatCurrency(stats.salesStats.avg_sale_amount)}</p>
                   </div>
                 </div>
               </div>
@@ -582,23 +637,23 @@ export default function AdminDashboard() {
 
           {/* Users Tab */}
           {activeTab === 'users' && (
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-slate-800/50 rounded-lg shadow-lg border border-slate-700">
               {/* Filters */}
-              <div className="p-4 border-b border-gray-200">
+              <div className="p-4 border-b border-slate-700">
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search users..."
-                        value={userSearch}
-                        onChange={(e) => {
-                          setUserSearch(e.target.value);
-                          setCurrentPage(prev => ({ ...prev, users: 1 }));
-                        }}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search users..."
+                    value={userSearch}
+                    onChange={(e) => {
+                      setUserSearch(e.target.value);
+                      setCurrentPage(prev => ({ ...prev, users: 1 }));
+                    }}
+                    className="w-full pl-10 pr-4 py-2 border border-slate-600 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-500"
+                  />
                     </div>
                   </div>
                   <select
@@ -607,7 +662,7 @@ export default function AdminDashboard() {
                       setUserAccountType(e.target.value);
                       setCurrentPage(prev => ({ ...prev, users: 1 }));
                     }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="px-4 py-2 border border-slate-600 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">All Types</option>
                     <option value="producer">Producers</option>
@@ -620,49 +675,49 @@ export default function AdminDashboard() {
               {/* Users Table */}
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-slate-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Followers</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">User</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Type</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Followers</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Joined</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-slate-800/30 divide-y divide-slate-700">
                     {usersLoading ? (
                       <tr>
-                        <td colSpan={5} className="px-6 py-4 text-center">Loading...</td>
+                        <td colSpan={5} className="px-6 py-4 text-center text-slate-300">Loading...</td>
                       </tr>
                     ) : users.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-6 py-4 text-center text-gray-500">No users found</td>
+                        <td colSpan={5} className="px-6 py-4 text-center text-slate-400">No users found</td>
                       </tr>
                     ) : (
                       users.map((user) => (
-                        <tr key={user.id} className="hover:bg-gray-50">
+                        <tr key={user.id} className="hover:bg-slate-700/50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
-                              <div className="text-sm font-medium text-gray-900">{user.username}</div>
-                              <div className="text-sm text-gray-500">{user.email}</div>
+                              <div className="text-sm font-medium text-white">{user.username}</div>
+                              <div className="text-sm text-slate-400">{user.email}</div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                              user.account_type === 'producer' ? 'bg-purple-100 text-purple-800' :
-                              user.account_type === 'artist' ? 'bg-blue-100 text-blue-800' :
-                              'bg-gray-100 text-gray-800'
+                              user.account_type === 'producer' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' :
+                              user.account_type === 'artist' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                              'bg-slate-600 text-slate-200 border border-slate-500'
                             }`}>
                               {user.account_type}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.followers_count}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(user.created_at)}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{user.followers_count}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">{formatDate(user.created_at)}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
                             <select
                               value={user.account_type}
                               onChange={(e) => handleUpdateUserStatus(user.id, { account_type: e.target.value })}
-                              className="px-2 py-1 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-500"
+                              className="px-2 py-1 border border-slate-600 bg-slate-800 text-white rounded text-xs focus:ring-2 focus:ring-blue-500"
                             >
                               <option value="producer">Producer</option>
                               <option value="artist">Artist</option>
@@ -679,21 +734,21 @@ export default function AdminDashboard() {
 
               {/* Pagination */}
               {pagination.users.pages > 1 && (
-                <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                <div className="px-6 py-4 border-t border-slate-700 flex items-center justify-between">
                   <button
                     onClick={() => setCurrentPage(prev => ({ ...prev, users: Math.max(1, prev.users - 1) }))}
                     disabled={currentPage.users === 1}
-                    className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-sm border border-slate-600 bg-slate-800 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-700"
                   >
                     Previous
                   </button>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-slate-300">
                     Page {currentPage.users} of {pagination.users.pages}
                   </span>
                   <button
                     onClick={() => setCurrentPage(prev => ({ ...prev, users: Math.min(pagination.users.pages, prev.users + 1) }))}
                     disabled={currentPage.users === pagination.users.pages}
-                    className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-sm border border-slate-600 bg-slate-800 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-700"
                   >
                     Next
                   </button>
@@ -704,11 +759,11 @@ export default function AdminDashboard() {
 
           {/* Beats Tab */}
           {activeTab === 'beats' && (
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-slate-800/50 rounded-lg shadow-lg border border-slate-700">
               {/* Filters */}
-              <div className="p-4 border-b border-gray-200">
+              <div className="p-4 border-b border-slate-700">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                   <input
                     type="text"
                     placeholder="Search beats..."
@@ -717,7 +772,7 @@ export default function AdminDashboard() {
                       setBeatSearch(e.target.value);
                       setCurrentPage(prev => ({ ...prev, beats: 1 }));
                     }}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-slate-600 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-500"
                   />
                 </div>
               </div>
@@ -725,50 +780,50 @@ export default function AdminDashboard() {
               {/* Beats Table */}
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-slate-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Beat</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Genre</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Beat</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Producer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Genre</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Price</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Created</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-slate-800/30 divide-y divide-slate-700">
                     {beatsLoading ? (
                       <tr>
-                        <td colSpan={6} className="px-6 py-4 text-center">Loading...</td>
+                        <td colSpan={6} className="px-6 py-4 text-center text-slate-300">Loading...</td>
                       </tr>
                     ) : beats.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-6 py-4 text-center text-gray-500">No beats found</td>
+                        <td colSpan={6} className="px-6 py-4 text-center text-slate-400">No beats found</td>
                       </tr>
                     ) : (
                       beats.map((beat) => (
-                        <tr key={beat.id} className="hover:bg-gray-50">
+                        <tr key={beat.id} className="hover:bg-slate-700/50">
                           <td className="px-6 py-4">
-                            <div className="text-sm font-medium text-gray-900">{beat.title}</div>
+                            <div className="text-sm font-medium text-white">{beat.title}</div>
                             {beat.description && (
-                              <div className="text-sm text-gray-500 truncate max-w-xs">{beat.description}</div>
+                              <div className="text-sm text-slate-400 truncate max-w-xs">{beat.description}</div>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{beat.producer_name}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{beat.genre || 'N/A'}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(beat.price)}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(beat.created_at)}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{beat.producer_name}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">{beat.genre || 'N/A'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{formatCurrency(beat.price)}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">{formatDate(beat.created_at)}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={() => handleUpdateBeatStatus(beat.id, true)}
-                                className="text-green-600 hover:text-green-800"
+                                className="text-green-400 hover:text-green-300"
                                 title="Activate"
                               >
                                 <CheckCircle className="h-5 w-5" />
                               </button>
                               <button
                                 onClick={() => handleUpdateBeatStatus(beat.id, false)}
-                                className="text-red-600 hover:text-red-800"
+                                className="text-red-400 hover:text-red-300"
                                 title="Deactivate"
                               >
                                 <XCircle className="h-5 w-5" />
@@ -784,21 +839,21 @@ export default function AdminDashboard() {
 
               {/* Pagination */}
               {pagination.beats.pages > 1 && (
-                <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                <div className="px-6 py-4 border-t border-slate-700 flex items-center justify-between">
                   <button
                     onClick={() => setCurrentPage(prev => ({ ...prev, beats: Math.max(1, prev.beats - 1) }))}
                     disabled={currentPage.beats === 1}
-                    className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-sm border border-slate-600 bg-slate-800 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-700"
                   >
                     Previous
                   </button>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-slate-300">
                     Page {currentPage.beats} of {pagination.beats.pages}
                   </span>
                   <button
                     onClick={() => setCurrentPage(prev => ({ ...prev, beats: Math.min(pagination.beats.pages, prev.beats + 1) }))}
                     disabled={currentPage.beats === pagination.beats.pages}
-                    className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-sm border border-slate-600 bg-slate-800 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-700"
                   >
                     Next
                   </button>
@@ -809,9 +864,9 @@ export default function AdminDashboard() {
 
           {/* Purchases Tab */}
           {activeTab === 'purchases' && (
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-slate-800/50 rounded-lg shadow-lg border border-slate-700">
               {/* Filters */}
-              <div className="p-4 border-b border-gray-200">
+              <div className="p-4 border-b border-slate-700">
                 <div className="flex flex-col md:flex-row gap-4">
                   <select
                     value={purchaseStatus}
@@ -819,7 +874,7 @@ export default function AdminDashboard() {
                       setPurchaseStatus(e.target.value);
                       setCurrentPage(prev => ({ ...prev, purchases: 1 }));
                     }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="px-4 py-2 border border-slate-600 bg-slate-800 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">All Statuses</option>
                     <option value="pending">Pending</option>
@@ -832,42 +887,42 @@ export default function AdminDashboard() {
               {/* Purchases Table */}
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-slate-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Beat</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Buyer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Beat</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Buyer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Producer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Amount</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Date</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-slate-800/30 divide-y divide-slate-700">
                     {purchasesLoading ? (
                       <tr>
-                        <td colSpan={6} className="px-6 py-4 text-center">Loading...</td>
+                        <td colSpan={6} className="px-6 py-4 text-center text-slate-300">Loading...</td>
                       </tr>
                     ) : purchases.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-6 py-4 text-center text-gray-500">No purchases found</td>
+                        <td colSpan={6} className="px-6 py-4 text-center text-slate-400">No purchases found</td>
                       </tr>
                     ) : (
                       purchases.map((purchase) => (
-                        <tr key={purchase.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{purchase.beat_title}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{purchase.buyer_name}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{purchase.producer_name}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(purchase.amount)}</td>
+                        <tr key={purchase.id} className="hover:bg-slate-700/50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{purchase.beat_title}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{purchase.buyer_name}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{purchase.producer_name}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{formatCurrency(purchase.amount)}</td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                              purchase.payment_status === 'completed' ? 'bg-green-100 text-green-800' :
-                              purchase.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-red-100 text-red-800'
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full border ${
+                              purchase.payment_status === 'completed' ? 'bg-green-500/20 text-green-300 border-green-500/30' :
+                              purchase.payment_status === 'pending' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
+                              'bg-red-500/20 text-red-300 border-red-500/30'
                             }`}>
                               {purchase.payment_status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(purchase.created_at)}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">{formatDate(purchase.created_at)}</td>
                         </tr>
                       ))
                     )}
@@ -877,21 +932,21 @@ export default function AdminDashboard() {
 
               {/* Pagination */}
               {pagination.purchases.pages > 1 && (
-                <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                <div className="px-6 py-4 border-t border-slate-700 flex items-center justify-between">
                   <button
                     onClick={() => setCurrentPage(prev => ({ ...prev, purchases: Math.max(1, prev.purchases - 1) }))}
                     disabled={currentPage.purchases === 1}
-                    className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-sm border border-slate-600 bg-slate-800 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-700"
                   >
                     Previous
                   </button>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-slate-300">
                     Page {currentPage.purchases} of {pagination.purchases.pages}
                   </span>
                   <button
                     onClick={() => setCurrentPage(prev => ({ ...prev, purchases: Math.min(pagination.purchases.pages, prev.purchases + 1) }))}
                     disabled={currentPage.purchases === pagination.purchases.pages}
-                    className="px-4 py-2 text-sm border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-sm border border-slate-600 bg-slate-800 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-700"
                   >
                     Next
                   </button>
